@@ -10,12 +10,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue"
+import { ref } from "vue"
 import * as THREE from "three"
-import { ElLoading } from "element-plus"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 import { useThree } from "../hooks/useThree.js"
 import { useFace } from "../hooks/useFace.js"
+import { useLoading } from "../hooks/useLoading.js"
 // 接收props
 const props = defineProps({
   modelPath: {
@@ -29,28 +29,17 @@ const props = defineProps({
 })
 
 const container = ref(null)
-let camera, mesh, controls, pointLight, loader
+let camera, mesh, controls, pointLight
 let modelView = ref({})
 
-let { scene, renderer, createRenderer, createLight, chooseLoader, createCarmera, getModelView, clearScene, LoadStep, LoadIges } =
-  useThree()
+let { scene, renderer, createLight, chooseLoader, createCarmera, getModelView, clearScene, LoadStep, LoadIges } = useThree()
 
 let { sceneOrtho, cameraOrtho } = useFace()
 
-const init = () => {
-  //  在此处初始化的模块 才能避免二次加载叠加
-  createRenderer() //  创建渲染器
-
-  // 监听鼠标移动事件
-  // window.addEventListener('mousemove', onMouseMove, false);
-}
+const { openLoading, closeLoading } = useLoading()
 
 const loadModel = async (path, type) => {
-  const loading = ElLoading.service({
-    lock: true,
-    text: "正在加载,请稍候...",
-    background: "rgba(0, 0, 0, 0.7)",
-  })
+  openLoading() // 开启加载效果
   clearScene() //  加载新模型前先清除旧场景所有对象
   if (type == "stp") {
     const { geometry, material } = await LoadStep(path)
@@ -93,10 +82,7 @@ const loadModel = async (path, type) => {
     container.value.appendChild(renderer.domElement) // 挂载
 
     animate()
-
-    setTimeout(() => {
-      loading.close()
-    }, 500)
+    closeLoading()
     // 获取模型的三维信息
     modelView.value = getModelView(box)
     return
@@ -139,25 +125,23 @@ const loadModel = async (path, type) => {
 
     animate()
 
-    setTimeout(() => {
-      loading.close()
-    }, 500)
+    closeLoading()
     // 获取模型的三维信息
     modelView.value = getModelView(box)
     return
   }
+  // 其他常规3d文件走这里
   // 获取对应的模型加载器
-  loader = chooseLoader(type)
+  const loader = chooseLoader(type)
   loader.load(
     path,
     model => {
-      const material = new THREE.MeshStandardMaterial({
-        color: 0xffffff,
-        roughness: 1,
-        metalness: 0.2,
-      })
-      // const material = new THREE.MeshStandardMaterial({color: 0xc2c2c2, roughness: 1, metalness: 0});
-      mesh = new THREE.Mesh(model, material)
+      if (type === "obj") {
+        mesh = model.scene || model
+      } else {
+        const material = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, metalness: 0.2 })
+        mesh = new THREE.Mesh(model, material)
+      }
       // 计算模型的中心点
       const box = new THREE.Box3().setFromObject(mesh)
       const center = box.getCenter(new THREE.Vector3())
@@ -191,9 +175,7 @@ const loadModel = async (path, type) => {
       // fitCameraToObject(camera, size,center, controls);
       container.value.appendChild(renderer.domElement) // 挂载
       animate()
-      setTimeout(() => {
-        loading.close()
-      }, 500)
+      closeLoading()
       // 获取模型的三维信息
       modelView.value = getModelView(box)
     },
@@ -230,13 +212,6 @@ const animate = () => {
   }
 }
 
-onMounted(() => {
-  init()
-})
-
-onUnmounted(() => {
-  renderer.dispose()
-})
 defineExpose({ loadModel })
 </script>
 

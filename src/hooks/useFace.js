@@ -1,8 +1,8 @@
 //  此处 只创建六面体
 import * as THREE from "three"
 import TWEEN from "@tweenjs/tween.js"
-const raycaster = new THREE.Raycaster()
-const mouse = new THREE.Vector2()
+// const raycaster = new THREE.Raycaster()
+// const mouse = new THREE.Vector2()
 // let selectedFace = null;
 // 初始化变量来存储上一次点击的面
 // let previousMaterial = null;
@@ -11,17 +11,17 @@ const sceneOrtho = new THREE.Scene()
 let viewBox, cameraOrtho
 
 // 定义立方体六个面的笛卡尔坐标
-const faceNormals = [
-  new THREE.Vector3(0, 0, 1), // 前面
-  new THREE.Vector3(0, 0, -1), // 后面
-  new THREE.Vector3(0, 1, 0), // 顶面
-  new THREE.Vector3(0, -1, 0), // 底面
-  new THREE.Vector3(-1, 0, 0), // 左面
-  new THREE.Vector3(1, 0, 0), // 右面
-]
+// const faceNormals = [
+//   new THREE.Vector3(0, 0, 1), // 前面
+//   new THREE.Vector3(0, 0, -1), // 后面
+//   new THREE.Vector3(0, 1, 0), // 顶面
+//   new THREE.Vector3(0, -1, 0), // 底面
+//   new THREE.Vector3(-1, 0, 0), // 左面
+//   new THREE.Vector3(1, 0, 0), // 右面
+// ]
 
-export const useFace = camera => {
-  const createviewBox = scene => {
+export const useFace = () => {
+  const createviewBox = () => {
     viewBox = new THREE.Mesh(new THREE.BoxGeometry(90, 90, 90, 1, 1, 1), createMaterial())
     const axes = new THREE.AxesHelper(100)
     viewBox.add(axes)
@@ -29,8 +29,8 @@ export const useFace = camera => {
 
   const createFaceCarmera = size => {
     //次相机
-    const aspect = 1
-    const frustumSize = 200
+    // const aspect = 1
+    // const frustumSize = 200
     const d = Math.sqrt(size.x * size.x + size.y * size.y) * 0.7
     // cameraOrtho = new THREE.OrthographicCamera(frustumSize * aspect / -2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / -2, 0.1, 20000000000);
     cameraOrtho = new THREE.OrthographicCamera(-d, d, d, -d, 0.1, 200000000000)
@@ -92,42 +92,6 @@ export const useFace = camera => {
       material.map.needsUpdate = true
     })
     return materialArr
-  }
-
-  const onMouseClick = event => {
-    // 将鼠标位置转换到标准化设备坐标 (NDC) 空间 [-1, 1]
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
-
-    // 更新射线投射器
-    raycaster.setFromCamera(mouse, camera)
-
-    // 计算射线与物体的交集
-    const intersects = raycaster.intersectObject(meshModel, true)
-
-    // 如果有交集
-    if (intersects.length > 0) {
-      const intersect = intersects[0]
-      const faceNormal = new THREE.Vector3()
-      faceNormal.copy(intersect.face.normal).applyMatrix4(intersect.object.matrixWorld).normalize()
-
-      // 计算旋转四元数，使该面朝向摄像机
-      const targetQuaternion = new THREE.Quaternion().setFromUnitVectors(faceNormal, new THREE.Vector3(0, 0, 1))
-
-      // 使用 Tween.js 平滑旋转
-      new TWEEN.Tween(meshModel.quaternion)
-        .to(
-          {
-            x: targetQuaternion.x,
-            y: targetQuaternion.y,
-            z: targetQuaternion.z,
-            w: targetQuaternion.w,
-          },
-          1000,
-        )
-        .easing(TWEEN.Easing.Quadratic.Out)
-        .start()
-    }
   }
 
   const initFace = () => {

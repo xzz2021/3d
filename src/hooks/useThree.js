@@ -1,4 +1,5 @@
 import * as THREE from "three"
+import { onMounted, onUnmounted } from "vue"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader"
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader"
@@ -27,6 +28,11 @@ export const useThree = () => {
   let renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" })
   // let controls =  new OrbitControls(camera, renderer.domElement)
   let gridHelper
+
+  const init = () => {
+    //  在此处初始化的模块 才能避免二次加载叠加
+    createRenderer() //  创建渲染器
+  }
   const createRenderer = () => {
     renderer.setSize(600, 600)
     renderer.shadowMap.enabled = true // 启用阴影
@@ -324,11 +330,8 @@ export const useThree = () => {
     // init occt-import-js   已全局引入
     // eslint-disable-next-line no-undef
     const occt = await occtimportjs()
-    // download a step file
-    // let fileUrl = 'https://raw.githubusercontent.com/kovacsv/occt-import-js/main/test/testfiles/cax-if/as1_pe_203.stp';
     let response = await fetch(fileUrl)
     let buffer = await response.arrayBuffer()
-
     // read the imported step file
     let fileBuffer = new Uint8Array(buffer)
     let result = occt.ReadStepFile(fileBuffer, null)
@@ -350,8 +353,6 @@ export const useThree = () => {
     } else {
       material = new THREE.MeshPhongMaterial({ color: 0xcccccc })
     }
-
-    console.log("🚀 ~ file: useThree.js:376 ~ LoadStep ~ geometry:", geometry)
     return { geometry, material }
   }
 
@@ -532,6 +533,12 @@ export const useThree = () => {
   //   return camera
   // }
 
+  onMounted(() => {
+    init()
+  })
+  onUnmounted(() => {
+    renderer.dispose()
+  })
   return {
     scene,
     renderer,

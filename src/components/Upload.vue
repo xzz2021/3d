@@ -9,7 +9,6 @@
     :on-change="onUpload"
     accept=".glb,.obj,.gltf,.fbx,.stl,.igs,.stp,.x_t,.iges,.igs"
   >
-    <!-- <el-icon class="el-icon--upload"><upload-filled /></el-icon> -->
     <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
     <div class="el-upload__text">
       直接拖拽文件 或者
@@ -29,6 +28,6 @@
 import ThreeViewer from "./ThreeViewer.vue"
 import { useUpload } from "../hooks/useUpload"
 import { UploadFilled } from "@element-plus/icons-vue"
-const { onUpload, modelPath, modelType, threeRef, uploadForm, forgeRef } = useUpload()
+const { onUpload, modelPath, modelType, threeRef, uploadForm } = useUpload()
 </script>
 <style></style>
