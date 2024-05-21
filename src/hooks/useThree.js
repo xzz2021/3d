@@ -13,6 +13,7 @@ import { PCDLoader } from "three/examples/jsm/loaders/PCDLoader"
 import { XYZLoader } from "three/examples/jsm/loaders/XYZLoader"
 import { PDBLoader } from "three/examples/jsm/loaders/PDBLoader"
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader"
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 
 export const useThree = () => {
   // const ll = 0.6
@@ -229,6 +230,14 @@ export const useThree = () => {
     scene.add(gridHelper)
   }
 
+  const getMeshAndSize = mesh => {
+    const box = new THREE.Box3().setFromObject(mesh)
+    const center = box.getCenter(new THREE.Vector3())
+    mesh.position.sub(center) // 将模型居中
+    const size = box.getSize(new THREE.Vector3())
+    return { box, center, size }
+  }
+
   //  获取模型信息
   const getModelView = box => {
     // 获取模型的宽高
@@ -244,23 +253,31 @@ export const useThree = () => {
     return model
   }
 
-  // const createControls = (camera, _dom) => {
-  //   // controls = new OrbitControls(camera, dom);
-  //   controls.enableDamping = true // 启用阻尼效果
-  //   controls.dampingFactor = 0.25 // 阻尼系数
-  //   controls.enableZoom = true // 启用缩放
-  //   // controls.enablePan = !true;
-  //   controls.enableRotate = true // 启用旋转
-  //   // controls.screenSpacePanning = false; // 允许基于世界坐标的平移
-  //   controls.target.set(0, 0, 0)
-  //   controls.minDistance = 1
-  //   controls.maxDistance = 1000
-  // }
+  const createControls = (camera, dom) => {
+    const controls = new OrbitControls(camera, dom)
+    controls.enableDamping = true // 启用阻尼效果
+    controls.dampingFactor = 0.25 // 阻尼系数
+    controls.enableZoom = true // 启用缩放
+    // controls.enablePan = !true;
+    controls.enableRotate = true // 启用旋转
+    // controls.screenSpacePanning = false; // 允许基于世界坐标的平移
+    controls.target.set(0, 0, 0)
+    controls.minDistance = 1
+    controls.maxDistance = 1000
+    return controls
+  }
   // 添加轴辅助器  原点坐标指示
   const addAxes = size => {
     const max = Math.max(size.x, size.y, size.z)
     const axesHelper = new THREE.AxesHelper(max / 2 + 30)
     scene.add(axesHelper)
+  }
+
+  const addLightOfCamera = () => {
+    const pointLight = new THREE.DirectionalLight(0xffffff, 0.5, 100)
+    pointLight.castShadow = true
+    scene.add(pointLight)
+    return pointLight
   }
   // 移除所有光源
   const removeAllLights = scene => {
@@ -545,6 +562,9 @@ export const useThree = () => {
     // pointLight,
     // camera,
     // controls,
+    addLightOfCamera,
+    createControls,
+    getMeshAndSize,
     createRenderer,
     createLight,
     chooseLoader,

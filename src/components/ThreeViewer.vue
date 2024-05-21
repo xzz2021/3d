@@ -29,10 +29,23 @@ const props = defineProps({
 })
 
 const container = ref(null)
-let camera, mesh, controls, pointLight
+let camera, controls, mesh, pointLight
 let modelView = ref({})
 
-let { scene, renderer, createLight, chooseLoader, createCarmera, getModelView, clearScene, LoadStep, LoadIges } = useThree()
+let {
+  scene,
+  renderer,
+  createLight,
+  createControls,
+  chooseLoader,
+  createCarmera,
+  getModelView,
+  clearScene,
+  LoadStep,
+  LoadIges,
+  getMeshAndSize,
+  addLightOfCamera,
+} = useThree()
 
 let { sceneOrtho, cameraOrtho } = useFace()
 
@@ -45,10 +58,7 @@ const loadModel = async (path, type) => {
     const { geometry, material } = await LoadStep(path)
     // mesh = await LoadIges(path)
     mesh = new THREE.Mesh(geometry, material)
-    const box = new THREE.Box3().setFromObject(mesh)
-    const center = box.getCenter(new THREE.Vector3())
-    mesh.position.sub(center) // 将模型居中
-    const size = box.getSize(new THREE.Vector3())
+    const { box, center, size } = getMeshAndSize(mesh)
     // createGridHelper(size)   // 创建网格底座
     // addAxes(size) // 添加轴辅助器  原点坐标指示
 
@@ -61,23 +71,13 @@ const loadModel = async (path, type) => {
     createLight(size) // 添加光源
 
     // 添加一个跟随相机的点光源
-    pointLight = new THREE.DirectionalLight(0xffffff, 0.5, 100)
-    pointLight.castShadow = true
-    scene.add(pointLight)
+    pointLight = addLightOfCamera()
+
     camera = createCarmera(size, center) // 创建相机
     scene.add(mesh)
     // 有了渲染器之后   一定要先创建相机   再创建控制器
-    // createControls(camera,renderer.domElement)
-    controls = new OrbitControls(camera, renderer.domElement)
-    controls.enableDamping = true // 启用阻尼效果
-    controls.dampingFactor = 0.25 // 阻尼系数
-    controls.enableZoom = true // 启用缩放
-    // controls.enablePan = !true;
-    controls.enableRotate = true // 启用旋转
-    // controls.screenSpacePanning = false; // 允许基于世界坐标的平移
-    controls.target.set(0, 0, 0)
-    controls.minDistance = 1
-    controls.maxDistance = 1000
+    controls = createControls(camera, renderer.domElement)
+
     // fitCameraToObject(camera, size,center, controls);
     container.value.appendChild(renderer.domElement) // 挂载
 
@@ -90,7 +90,6 @@ const loadModel = async (path, type) => {
   if (type == "iges" || type == "igs") {
     // await LoadGeometry(path)
     const { mergedGeometry, material } = await LoadIges(path)
-    console.log("🚀 ~ file: StlViewer6.vue:131 ~ loadModel ~ geometry:", mergedGeometry)
     // mesh = await LoadIges(path)
     mesh = new THREE.Mesh(mergedGeometry, material)
     const box = new THREE.Box3().setFromObject(mesh)
@@ -100,26 +99,20 @@ const loadModel = async (path, type) => {
     // createGridHelper(size)   // 创建网格底座
     // addAxes(size) // 添加轴辅助器  原点坐标指示
 
+    // 可视化包围盒
+    const boxHelper = new THREE.BoxHelper(mesh, 0xffffff)
+    scene.add(boxHelper)
+
     createLight(size) // 添加光源
 
     // 添加一个跟随相机的点光源
-    pointLight = new THREE.DirectionalLight(0xffffff, 0.5, 100)
-    pointLight.castShadow = true
-    scene.add(pointLight)
+    pointLight = addLightOfCamera()
+
     camera = createCarmera(size, center) // 创建相机
     scene.add(mesh)
     // 有了渲染器之后   一定要先创建相机   再创建控制器
-    // createControls(camera,renderer.domElement)
-    controls = new OrbitControls(camera, renderer.domElement)
-    controls.enableDamping = true // 启用阻尼效果
-    controls.dampingFactor = 0.25 // 阻尼系数
-    controls.enableZoom = true // 启用缩放
-    // controls.enablePan = !true;
-    controls.enableRotate = true // 启用旋转
-    // controls.screenSpacePanning = false; // 允许基于世界坐标的平移
-    controls.target.set(0, 0, 0)
-    controls.minDistance = 1
-    controls.maxDistance = 1000
+    controls = createControls(camera, renderer.domElement)
+
     // fitCameraToObject(camera, size,center, controls);
     container.value.appendChild(renderer.domElement) // 挂载
 
@@ -154,25 +147,14 @@ const loadModel = async (path, type) => {
       createLight(size) // 添加光源
 
       // 添加一个跟随相机的点光源 此处必须添加
-      pointLight = new THREE.DirectionalLight(0xffffff, 0.5, 100)
-      pointLight.castShadow = true
-      scene.add(pointLight)
+      pointLight = addLightOfCamera()
+
       camera = createCarmera(size, center) // 创建相机
       scene.add(mesh)
 
       // 有了渲染器之后   一定要先创建相机   再创建控制器
-      // createControls(camera,renderer.domElement)
-      controls = new OrbitControls(camera, renderer.domElement)
-      controls.enableDamping = true // 启用阻尼效果
-      controls.dampingFactor = 0.25 // 阻尼系数
-      controls.enableZoom = true // 启用缩放
-      // controls.enablePan = !true;
-      controls.enableRotate = true // 启用旋转
-      // controls.screenSpacePanning = false; // 允许基于世界坐标的平移
-      controls.target.set(0, 0, 0)
-      controls.minDistance = 1
-      controls.maxDistance = 1000
-      // fitCameraToObject(camera, size,center, controls);
+      controls = createControls(camera, renderer.domElement)
+
       container.value.appendChild(renderer.domElement) // 挂载
       animate()
       closeLoading()
