@@ -22,7 +22,6 @@ export const useThree = () => {
   // const winH = window.innerHeight
   let scene = new THREE.Scene()
   scene.background = new THREE.Color(0x8c8aff) //  设置场景的背景色
-  let pointLight
 
   // let d = 75 // 控制视锥的尺寸  //  控制相机与模型中心的距离
   // let camera = new THREE.OrthographicCamera(-d, d, d, -d, 1, 1000);
@@ -147,12 +146,7 @@ export const useThree = () => {
     // spotLightRight.distance = 200;
     // scene.add(spotLightRight);
   }
-  // 添加一个跟随相机的平行光源
-  const createCameraLight = () => {
-    pointLight = new THREE.DirectionalLight(0xffffff, 1, 100)
-    pointLight.castShadow = true
-    scene.add(pointLight)
-  }
+
   // 自动选择相应 加载器
   const chooseLoader = type => {
     let loader
@@ -273,6 +267,7 @@ export const useThree = () => {
     scene.add(axesHelper)
   }
 
+  // 添加一个跟随相机的平行光源
   const addLightOfCamera = () => {
     const pointLight = new THREE.DirectionalLight(0xffffff, 0.5, 100)
     pointLight.castShadow = true
@@ -294,23 +289,23 @@ export const useThree = () => {
     })
   }
 
-  const fitCameraToObject = (camera, size, center, controls) => {
-    const maxSize = Math.max(size.x, size.y, size.z)
-    const fitHeightDistance = maxSize / (2 * Math.atan((Math.PI * camera.fov) / 360))
-    const fitWidthDistance = fitHeightDistance / camera.aspect
-    const distance = Math.max(fitHeightDistance, fitWidthDistance)
+  // const fitCameraToObject = (camera, size, center, controls) => {
+  //   const maxSize = Math.max(size.x, size.y, size.z)
+  //   const fitHeightDistance = maxSize / (2 * Math.atan((Math.PI * camera.fov) / 360))
+  //   const fitWidthDistance = fitHeightDistance / camera.aspect
+  //   const distance = Math.max(fitHeightDistance, fitWidthDistance)
 
-    const direction = controls.target.clone().sub(camera.position).normalize().multiplyScalar(distance)
-    controls.maxDistance = distance * 10
-    controls.target.copy(center)
+  //   const direction = controls.target.clone().sub(camera.position).normalize().multiplyScalar(distance)
+  //   controls.maxDistance = distance * 10
+  //   controls.target.copy(center)
 
-    camera.near = distance / 100
-    camera.far = distance * 100
-    camera.updateProjectionMatrix()
-    camera.position.copy(controls.target).sub(direction)
+  //   camera.near = distance / 100
+  //   camera.far = distance * 100
+  //   camera.updateProjectionMatrix()
+  //   camera.position.copy(controls.target).sub(direction)
 
-    controls.update()
-  }
+  //   controls.update()
+  // }
   // 清空场景所有对象
   const clearScene = () => {
     // 遍历场景中的所有对象
@@ -377,23 +372,13 @@ export const useThree = () => {
     // init occt-import-js   已全局引入
     // eslint-disable-next-line no-undef
     const occt = await occtimportjs()
-    console.log("🚀 ~ file: useThree.js:380 ~ LoadIges ~ occt:", occt)
-    // return
     // download a step file
     let response = await fetch(fileUrl)
     let buffer = await response.arrayBuffer()
-    // occt.viewer.LoadIges(buffer, { optimiaze: true })
-    // occt.viewer
-    // return { geometry, material }
-
     // read the imported step file
     let fileBuffer = new Uint8Array(buffer)
     // let igesResult = occt.ReadIgesFile(fileBuffer, null);
     let result = occt.ReadIgesFile(fileBuffer, null)
-    console.log("🚀 ~ file: useThree.js:394 ~ LoadIges ~ result:", result)
-    // return
-    // 将 IGES 数据转换为 STEP 文件
-    // let threeMesh
     if (result.success) {
       const mergedGeometry = new THREE.BufferGeometry()
       const positionArray = []
@@ -414,31 +399,23 @@ export const useThree = () => {
           offset += mesh.attributes.position.array.length / 3
         }
       })
-
       const positions = new Float32Array(positionArray)
       mergedGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3))
-
       if (normalArray.length > 0) {
         const normals = new Float32Array(normalArray)
         mergedGeometry.setAttribute("normal", new THREE.BufferAttribute(normals, 3))
       }
-
       if (indexArray.length > 0) {
         const indices = new Uint32Array(indexArray)
         mergedGeometry.setIndex(new THREE.BufferAttribute(indices, 1))
       }
-
       mergedGeometry.computeBoundingBox()
       mergedGeometry.computeBoundingSphere()
-
       const material = new THREE.MeshStandardMaterial({ color: 0xffffff })
-      const combinedMesh = new THREE.Mesh(mergedGeometry, material)
-      // scene.add(combinedMesh);
-      return { mergedGeometry, material }
+      return { geometry: mergedGeometry, material }
     } else {
-      console.error("Failed to load IGES file")
+      console.error("IGES文件加载失败")
     }
-    // return { mergedGeometry, material }
   }
 
   // const LoadX_T = async file => {
@@ -565,16 +542,13 @@ export const useThree = () => {
     addLightOfCamera,
     createControls,
     getMeshAndSize,
-    createRenderer,
     createLight,
     chooseLoader,
     createCarmera,
     getModelView,
     createGridHelper,
     addAxes,
-    fitCameraToObject,
     clearScene,
-    createCameraLight,
     LoadStep,
     LoadIges,
   }

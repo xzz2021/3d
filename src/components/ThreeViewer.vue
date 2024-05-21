@@ -55,7 +55,7 @@ const loadModel = async (path, type) => {
   openLoading() // 开启加载效果
   clearScene() //  加载新模型前先清除旧场景所有对象
   let loadView
-  //  特殊3d文件类型判断, 使用自定义的加载方法, 不走官方loader
+  //  特殊3d文件类型判断, 使用自定义的加载方法, 不走官方loader判断
   if (type == "stp") {
     loadView = await LoadStep(path)
   } else if (type == "iges" || type == "igs") {
