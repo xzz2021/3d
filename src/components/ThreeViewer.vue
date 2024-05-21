@@ -12,7 +12,6 @@
 <script setup>
 import { ref } from "vue"
 import * as THREE from "three"
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 import { useThree } from "../hooks/useThree.js"
 import { useFace } from "../hooks/useFace.js"
 import { useLoading } from "../hooks/useLoading.js"
@@ -27,6 +26,7 @@ const props = defineProps({
     default: "",
   },
 })
+// threejs   scene、mesh camera、renderer、controls 内部有只读属性的value  无法使用vue的响应式  ref 包裹
 
 const container = ref(null)
 let camera, controls, mesh, pointLight
@@ -54,11 +54,23 @@ const { openLoading, closeLoading } = useLoading()
 const loadModel = async (path, type) => {
   openLoading() // 开启加载效果
   clearScene() //  加载新模型前先清除旧场景所有对象
+  let loadView
+  //  特殊3d文件类型判断, 使用自定义的加载方法, 不走官方loader
   if (type == "stp") {
-    const { geometry, material } = await LoadStep(path)
+    loadView = await LoadStep(path)
+  } else if (type == "iges" || type == "igs") {
+    // await LoadGeometry(path)
+    loadView = await LoadIges(path)
+  } else {
+  }
+
+  if (loadView) {
+    const { geometry, material } = loadView
     // mesh = await LoadIges(path)
     mesh = new THREE.Mesh(geometry, material)
+
     const { box, center, size } = getMeshAndSize(mesh)
+
     // createGridHelper(size)   // 创建网格底座
     // addAxes(size) // 添加轴辅助器  原点坐标指示
 
@@ -87,42 +99,6 @@ const loadModel = async (path, type) => {
     modelView.value = getModelView(box)
     return
   }
-  if (type == "iges" || type == "igs") {
-    // await LoadGeometry(path)
-    const { mergedGeometry, material } = await LoadIges(path)
-    // mesh = await LoadIges(path)
-    mesh = new THREE.Mesh(mergedGeometry, material)
-    const box = new THREE.Box3().setFromObject(mesh)
-    const center = box.getCenter(new THREE.Vector3())
-    mesh.position.sub(center) // 将模型居中
-    const size = box.getSize(new THREE.Vector3())
-    // createGridHelper(size)   // 创建网格底座
-    // addAxes(size) // 添加轴辅助器  原点坐标指示
-
-    // 可视化包围盒
-    const boxHelper = new THREE.BoxHelper(mesh, 0xffffff)
-    scene.add(boxHelper)
-
-    createLight(size) // 添加光源
-
-    // 添加一个跟随相机的点光源
-    pointLight = addLightOfCamera()
-
-    camera = createCarmera(size, center) // 创建相机
-    scene.add(mesh)
-    // 有了渲染器之后   一定要先创建相机   再创建控制器
-    controls = createControls(camera, renderer.domElement)
-
-    // fitCameraToObject(camera, size,center, controls);
-    container.value.appendChild(renderer.domElement) // 挂载
-
-    animate()
-
-    closeLoading()
-    // 获取模型的三维信息
-    modelView.value = getModelView(box)
-    return
-  }
   // 其他常规3d文件走这里
   // 获取对应的模型加载器
   const loader = chooseLoader(type)
@@ -143,6 +119,10 @@ const loadModel = async (path, type) => {
       // createGridHelper(size)   // 创建网格底座
 
       // addAxes(size) // 添加轴辅助器  原点坐标指示
+
+      // 可视化包围盒
+      const boxHelper = new THREE.BoxHelper(mesh, 0xffffff)
+      scene.add(boxHelper)
 
       createLight(size) // 添加光源
 
