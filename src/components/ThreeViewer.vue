@@ -115,12 +115,8 @@ const loadModel = async (path, type) => {
         const material = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, metalness: 0.2 })
         mesh = new THREE.Mesh(model, material)
       }
-      console.log("🚀 ~ loadModel ~ mesh:")
       // 计算模型的中心点
-      const box = new THREE.Box3().setFromObject(mesh)
-      const center = box.getCenter(new THREE.Vector3())
-      mesh.position.sub(center) // 将模型居中
-      const size = box.getSize(new THREE.Vector3())
+      const { box, center, size } = getMeshAndSize(mesh)
       // createGridHelper(size)   // 创建网格底座
 
       addAxes(size) // 添加轴辅助器  原点坐标指示

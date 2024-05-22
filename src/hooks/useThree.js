@@ -205,7 +205,7 @@ export const useThree = () => {
     // const { x, y, z } = up || { x: 0, y: 0, z: 1 } //  元素自带基底面  用于相机视角 默认为Z轴
     const d = Math.sqrt(size.x * size.x + size.y * size.y)
     let camera = new THREE.OrthographicCamera(-d, d, d, -d, 1, 1000)
-    // const camera = new THREE.PerspectiveCamera(45, 1, 1, 1000)
+    // const camera = new THREE.PerspectiveCamera(75, 1, 1, 1000)
     // 计算相机位置
     // 定位相机到左上角
     // camera.position.set(center.x - size.x, center.y + size.y, center.z)
