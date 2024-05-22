@@ -1,5 +1,8 @@
 <template>
   <div ref="container" style="border: 1px solid black; margin: 20px; width: 600px; height: 600px"></div>
+  <div v-if="mesh">
+    <button id="button" @click="toggleLabel">{{ labelStatus ? "开启" : "关闭" }}三维信息</button>
+  </div>
   <div>模型信息:</div>
   <div>长: {{ modelView.height }}</div>
   <div>宽: {{ modelView.width }}</div>
@@ -29,12 +32,15 @@ const props = defineProps({
 // threejs   scene、mesh camera、renderer、controls 内部有只读属性的value  无法使用vue的响应式  ref 包裹
 
 const container = ref(null)
-let camera, controls, mesh, pointLight
+const labelStatus = ref(false)
+let camera, controls, mesh, pointLight, labelArr
 let modelView = ref({})
 
 let {
   scene,
   renderer,
+  addBox,
+  addAxes,
   createLight,
   createControls,
   chooseLoader,
@@ -74,11 +80,8 @@ const loadModel = async (path, type) => {
     // createGridHelper(size)   // 创建网格底座
     // addAxes(size) // 添加轴辅助器  原点坐标指示
 
-    // 可视化包围盒
-    const boxHelper = new THREE.BoxHelper(mesh, 0xffffff)
-    scene.add(boxHelper)
-    // const label = createLabel(dimensions, center2);
-    // scene.add(label);
+    // 添加可视化包围盒
+    labelArr = addBox(mesh)
 
     createLight(size) // 添加光源
 
@@ -105,12 +108,14 @@ const loadModel = async (path, type) => {
   loader.load(
     path,
     model => {
-      if (type === "obj") {
+      const simpleArr = ["obj", "dae", "3ds"]
+      if (simpleArr.includes(type)) {
         mesh = model.scene || model
       } else {
         const material = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, metalness: 0.2 })
         mesh = new THREE.Mesh(model, material)
       }
+      console.log("🚀 ~ loadModel ~ mesh:")
       // 计算模型的中心点
       const box = new THREE.Box3().setFromObject(mesh)
       const center = box.getCenter(new THREE.Vector3())
@@ -118,18 +123,17 @@ const loadModel = async (path, type) => {
       const size = box.getSize(new THREE.Vector3())
       // createGridHelper(size)   // 创建网格底座
 
-      // addAxes(size) // 添加轴辅助器  原点坐标指示
+      addAxes(size) // 添加轴辅助器  原点坐标指示
 
-      // 可视化包围盒
-      const boxHelper = new THREE.BoxHelper(mesh, 0xffffff)
-      scene.add(boxHelper)
+      // 添加可视化包围盒
+      labelArr = addBox(mesh)
 
       createLight(size) // 添加光源
 
       // 添加一个跟随相机的点光源 此处必须添加
       pointLight = addLightOfCamera()
 
-      camera = createCarmera(size, center) // 创建相机
+      camera = createCarmera(size, center, mesh.up) // 创建相机
       scene.add(mesh)
 
       // 有了渲染器之后   一定要先创建相机   再创建控制器
@@ -174,6 +178,24 @@ const animate = () => {
   }
 }
 
+//  一键切换显示三维信息
+const toggleLabel = () => {
+  return
+  if (!mesh) return
+  if (labelStatus.value) {
+    labelArr.map(item => {
+      scene.add(item)
+    })
+  } else {
+    labelArr.map(item => {
+      scene.remove(item)
+    })
+  }
+  labelStatus.value = !labelStatus.value
+}
+
+// 一键还原模型初始状态
+const autoBack = () => {}
 defineExpose({ loadModel })
 </script>
 
@@ -181,5 +203,16 @@ defineExpose({ loadModel })
 #container {
   width: 100%;
   height: 100%;
+}
+#button {
+  /* position: absolute;
+  top: 20px;
+  left: 20px; */
+  padding: 10px 20px;
+  background-color: #ff9800;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
 }
 </style>

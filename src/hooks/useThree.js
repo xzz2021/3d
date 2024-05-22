@@ -50,7 +50,6 @@ export const useThree = () => {
     const lightX = size.x + 50
     const lightY = size.y + 50
     const lightZ = size.z
-    console.log(lightX, lightY, lightZ)
     const halfZ = lightZ / 2
     // 添加光源  不然模型会是全黑色的
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.8)
@@ -203,9 +202,10 @@ export const useThree = () => {
 
   // 设置相机位置和方向
   const createCarmera = (size, center) => {
-    console.log(size)
+    // const { x, y, z } = up || { x: 0, y: 0, z: 1 } //  元素自带基底面  用于相机视角 默认为Z轴
     const d = Math.sqrt(size.x * size.x + size.y * size.y)
     let camera = new THREE.OrthographicCamera(-d, d, d, -d, 1, 1000)
+    // const camera = new THREE.PerspectiveCamera(45, 1, 1, 1000)
     // 计算相机位置
     // 定位相机到左上角
     // camera.position.set(center.x - size.x, center.y + size.y, center.z)
@@ -527,6 +527,98 @@ export const useThree = () => {
   //   return camera
   // }
 
+  const addBox = mesh => {
+    // 添加可视化包围盒
+    const boxHelper = new THREE.BoxHelper(mesh, 0xffffff)
+    const box = new THREE.Box3().setFromObject(mesh)
+    const labelArr = [boxHelper] //  labelArr 用于记录元素  便于后续 一键清除
+    addSizeLabels(box, labelArr)
+    scene.add(boxHelper)
+    return labelArr
+  }
+
+  // 添加尺寸信息的函数
+  const addSizeLabels = (box, labelArr) => {
+    // const size = new THREE.Vector3()
+    // box.getSize(size)
+    const size = box.getSize(new THREE.Vector3())
+    //  此处scale 用于获得相机距离模型的距离  从而计算 文本放大比例
+    const d = Math.sqrt(size.x * size.x + size.y * size.y)
+    const scale = (d / 4).toFixed(2)
+    const positions = [
+      {
+        text: `长: ${size.x.toFixed(2)}`,
+        position: new THREE.Vector3((box.min.x + box.max.x) / 2, box.min.y, box.min.z),
+      },
+      {
+        text: `宽: ${size.y.toFixed(2)}`,
+        position: new THREE.Vector3(box.min.x, (box.min.y + box.max.y) / 2, box.min.z),
+      },
+      {
+        text: `高: ${size.z.toFixed(2)}`,
+        position: new THREE.Vector3(box.min.x, box.min.y, (box.min.z + box.max.z) / 2),
+      },
+    ]
+
+    positions.forEach(dimension => {
+      const sprite = createTextSprite(dimension.text, scale)
+      sprite.position.copy(dimension.position)
+      // sprite.material.depthTest = false; // 确保文本不被遮挡
+      scene.add(sprite) // 添加到场景中
+      labelArr.push(sprite)
+    })
+
+    // 调整每个标签的位置，使其位于对应的线条中间
+    positions[0].position.set((box.min.x + box.max.x) / 2, box.min.y - 0.1, box.min.z - 0.1) // 长：底部中间
+    positions[1].position.set(box.min.x - 0.1, (box.min.y + box.max.y) / 2, box.min.z - 0.1) // 宽：左侧中间
+    positions[2].position.set(box.min.x - 0.1, box.min.y - 0.1, (box.min.z + box.max.z) / 2) // 高：前面中间
+
+    positions.forEach(dimension => {
+      const sprite = createTextSprite(dimension.text)
+      sprite.position.copy(dimension.position)
+      // sprite.material.depthTest = false; // 确保文本不被遮挡
+      sprite.position.z += 0.1 // 防止与其他对象重叠
+      scene.add(sprite) // 添加到场景中
+      labelArr.push(sprite)
+    })
+  }
+
+  // 创建显示尺寸信息的精灵函数
+  const createTextSprite = (text, scale) => {
+    const canvas = document.createElement("canvas")
+    const context = canvas.getContext("2d")
+
+    // 设置较大的分辨率和字体
+    const fontSize = 40 // 增大字体大小
+    const padding = 10 // 内边距
+    context.font = `Bold ${fontSize}px Arial`
+    context.fillStyle = "rgba(255, 255, 255, 1.0)"
+
+    // 计算文本宽度，调整canvas大小
+    const metrics = context.measureText(text)
+    const textWidth = metrics.width
+
+    canvas.width = textWidth + padding * 2 // 加一些填充
+    canvas.height = fontSize + padding * 2 // 固定高度
+
+    // 重新绘制文本到调整过大小的canvas上
+    context.font = `Bold ${fontSize}px Arial`
+    context.fillStyle = "rgba(255, 255, 255, 1.0)"
+    context.fillText(text, padding, fontSize + padding)
+
+    const texture = new THREE.CanvasTexture(canvas)
+    texture.needsUpdate = true
+
+    const spriteMaterial = new THREE.SpriteMaterial({ map: texture })
+    const sprite = new THREE.Sprite(spriteMaterial)
+    // sprite.renderOrder = 999 // 确保精灵渲染在其他对象之上  ??  不需要
+
+    // 调整比例以适应场景，使用固定的比例
+    // const scale = 10 // 固定大小的比例
+    sprite.scale.set(scale, scale * (canvas.height / canvas.width), 1)
+
+    return sprite
+  }
   onMounted(() => {
     init()
   })
@@ -539,6 +631,7 @@ export const useThree = () => {
     // pointLight,
     // camera,
     // controls,
+    addBox,
     addLightOfCamera,
     createControls,
     getMeshAndSize,

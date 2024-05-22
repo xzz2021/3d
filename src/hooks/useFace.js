@@ -38,6 +38,8 @@ export const useFace = () => {
     //     cameraOrtho = new THREE.OrthographicCamera(-d, d, d, -d, 0.1, 2000);
     // cameraOrtho.position.z = 500;
     //    cameraOrtho.position.set(0, 0, 100);
+    // const { x, y, z } = up || { x: 0, y: 0, z: 1 }
+    // cameraOrtho.up.set(x, y, z)
   }
   // 创建文字
   const createTextTexture = text => {

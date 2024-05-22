@@ -7,7 +7,7 @@
     :limit="1"
     :auto-upload="false"
     :on-change="onUpload"
-    accept=".glb,.obj,.gltf,.fbx,.stl,.igs,.stp,.x_t,.iges,.igs"
+    accept=".glb,.obj,.gltf,.fbx,.stl,.igs,.stp,.iges,.dae,.3ds"
   >
     <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
     <div class="el-upload__text">
@@ -15,7 +15,7 @@
       <em>点击选择</em>
     </div>
     <template #tip>
-      <div class="el-upload__tip">文件类型: STL, OBJ, STEP, STP, IGES, IGS, SLDPRT, 3DM, SAT, X_T</div>
+      <div class="el-upload__tip">文件类型: STL, OBJ, STEP, STP, IGES, IGS, DAE, 3DS, GLTF, GLB,</div>
     </template>
   </el-upload>
   <div style="margin: 20px">========</div>
