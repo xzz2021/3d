@@ -21,7 +21,7 @@ export const useThree = () => {
   // const winW = window.innerWidth
   // const winH = window.innerHeight
   let scene = new THREE.Scene()
-  scene.background = new THREE.Color(0x8c8aff) //  设置场景的背景色
+  scene.background = new THREE.Color(0x1f1f1f) //  设置场景的背景色0x8c8aff
 
   // let d = 75 // 控制视锥的尺寸  //  控制相机与模型中心的距离
   // let camera = new THREE.OrthographicCamera(-d, d, d, -d, 1, 1000);
@@ -47,66 +47,135 @@ export const useThree = () => {
     // 添加灯源前先移除所有的灯光
     removeAllLights(scene)
     //  平行光的距离影响也很大  太远会显得很模糊
-    const lightX = size.x + 50
-    const lightY = size.y + 50
-    const lightZ = size.z
-    const halfZ = lightZ / 2
+    // const lightX = size.x + 50
+    // const lightY = size.y + (lightX / size.y) * 50
+    const ll = size.x + size.y
+    const lightX = ll
+    const lightY = ll
+    // const lightY = size.y + 50
+    const lightZ = size.z * 2
+    // const halfZ = lightZ / 2
+    const halfZ = lightZ / 4
     // 添加光源  不然模型会是全黑色的
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8)
+
+    const color = 0xffffff
+    const skyColor = 0xb1e1ff // light blue
+    const groundColor = 0xb97a20 // brownish orange
+    const intensity = 0.8
+
+    //  环境光   没有方向，无法产生阴影   通常的作用是提亮场景，让暗部不要太暗
+    const ambientLight = new THREE.AmbientLight(color, intensity)
     scene.add(ambientLight)
+
+    //  点光源
+    // const pointLight = new THREE.PointLight(color, intensity * 100)
+    // pointLight.position.set(lightX / 2, lightX / 2, halfZ)
+    // pointLight.distance = 200
+    // scene.add(pointLight)
+    // const helper = new THREE.PointLightHelper(pointLight)
+    // scene.add(helper)
+
+    //  半球光
+    // const hemiLight = new THREE.HemisphereLight(skyColor, groundColor, intensity)
+    // scene.add(hemiLight)
     //  return
+
+    //  聚光灯
+    // const spotLight = new THREE.SpotLight(color, 150)
+    // scene.add(spotLight)
+    // scene.add(spotLight.target)
+    // const spotHelper = new THREE.SpotLightHelper(spotLight)
+    // scene.add(spotHelper)
+
+    //  方向光  用来表现太阳光照的效果
     // 左前XY
-    const directionLight2 = new THREE.DirectionalLight(0xffffff, 0.8)
-    directionLight2.position.set(lightX, -lightY / 4, halfZ)
+    const directionLight2 = new THREE.DirectionalLight(0xffffff, intensity)
+    directionLight2.position.set(-lightX, lightY, lightZ)
+    // directionLight2.target.position.set(0, 0, 0)
+    const directionLight2Helper = new THREE.DirectionalLightHelper(directionLight2)
     scene.add(directionLight2)
+    scene.add(directionLight2Helper)
     //  return
     // 右前
-    const directionLight22 = new THREE.DirectionalLight(0xffffff, 0.8)
-    directionLight22.position.set(lightX, lightY / 4, halfZ)
+    const directionLight22 = new THREE.DirectionalLight(0xffffff, intensity)
+    directionLight22.position.set(lightX, lightY, lightZ)
+    // directionLight22.target.position.set(0, 0, 0)
+    const directionLight22Helper = new THREE.DirectionalLightHelper(directionLight22)
+    scene.add(directionLight22Helper)
     scene.add(directionLight22)
     // 左后
-    const directionLight77 = new THREE.DirectionalLight(0xffffff, 0.8)
-    directionLight77.position.set(-lightX, -lightY / 4, 20)
+    const directionLight77 = new THREE.DirectionalLight(0xffffff, intensity)
+    directionLight77.position.set(-lightX, -lightY, lightZ)
+    // directionLight77.target.position.set(0, 0, 0)
+    const directionLight77Helper = new THREE.DirectionalLightHelper(directionLight77)
+    scene.add(directionLight77Helper)
     scene.add(directionLight77)
     // 右后
-    const directionLight27 = new THREE.DirectionalLight(0xffffff, 0.8)
-    directionLight27.position.set(-lightX, lightY / 4, 20)
+    const directionLight27 = new THREE.DirectionalLight(0xffffff, intensity)
+    directionLight27.position.set(lightX, -lightY, lightZ)
+    // directionLight27.target.position.set(0, 0, 0)
+    const directionLight27Helper = new THREE.DirectionalLightHelper(directionLight27)
+    scene.add(directionLight27Helper)
     scene.add(directionLight27)
 
-    // 顶部
-    // const directionLightBottom = new THREE.DirectionalLight(0xffffff,0.4)
-    // directionLightBottom.position.set(0, 0, lightZ +50);
-    // scene.add(directionLightBottom);
+    //  顶部
+    // const directionLightBottom = new THREE.DirectionalLight(0xffffff, intensity)
+    // directionLightBottom.position.set(0, 0, lightZ + 50)
+    // const directionLightBottomHelper = new THREE.DirectionalLightHelper(directionLightBottom)
+    // scene.add(directionLightBottomHelper)
+    // scene.add(directionLightBottom)
 
-    // //底部
-    // const directionLightTop = new THREE.DirectionalLight(0xffffff,0.4)
-    // directionLightTop.position.set(0, 0, -200);
-    // scene.add(directionLightTop);
+    //底部
+    // const directionLightTop = new THREE.DirectionalLight(0xffffff, intensity)
+    // directionLightTop.position.set(0, 0, -lightZ - 50)
+    // const directionLightTopHelper = new THREE.DirectionalLightHelper(directionLightTop)
+    // scene.add(directionLightTopHelper)
+    // scene.add(directionLightTop)
 
     // X 正前方
-    //   const directionLightFront = new THREE.DirectionalLight(0xffffff,0.8)
-    //   directionLightFront.position.set(lightX * 2, 0, halfZ);
-    //    scene.add(directionLightFront);
+    const directionLight44 = new THREE.DirectionalLight(0xffffff, intensity)
+    directionLight44.position.set(-lightX, lightY, 0)
+    const directionLight44Helper = new THREE.DirectionalLightHelper(directionLight44)
+    scene.add(directionLight44Helper)
+    scene.add(directionLight44)
 
+    const directionLight443 = new THREE.DirectionalLight(0xffffff, intensity)
+    directionLight443.position.set(lightX, lightY, 0)
+    const directionLight443Helper = new THREE.DirectionalLightHelper(directionLight443)
+    scene.add(directionLight443Helper)
+    scene.add(directionLight443)
     //    // -X 正前方
     //   const directionLightBack = new THREE.DirectionalLight(0xffffff,0.8)
     //   directionLightBack.position.set(-lightX * 2, 0, halfZ);
     //    scene.add(directionLightBack);
 
-    //  // Y 正前方
-    //   const directionLightRight = new THREE.DirectionalLight(0xffffff,0.2)
-    //   directionLightRight.position.set(0, lightY, halfZ);
-    //   scene.add(directionLightRight);
+    // // 左面
+    // const directionLightLeft = new THREE.DirectionalLight(0xffffff, intensity)
+    // directionLightLeft.position.set(0, -lightY, lightZ)
+    // const directionLightLeftHelper = new THREE.DirectionalLightHelper(directionLightLeft)
+    // scene.add(directionLightLeftHelper)
+    // scene.add(directionLightLeft)
 
-    //   // -Y 正前方
-    //   const directionLightLeft = new THREE.DirectionalLight(0xffffff,0.2)
-    //   directionLightLeft.position.set(0, -lightY, halfZ);
-    //   scene.add(directionLightLeft);
+    // //  右侧
+    // const directionLightRight = new THREE.DirectionalLight(0xffffff, intensity)
+    // directionLightRight.position.set(0, lightY, lightZ)
+    // const directionLightRightHelper = new THREE.DirectionalLightHelper(directionLightRight)
+    // scene.add(directionLightRightHelper)
+    // scene.add(directionLightRight)
 
-    //   // // 左面
-    //   const directionLightLeft = new THREE.DirectionalLight(0xffffff,0.2)
-    //   directionLightLeft.position.set(0, -150, 20);
-    //   scene.add(directionLightLeft);
+    // // // 左面
+    // const directionLightFront = new THREE.DirectionalLight(0xffffff, intensity)
+    // directionLightFront.position.set(lightX, 0, lightZ)
+    // const directionLightFrontHelper = new THREE.DirectionalLightHelper(directionLightFront)
+    // scene.add(directionLightFrontHelper)
+    // scene.add(directionLightFront)
+
+    // //  右侧
+    // const directionLightBack = new THREE.DirectionalLight(0xffffff, intensity)
+    // directionLightRight.position.set(-lightX, 0, lightZ)
+    // const directionLightBackHelper = new THREE.DirectionalLightHelper(directionLightBack)
+    // scene.add(directionLightBackHelper)
+    // scene.add(directionLightBack)
 
     //  正前方45度
     // const directionLight33 = new THREE.DirectionalLight(0xffffff,0.1)
@@ -204,8 +273,8 @@ export const useThree = () => {
   const createCarmera = (size, center) => {
     // const { x, y, z } = up || { x: 0, y: 0, z: 1 } //  元素自带基底面  用于相机视角 默认为Z轴
     const d = Math.sqrt(size.x * size.x + size.y * size.y)
-    let camera = new THREE.OrthographicCamera(-d, d, d, -d, 1, 1000)
-    // const camera = new THREE.PerspectiveCamera(75, 1, 1, 1000)
+    let camera = new THREE.OrthographicCamera(-d, d, d, -d, 1, 1000) //  直接展示物体每个面的真实 映射  眼 = 物体
+    // const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000)  //  模拟人眼  以点看物体  眼 < 物体
     // 计算相机位置
     // 定位相机到左上角
     // camera.position.set(center.x - size.x, center.y + size.y, center.z)
@@ -363,6 +432,8 @@ export const useThree = () => {
       const color = new THREE.Color(resultMesh.color[0], resultMesh.color[1], resultMesh.color[2])
       material = new THREE.MeshPhongMaterial({ color: color })
     } else {
+      //  side 属性很重要  用于剖面空心状态的显示
+      // material = new THREE.MeshPhongMaterial({ color: 0xcccccc, side: THREE.BackSide })
       material = new THREE.MeshPhongMaterial({ color: 0xcccccc })
     }
     return { geometry, material }

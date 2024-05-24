@@ -18,6 +18,8 @@ import * as THREE from "three"
 import { useThree } from "../hooks/useThree.js"
 import { useFace } from "../hooks/useFace.js"
 import { useLoading } from "../hooks/useLoading.js"
+
+import WebGL from "three/addons/capabilities/WebGL.js"
 // 接收props
 const props = defineProps({
   modelPath: {
@@ -33,7 +35,7 @@ const props = defineProps({
 
 const container = ref(null)
 const labelStatus = ref(false)
-let camera, controls, mesh, pointLight, labelArr
+let camera, controls, mesh, pointLight, labelArr, gui, planeItem
 let modelView = ref({})
 
 let {
@@ -72,7 +74,7 @@ const loadModel = async (path, type) => {
 
   if (loadView) {
     const { geometry, material } = loadView
-    // mesh = await LoadIges(path)
+
     mesh = new THREE.Mesh(geometry, material)
 
     const { box, center, size } = getMeshAndSize(mesh)
@@ -83,20 +85,27 @@ const loadModel = async (path, type) => {
     // 添加可视化包围盒
     labelArr = addBox(mesh)
 
+    scene.add(mesh)
+
     createLight(size) // 添加光源
 
     // 添加一个跟随相机的点光源
     pointLight = addLightOfCamera()
 
     camera = createCarmera(size, center) // 创建相机
-    scene.add(mesh)
+
+    // scene.add(mesh)
     // 有了渲染器之后   一定要先创建相机   再创建控制器
     controls = createControls(camera, renderer.domElement)
 
-    // fitCameraToObject(camera, size,center, controls);
+    // const { x, y, z } = size
+
     container.value.appendChild(renderer.domElement) // 挂载
 
     animate()
+
+    // addGui(material)
+
     closeLoading()
     // 获取模型的三维信息
     modelView.value = getModelView(box)
@@ -109,12 +118,59 @@ const loadModel = async (path, type) => {
     path,
     model => {
       const simpleArr = ["obj", "dae", "3ds"]
+      let material = new THREE.MeshLambertMaterial({
+        color: 0xffffff,
+        roughness: 1,
+        metalness: 0.2,
+        curveSegments: 12,
+        bevelEnabled: true,
+        bevelThickness: 0.03,
+        bevelSize: 0.02,
+        bevelOffset: 0,
+        bevelSegments: 5,
+        // side: THREE.FrontSide,
+        // clippingPlanes: [new THREE.Plane(new THREE.Vector3(1, 0, 0), 0)], // 添加裁剪平面
+        // clipShadows: true,
+      })
       if (simpleArr.includes(type)) {
         mesh = model.scene || model
       } else {
-        const material = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, metalness: 0.2 })
         mesh = new THREE.Mesh(model, material)
       }
+      mesh.castShadow = true // 使文字投射阴影
+      console.log("🚀 ~ file: ThreeViewer.vue:132 ~ loadModel ~ mesh:", mesh)
+
+      // 设置剖面平面
+      // const plane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0)
+      // // 设置模型材质
+      // model.traverse(function (child) {
+      //   if (child.isMesh) {
+      //     // 外部材质
+      //     child.material = new THREE.MeshStandardMaterial({
+      //       color: 0xff00ff,
+      //       side: THREE.BackSide,
+      //       clippingPlanes: [plane],
+      //       opacity: 1,
+      //       depthWrite: true,
+      //       depthTest: true, // 启用深度测试
+      //       clipShadows: true,
+      //     })
+      //     // 内部材质
+      //     const innerMaterial = new THREE.MeshStandardMaterial({
+      //       color: 0x808080,
+      //       side: THREE.FrontSide,
+      //       clippingPlanes: [plane],
+      //       opacity: 1,
+      //       clipShadows: true,
+      //       depthWrite: true,
+      //       depthTest: true, // 启用深度测试
+      //     })
+      //     const innerMesh = child.clone()
+      //     innerMesh.material = innerMaterial
+      //     scene.add(innerMesh)
+      //   }
+      // })
+
       // 计算模型的中心点
       const { box, center, size } = getMeshAndSize(mesh)
       // createGridHelper(size)   // 创建网格底座
@@ -130,6 +186,7 @@ const loadModel = async (path, type) => {
       pointLight = addLightOfCamera()
 
       camera = createCarmera(size, center, mesh.up) // 创建相机
+
       scene.add(mesh)
 
       // 有了渲染器之后   一定要先创建相机   再创建控制器
@@ -137,6 +194,9 @@ const loadModel = async (path, type) => {
 
       container.value.appendChild(renderer.domElement) // 挂载
       animate()
+
+      // addGui(material)
+
       closeLoading()
       // 获取模型的三维信息
       modelView.value = getModelView(box)
@@ -149,6 +209,12 @@ const loadModel = async (path, type) => {
 }
 
 const animate = () => {
+  // if (!WebGL.isWebGLAvailable()) {
+  //   //  webgl支持检查
+  //   const warning = WebGL.getWebGLErrorMessage()
+  //   container.value.appendChild(warning)
+  //   return
+  // }
   requestAnimationFrame(animate)
 
   if (mesh && camera) {
@@ -176,7 +242,6 @@ const animate = () => {
 
 //  一键切换显示三维信息
 const toggleLabel = () => {
-  return
   if (!mesh) return
   if (labelStatus.value) {
     labelArr.map(item => {
@@ -188,6 +253,58 @@ const toggleLabel = () => {
     })
   }
   labelStatus.value = !labelStatus.value
+}
+
+const addGui = material => {
+  // 创建一个剪裁平面  此处 可以控制轴向剖面
+  const plane = new THREE.Plane(new THREE.Vector3(1, 0, 0), 0)
+
+  // 启用全局剪裁平面
+  // material.clippingPlanes = [plane]
+  // material.clipShadows = true
+  renderer.localClippingEnabled = true
+  // renderer.clippingPlanes = [plane]
+  // 清除上一次gui添加的plane
+  if (gui && planeItem) {
+    // planeItem  清除已有的gui操控实例
+    gui.remove(planeItem)
+    gui.add(plane, "constant", -1, 1).name("剖面图")
+    return
+  }
+
+  gui = new dat.GUI()
+  const options = {
+    // clipIntersection: true,
+    // displayHelper: false,
+    solid: true,
+  }
+
+  gui
+    .add(options, "solid")
+    .name("实心/空心")
+    .onChange(value => {
+      if (value) {
+        material.transparent = false
+        material.opacity = 1.0
+        material.depthWrite = true
+        material.depthTest = true
+        material.side = THREE.DoubleSide
+      } else {
+        material.transparent = true
+        material.opacity = 1
+        material.depthWrite = false
+        material.depthTest = false
+        material.side = THREE.DoubleSide
+      }
+    })
+
+  planeItem = gui.add(plane, "constant", -10, 10).name("剖面图")
+  gui.add({ speed: 1 }, "speed", 0, 5).name("速度")
+  const cubeFolder = gui.addFolder("Cube")
+  cubeFolder.add(mesh.rotation, "x", 0, Math.PI * 2)
+  cubeFolder.add(mesh.rotation, "y", 0, Math.PI * 2)
+  cubeFolder.add(mesh.rotation, "z", 0, Math.PI * 2)
+  cubeFolder.open()
 }
 
 // 一键还原模型初始状态
@@ -210,5 +327,9 @@ defineExpose({ loadModel })
   border: none;
   cursor: pointer;
   font-size: 16px;
+}
+
+#button:focus {
+  outline: none;
 }
 </style>

@@ -19,6 +19,7 @@ export default [
           caughtErrors: "all",
           ignoreRestSiblings: false,
           reportUsedIgnorePattern: false,
+          "no-undef": "error",
         },
       ],
     },
