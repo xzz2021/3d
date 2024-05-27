@@ -1,0 +1,40 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 4562473 */
+  src:
+    url("./iconfont.woff2?t=1716774643195") format("woff2"),
+    url("./iconfont.woff?t=1716774643195") format("woff"),
+    url("./iconfont.ttf?t=1716774643195") format("truetype");
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 20px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: aqua;
+}
+
+.icon-shitufushitu:before {
+  content: "\e64f";
+}
+
+.icon-shituyangshitu:before {
+  content: "\e650";
+}
+
+.icon-shituzuoshitu:before {
+  content: "\e653";
+}
+
+.icon-shituzhushitu:before {
+  content: "\e654";
+}
+
+.icon-shituyoushitu:before {
+  content: "\e655";
+}
+
+.icon-shituhoushitu:before {
+  content: "\e656";
+}

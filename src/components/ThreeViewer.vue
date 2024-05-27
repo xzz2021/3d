@@ -1,8 +1,12 @@
 <template>
-  <div ref="container" style="border: 1px solid black; margin: 20px; width: 600px; height: 600px"></div>
+  <div ref="container" id="threecontainer">
+    <AxisLine :camera2="camera" />
+  </div>
   <div v-if="mesh">
     <button id="button" @click="toggleLabel">{{ labelStatus ? "开启" : "关闭" }}三维信息</button>
   </div>
+  <button id="button" @click="toggleCor">变换控制器</button>
+
   <div>模型信息:</div>
   <div>长: {{ modelView.height }}</div>
   <div>宽: {{ modelView.width }}</div>
@@ -19,7 +23,14 @@ import { useThree } from "../hooks/useThree.js"
 import { useFace } from "../hooks/useFace.js"
 import { useLoading } from "../hooks/useLoading.js"
 
-import WebGL from "three/addons/capabilities/WebGL.js"
+import AxisLine from "./AxisLine.vue"
+
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js"
+import { RenderPass } from "three/addons/postprocessing/RenderPass.js"
+import { GlitchPass } from "three/addons/postprocessing/GlitchPass.js"
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js"
+import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js"
+
 // 接收props
 const props = defineProps({
   modelPath: {
@@ -35,14 +46,20 @@ const props = defineProps({
 
 const container = ref(null)
 const labelStatus = ref(false)
-let camera, controls, mesh, pointLight, labelArr, gui, planeItem
+let mesh, pointLight, labelArr, gui, planeItem, pmremGenerator
 let modelView = ref({})
-
+const camera = ref(null)
 let {
   scene,
   renderer,
+  controls,
   addBox,
+  addArrow,
   addAxes,
+  // addFaceGui,
+  addEnvironment,
+  changeFace,
+  restoreCarmera,
   createLight,
   createControls,
   chooseLoader,
@@ -58,7 +75,6 @@ let {
 let { sceneOrtho, cameraOrtho } = useFace()
 
 const { openLoading, closeLoading } = useLoading()
-
 const loadModel = async (path, type) => {
   openLoading() // 开启加载效果
   clearScene() //  加载新模型前先清除旧场景所有对象
@@ -67,7 +83,6 @@ const loadModel = async (path, type) => {
   if (type == "stp") {
     loadView = await LoadStep(path)
   } else if (type == "iges" || type == "igs") {
-    // await LoadGeometry(path)
     loadView = await LoadIges(path)
   } else {
   }
@@ -92,11 +107,11 @@ const loadModel = async (path, type) => {
     // 添加一个跟随相机的点光源
     pointLight = addLightOfCamera()
 
-    camera = createCarmera(size, center) // 创建相机
+    camera.value = createCarmera(size, center) // 创建相机
 
     // scene.add(mesh)
     // 有了渲染器之后   一定要先创建相机   再创建控制器
-    controls = createControls(camera, renderer.domElement)
+    controls = createControls(camera.value, renderer.domElement)
 
     // const { x, y, z } = size
 
@@ -118,16 +133,13 @@ const loadModel = async (path, type) => {
     path,
     model => {
       const simpleArr = ["obj", "dae", "3ds"]
-      let material = new THREE.MeshLambertMaterial({
+      let material = new THREE.MeshStandardMaterial({
         color: 0xffffff,
         roughness: 1,
-        metalness: 0.2,
-        curveSegments: 12,
-        bevelEnabled: true,
-        bevelThickness: 0.03,
-        bevelSize: 0.02,
-        bevelOffset: 0,
-        bevelSegments: 5,
+        metalness: 0,
+        // flatShading: true, // 显示线框
+        // reflectivity: 0.3,
+
         // side: THREE.FrontSide,
         // clippingPlanes: [new THREE.Plane(new THREE.Vector3(1, 0, 0), 0)], // 添加裁剪平面
         // clipShadows: true,
@@ -185,14 +197,17 @@ const loadModel = async (path, type) => {
       // 添加一个跟随相机的点光源 此处必须添加
       pointLight = addLightOfCamera()
 
-      camera = createCarmera(size, center, mesh.up) // 创建相机
+      camera.value = createCarmera(size, center, mesh.up) // 创建相机
 
+      // addEnvironment()
+      // addFaceGui(camera)
       scene.add(mesh)
 
       // 有了渲染器之后   一定要先创建相机   再创建控制器
-      controls = createControls(camera, renderer.domElement)
-
+      controls = createControls(camera.value, renderer.domElement)
       container.value.appendChild(renderer.domElement) // 挂载
+
+      // addArrow()
       animate()
 
       // addGui(material)
@@ -208,6 +223,11 @@ const loadModel = async (path, type) => {
   )
 }
 
+const toggleCor = () => {
+  restoreCarmera(camera.value, controls)
+  // controls = createControls(camera, renderer.domElement, "TransformControls")
+}
+
 const animate = () => {
   // if (!WebGL.isWebGLAvailable()) {
   //   //  webgl支持检查
@@ -217,21 +237,21 @@ const animate = () => {
   // }
   requestAnimationFrame(animate)
 
-  if (mesh && camera) {
+  if (mesh && camera.value) {
     controls.update() // 更新控制器
     // 使点光源跟随相机
-    const vector = camera.position.clone()
+    const vector = camera.value.position.clone()
     pointLight.position.set(vector.x, vector.y, vector.z) //点光源位置
     //主场景
     renderer.setViewport(0, 0, 600, 600) //主场景视区
     renderer.autoClear = false //【scene.autoClear一定要关闭】
-    renderer.render(scene, camera)
+    renderer.render(scene, camera.value)
     // 旋转
     // viewBox.rotation.x += 0.01;
     // viewBox.rotation.y += 0.01;
     //次场景:1.复制主场景相机的位置、四元数，2.设置场景视区，3.渲染
-    cameraOrtho.position.copy(camera.position)
-    cameraOrtho.quaternion.copy(camera.quaternion) //Quaternion（表示对象局部旋转的四元数)
+    cameraOrtho.position.copy(camera.value.position)
+    cameraOrtho.quaternion.copy(camera.value.quaternion) //Quaternion（表示对象局部旋转的四元数)
     cameraOrtho.lookAt(scene.position)
     cameraOrtho.up.set(0, 0, 1) // 同步基准面
     renderer.setViewport(450, 450, 150, 150) //【设置次场景视区视口，(x, y,width,height)，用来显示viewCube】
@@ -317,6 +337,13 @@ defineExpose({ loadModel })
   width: 100%;
   height: 100%;
 }
+#threecontainer {
+  position: relative;
+  border: 1px solid black;
+  margin: 20px;
+  width: 600px;
+  height: 600px;
+}
 #button {
   /* position: absolute;
   top: 20px;
@@ -331,5 +358,14 @@ defineExpose({ loadModel })
 
 #button:focus {
   outline: none;
+}
+
+#faceBox {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  /* border: 1px solid black;
+  width: 50px;
+  height: 50px; */
 }
 </style>

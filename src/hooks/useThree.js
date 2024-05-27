@@ -13,21 +13,25 @@ import { PCDLoader } from "three/examples/jsm/loaders/PCDLoader"
 import { XYZLoader } from "three/examples/jsm/loaders/XYZLoader"
 import { PDBLoader } from "three/examples/jsm/loaders/PDBLoader"
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader"
+// import { MaterialLoader } from "three/examples/"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 
+import { TransformControls } from "three/addons/controls/TransformControls.js"
+
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js"
 export const useThree = () => {
   // const ll = 0.6
   // const aspect = window.innerWidth / window.innerHeight  * 0.6// 窗口宽高比
   // const winW = window.innerWidth
   // const winH = window.innerHeight
   let scene = new THREE.Scene()
-  scene.background = new THREE.Color(0x1f1f1f) //  设置场景的背景色0x8c8aff
+  scene.background = new THREE.Color(0x8c8aff) //  设置场景的背景色0x8c8aff
 
   // let d = 75 // 控制视锥的尺寸  //  控制相机与模型中心的距离
   // let camera = new THREE.OrthographicCamera(-d, d, d, -d, 1, 1000);
   let renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" })
   // let controls =  new OrbitControls(camera, renderer.domElement)
-  let gridHelper
+  let gridHelper, savedPosition, savedRotation, savedTarget, controls, savedZoom
 
   const init = () => {
     //  在此处初始化的模块 才能避免二次加载叠加
@@ -39,8 +43,8 @@ export const useThree = () => {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
     //  此处与renderer.autoClear  冲突
     // renderer.setClearColor(0x8c8aff); // 设置为白色
-    // 设置渲染器屏幕像素比
-    renderer.setPixelRatio(window.devicePixelRatio || 1)
+    // 设置渲染器屏幕像素比  高分辨率屏幕上 渲染更精细  但不建议直接设置  会导致性能问题
+    // renderer.setPixelRatio(window.devicePixelRatio || 1)
   }
   // 添加光源  不然模型会是全黑色的
   const createLight = size => {
@@ -68,7 +72,7 @@ export const useThree = () => {
     scene.add(ambientLight)
 
     //  点光源
-    // const pointLight = new THREE.PointLight(color, intensity * 100)
+    // const pointLight = new THREE.PointLight(color, intensity)
     // pointLight.position.set(lightX / 2, lightX / 2, halfZ)
     // pointLight.distance = 200
     // scene.add(pointLight)
@@ -81,20 +85,23 @@ export const useThree = () => {
     //  return
 
     //  聚光灯
-    // const spotLight = new THREE.SpotLight(color, 150)
+    // const spotLight = new THREE.SpotLight(color, intensity)
+    // spotLight.position.set(0, 0, lightZ)
+    // spotLight.castShadow = true // 启用阴影
     // scene.add(spotLight)
     // scene.add(spotLight.target)
     // const spotHelper = new THREE.SpotLightHelper(spotLight)
     // scene.add(spotHelper)
 
     //  方向光  用来表现太阳光照的效果
-    // 左前XY
-    const directionLight2 = new THREE.DirectionalLight(0xffffff, intensity)
-    directionLight2.position.set(-lightX, lightY, lightZ)
-    // directionLight2.target.position.set(0, 0, 0)
-    const directionLight2Helper = new THREE.DirectionalLightHelper(directionLight2)
-    scene.add(directionLight2)
-    scene.add(directionLight2Helper)
+    // 正前XY
+    // const directionLight2 = new THREE.DirectionalLight(0xffffff, intensity)
+    // directionLight2.position.set(lightX, -lightY, lightZ)
+    // // directionLight2.target.position.set(0, 0, 0)
+    // const directionLight2Helper = new THREE.DirectionalLightHelper(directionLight2)
+    // scene.add(directionLight2)
+    // scene.add(directionLight2Helper)
+
     //  return
     // 右前
     const directionLight22 = new THREE.DirectionalLight(0xffffff, intensity)
@@ -104,28 +111,28 @@ export const useThree = () => {
     scene.add(directionLight22Helper)
     scene.add(directionLight22)
     // 左后
-    const directionLight77 = new THREE.DirectionalLight(0xffffff, intensity)
-    directionLight77.position.set(-lightX, -lightY, lightZ)
-    // directionLight77.target.position.set(0, 0, 0)
-    const directionLight77Helper = new THREE.DirectionalLightHelper(directionLight77)
-    scene.add(directionLight77Helper)
-    scene.add(directionLight77)
-    // 右后
-    const directionLight27 = new THREE.DirectionalLight(0xffffff, intensity)
-    directionLight27.position.set(lightX, -lightY, lightZ)
-    // directionLight27.target.position.set(0, 0, 0)
-    const directionLight27Helper = new THREE.DirectionalLightHelper(directionLight27)
-    scene.add(directionLight27Helper)
-    scene.add(directionLight27)
+    // const directionLight77 = new THREE.DirectionalLight(0xffffff, intensity)
+    // directionLight77.position.set(-lightX, -lightY, lightZ)
+    // // directionLight77.target.position.set(0, 0, 0)
+    // const directionLight77Helper = new THREE.DirectionalLightHelper(directionLight77)
+    // scene.add(directionLight77Helper)
+    // scene.add(directionLight77)
+    // // 右后
+    // const directionLight27 = new THREE.DirectionalLight(0xffffff, intensity)
+    // directionLight27.position.set(lightX, -lightY, lightZ)
+    // // directionLight27.target.position.set(0, 0, 0)
+    // const directionLight27Helper = new THREE.DirectionalLightHelper(directionLight27)
+    // scene.add(directionLight27Helper)
+    // scene.add(directionLight27)
 
-    //  顶部
-    // const directionLightBottom = new THREE.DirectionalLight(0xffffff, intensity)
-    // directionLightBottom.position.set(0, 0, lightZ + 50)
-    // const directionLightBottomHelper = new THREE.DirectionalLightHelper(directionLightBottom)
-    // scene.add(directionLightBottomHelper)
-    // scene.add(directionLightBottom)
+    // 顶部
+    const directionLightBottom = new THREE.DirectionalLight(0xffffff, intensity)
+    directionLightBottom.position.set(0, 0, lightZ + 50)
+    const directionLightBottomHelper = new THREE.DirectionalLightHelper(directionLightBottom)
+    scene.add(directionLightBottomHelper)
+    scene.add(directionLightBottom)
 
-    //底部
+    // 底部
     // const directionLightTop = new THREE.DirectionalLight(0xffffff, intensity)
     // directionLightTop.position.set(0, 0, -lightZ - 50)
     // const directionLightTopHelper = new THREE.DirectionalLightHelper(directionLightTop)
@@ -133,17 +140,17 @@ export const useThree = () => {
     // scene.add(directionLightTop)
 
     // X 正前方
-    const directionLight44 = new THREE.DirectionalLight(0xffffff, intensity)
-    directionLight44.position.set(-lightX, lightY, 0)
-    const directionLight44Helper = new THREE.DirectionalLightHelper(directionLight44)
-    scene.add(directionLight44Helper)
-    scene.add(directionLight44)
+    // const directionLight44 = new THREE.DirectionalLight(0xffffff, intensity)
+    // directionLight44.position.set(-lightX, lightY, 0)
+    // const directionLight44Helper = new THREE.DirectionalLightHelper(directionLight44)
+    // scene.add(directionLight44Helper)
+    // scene.add(directionLight44)
 
-    const directionLight443 = new THREE.DirectionalLight(0xffffff, intensity)
-    directionLight443.position.set(lightX, lightY, 0)
-    const directionLight443Helper = new THREE.DirectionalLightHelper(directionLight443)
-    scene.add(directionLight443Helper)
-    scene.add(directionLight443)
+    // const directionLight443 = new THREE.DirectionalLight(0xffffff, intensity)
+    // directionLight443.position.set(lightX, lightY, 0)
+    // const directionLight443Helper = new THREE.DirectionalLightHelper(directionLight443)
+    // scene.add(directionLight443Helper)
+    // scene.add(directionLight443)
     //    // -X 正前方
     //   const directionLightBack = new THREE.DirectionalLight(0xffffff,0.8)
     //   directionLightBack.position.set(-lightX * 2, 0, halfZ);
@@ -262,6 +269,9 @@ export const useThree = () => {
       case "ktx2":
         loader = new KTX2Loader()
         break
+      case "json":
+        loader = new THREE.MaterialLoader()
+        break
       default:
         console.error("Unsupported model type:", type)
         return
@@ -278,9 +288,15 @@ export const useThree = () => {
     // 计算相机位置
     // 定位相机到左上角
     // camera.position.set(center.x - size.x, center.y + size.y, center.z)
-    camera.position.set(size.x - center.x, -(center.y + size.y), center.z)
+    camera.position.set(size.x + size.y, 0, center.z)
     camera.lookAt(center)
     camera.up.set(0, 0, 1)
+
+    // const helper = new THREE.CameraHelper(camera)
+    // scene.add(helper)
+    savedPosition = camera.position.clone()
+    savedRotation = camera.rotation.clone()
+    savedZoom = camera.zoom
     return camera
   }
 
@@ -316,8 +332,14 @@ export const useThree = () => {
     return model
   }
 
-  const createControls = (camera, dom) => {
-    const controls = new OrbitControls(camera, dom)
+  const createControls = (camera, dom, type = "orbit") => {
+    let controls
+    if (type != "orbit") {
+      controls = new TransformControls(camera, dom)
+    } else {
+      controls = new OrbitControls(camera, dom)
+    }
+    // controls.size = 20
     controls.enableDamping = true // 启用阻尼效果
     controls.dampingFactor = 0.25 // 阻尼系数
     controls.enableZoom = true // 启用缩放
@@ -327,6 +349,15 @@ export const useThree = () => {
     controls.target.set(0, 0, 0)
     controls.minDistance = 1
     controls.maxDistance = 1000
+
+    savedTarget = controls.target.clone()
+
+    // const transControl = new TransformControls(camera, dom)
+    // transControl.setTranslationSnap(1)
+    // transControl.setRotationSnap(THREE.MathUtils.degToRad(15))
+    // transControl.setScaleSnap(0.25)
+    // scene.add(transControl)
+    // transControl.attach(mesh)
     return controls
   }
   // 添加轴辅助器  原点坐标指示
@@ -342,6 +373,17 @@ export const useThree = () => {
     pointLight.castShadow = true
     scene.add(pointLight)
     return pointLight
+  }
+  //
+  const addPotlightOfCamera = () => {
+    const spotLight = new THREE.SpotLight(0xffffff, 1)
+    // spotLight.position.set(0, 0, 0)
+    // spotLight.castShadow = true // 启用阴影  灯光将投射阴影  这样做的代价比较高
+    scene.add(spotLight)
+    // scene.add(spotLight.target)
+    const spotHelper = new THREE.SpotLightHelper(spotLight)
+    scene.add(spotHelper)
+    return spotLight
   }
   // 移除所有光源
   const removeAllLights = scene => {
@@ -382,6 +424,7 @@ export const useThree = () => {
       // 获取第一个子对象
       const object = scene.children[0]
 
+      // geometry（几何体）或material（材质）可以在3D物体之间共享,所以THREE不会主动移除
       // 如果对象是一个网格
       if (object.isMesh) {
         // 如果网格使用了几何体，释放几何体
@@ -599,6 +642,9 @@ export const useThree = () => {
   // }
 
   const addBox = mesh => {
+    //  三维盒 ????
+    // const box = new THREE.Box3().setFromObject(mesh)
+    // const boxHelper = new THREE.Box3Helper(box, 0xffffff)
     // 添加可视化包围盒
     const boxHelper = new THREE.BoxHelper(mesh, 0xffffff)
     const box = new THREE.Box3().setFromObject(mesh)
@@ -654,6 +700,74 @@ export const useThree = () => {
     })
   }
 
+  //  添加 方向 箭头
+  const addArrow = () => {
+    const dir = new THREE.Vector3(1, 2, 0)
+
+    //normalize the direction vector (convert to vector of length 1)
+    dir.normalize()
+
+    const origin = new THREE.Vector3(10, 10, 10)
+    const length = 50
+    const hex = 0xffff00
+
+    const arrowHelper = new THREE.ArrowHelper(dir, origin, length, hex)
+    scene.add(arrowHelper)
+  }
+
+  const addEnvironment = () => {
+    // 添加 官方预设环境
+    const pmremGenerator = new THREE.PMREMGenerator(renderer)
+    pmremGenerator.compileEquirectangularShader()
+    scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture
+    renderer.toneMapping = THREE.ACESFilmicToneMapping
+    renderer.toneMappingExposure = 1.0
+  }
+
+  const changeFace = (camera, i) => {
+    const distanceToOrigin = camera.position.distanceTo(new THREE.Vector3(0, 0, 0))
+    const positionArr = [
+      new THREE.Vector3(0, 0, distanceToOrigin), // 正上方
+      new THREE.Vector3(0, 0, -distanceToOrigin), // 正下方
+      new THREE.Vector3(0, -distanceToOrigin, 0), // 正左方
+      new THREE.Vector3(0, distanceToOrigin, 0), // 正右方
+      new THREE.Vector3(distanceToOrigin, 0, 0), // 正前方
+      new THREE.Vector3(-distanceToOrigin, 0, 0), // 正后方
+    ]
+    camera.position.copy(positionArr[i])
+  }
+
+  //  添加视图控制器
+  // const addFaceGui = camera => {
+  //   const gui = new dat.GUI()
+  //   const options = { View: "" }
+
+  //   gui.add(options, "View", ["顶视图", "底视图", "左视图", "右视图", "前视图", "后视图"]).onChange(function (value) {
+  //     switch (value) {
+  //       case "顶视图":
+  //         changeFace(camera, 0)
+  //         break
+  //       case "底视图":
+  //         changeFace(camera, 1)
+  //         break
+  //       case "左视图":
+  //         changeFace(camera, 2)
+  //         break
+  //       case "右视图":
+  //         changeFace(camera, 3)
+  //         break
+  //       case "前视图":
+  //         changeFace(camera, 4)
+  //         break
+  //       case "后视图":
+  //         changeFace(camera, 5)
+  //         break
+  //       default:
+  //         break
+  //     }
+  //   })
+  // }
+
   // 创建显示尺寸信息的精灵函数
   const createTextSprite = (text, scale) => {
     const canvas = document.createElement("canvas")
@@ -690,6 +804,46 @@ export const useThree = () => {
 
     return sprite
   }
+
+  //  恢复模型（相机） 初始状态
+  const restoreCarmera = (camera, controls) => {
+    //  为何要传递参数？  因为数据不是响应式的， 模型加载后 变更后的参数只能实时传递？？
+    camera.position.copy(savedPosition)
+    camera.rotation.copy(savedRotation)
+    camera.zoom = savedZoom
+    camera.updateProjectionMatrix()
+    controls.target.copy(savedTarget)
+    controls.update()
+  }
+  //  变换视角
+  const changeCamera = face => {
+    // 获取相机与原点的距离
+    const distanceToOrigin = camera.position.distanceTo(new THREE.Vector3(0, 0, 0))
+    const positionArr = [
+      new THREE.Vector3(0, 0, distanceToOrigin), // 正上方
+      new THREE.Vector3(distanceToOrigin, 0, 0), // 正前方
+      new THREE.Vector3(0, distanceToOrigin, 0), // 正右方
+      new THREE.Vector3(0, 0, -distanceToOrigin), // 正下方
+      new THREE.Vector3(-distanceToOrigin, 0, 0), // 正后方
+      new THREE.Vector3(0, -distanceToOrigin, 0), // 正左方
+    ]
+    camera.zoom = savedZoom
+    camera.position.copy(positionArr[face])
+  }
+
+  //  检查是否要调整renderer   因为renderer要和canvas大小一致
+  const resizeRendererToDisplaySize = renderer => {
+    const canvas = renderer.domElement
+    //  根据设备显示器性能  自动调整渲染器的精度   高分辨率屏幕上 渲染更精细
+    const pixelRatio = window.devicePixelRatio
+    const width = Math.floor(canvas.clientWidth * pixelRatio)
+    const height = Math.floor(canvas.clientHeight * pixelRatio)
+    const needResize = canvas.width !== width || canvas.height !== height
+    if (needResize) {
+      renderer.setSize(width, height, false)
+    }
+    return needResize
+  }
   onMounted(() => {
     init()
   })
@@ -699,11 +853,17 @@ export const useThree = () => {
   return {
     scene,
     renderer,
+    controls,
     // pointLight,
     // camera,
     // controls,
     addBox,
+    addArrow,
     addLightOfCamera,
+    // addFaceGui,
+    changeFace,
+    restoreCarmera,
+    addEnvironment,
     createControls,
     getMeshAndSize,
     createLight,
@@ -715,5 +875,7 @@ export const useThree = () => {
     clearScene,
     LoadStep,
     LoadIges,
+    resizeRendererToDisplaySize,
+    addPotlightOfCamera,
   }
 }
