@@ -1,18 +1,34 @@
 @font-face {
   font-family: "iconfont"; /* Project id 4562473 */
   src:
-    url("./iconfont.woff2?t=1716774643195") format("woff2"),
-    url("./iconfont.woff?t=1716774643195") format("woff"),
-    url("./iconfont.ttf?t=1716774643195") format("truetype");
+    url("iconfont.woff2?t=1716780752352") format("woff2"),
+    url("iconfont.woff?t=1716780752352") format("woff"),
+    url("iconfont.ttf?t=1716780752352") format("truetype");
 }
 
 .iconfont {
   font-family: "iconfont" !important;
-  font-size: 20px;
+  font-size: 18px;
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: aqua;
+  color: #004cff;
+}
+
+.icon-shitu2:before {
+  content: "\e609";
+}
+
+.icon-shitu1:before {
+  content: "\e80f";
+}
+
+.icon-materializedView:before {
+  content: "\e600";
+}
+
+.icon-fushishitu:before {
+  content: "\e615";
 }
 
 .icon-shitufushitu:before {

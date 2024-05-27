@@ -1,11 +1,10 @@
 <template>
   <div ref="container" id="threecontainer">
-    <AxisLine :camera2="camera" />
+    <AxisLine :camera2="camera" @backCarmera="backCarmera" @totastMesh="totastMesh(controls)" />
   </div>
   <div v-if="mesh">
     <button id="button" @click="toggleLabel">{{ labelStatus ? "开启" : "关闭" }}三维信息</button>
   </div>
-  <button id="button" @click="toggleCor">变换控制器</button>
 
   <div>模型信息:</div>
   <div>长: {{ modelView.height }}</div>
@@ -48,6 +47,7 @@ const container = ref(null)
 const labelStatus = ref(false)
 let mesh, pointLight, labelArr, gui, planeItem, pmremGenerator
 let modelView = ref({})
+
 const camera = ref(null)
 let {
   scene,
@@ -70,9 +70,9 @@ let {
   LoadIges,
   getMeshAndSize,
   addLightOfCamera,
+  totastMesh,
 } = useThree()
-
-let { sceneOrtho, cameraOrtho } = useFace()
+let { sceneOrtho, cameraOrtho } = useFace(camera)
 
 const { openLoading, closeLoading } = useLoading()
 const loadModel = async (path, type) => {
@@ -101,7 +101,6 @@ const loadModel = async (path, type) => {
     labelArr = addBox(mesh)
 
     scene.add(mesh)
-
     createLight(size) // 添加光源
 
     // 添加一个跟随相机的点光源
@@ -183,6 +182,7 @@ const loadModel = async (path, type) => {
       //   }
       // })
 
+      // mesh.position.set(0, 0, 0)
       // 计算模型的中心点
       const { box, center, size } = getMeshAndSize(mesh)
       // createGridHelper(size)   // 创建网格底座
@@ -223,9 +223,9 @@ const loadModel = async (path, type) => {
   )
 }
 
-const toggleCor = () => {
+const backCarmera = () => {
+  //  为何要传递参数？  因为数据不是响应式的， 模型加载后 变更后的参数只能实时传递？？
   restoreCarmera(camera.value, controls)
-  // controls = createControls(camera, renderer.domElement, "TransformControls")
 }
 
 const animate = () => {
@@ -247,6 +247,7 @@ const animate = () => {
     renderer.autoClear = false //【scene.autoClear一定要关闭】
     renderer.render(scene, camera.value)
     // 旋转
+
     // viewBox.rotation.x += 0.01;
     // viewBox.rotation.y += 0.01;
     //次场景:1.复制主场景相机的位置、四元数，2.设置场景视区，3.渲染

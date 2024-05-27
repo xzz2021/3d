@@ -31,7 +31,7 @@ export const useThree = () => {
   // let camera = new THREE.OrthographicCamera(-d, d, d, -d, 1, 1000);
   let renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" })
   // let controls =  new OrbitControls(camera, renderer.domElement)
-  let gridHelper, savedPosition, savedRotation, savedTarget, controls, savedZoom
+  let gridHelper, savedPosition, savedRotation, controls, savedTarget, savedZoom
 
   const init = () => {
     //  在此处初始化的模块 才能避免二次加载叠加
@@ -288,7 +288,7 @@ export const useThree = () => {
     // 计算相机位置
     // 定位相机到左上角
     // camera.position.set(center.x - size.x, center.y + size.y, center.z)
-    camera.position.set(size.x + size.y, 0, center.z)
+    camera.position.set(size.x + size.y, -size.y, center.z)
     camera.lookAt(center)
     camera.up.set(0, 0, 1)
 
@@ -771,6 +771,7 @@ export const useThree = () => {
   // 创建显示尺寸信息的精灵函数
   const createTextSprite = (text, scale) => {
     const canvas = document.createElement("canvas")
+
     const context = canvas.getContext("2d")
 
     // 设置较大的分辨率和字体
@@ -831,6 +832,17 @@ export const useThree = () => {
     camera.position.copy(positionArr[face])
   }
 
+  const totastMesh = controls => {
+    // if (!controls.autoRotate) {
+    //   controls.autoRotate = true
+    // } else {
+    //   controls.autoRotate = false
+    // }
+    // console.log("🚀 ~ file: useThree.js:837 ~ totastMesh ~ controls.autoRotate:", controls?.autoRotate)
+    controls.autoRotateSpeed = 6
+    controls.autoRotate = controls?.autoRotate ? false : true
+  }
+
   //  检查是否要调整renderer   因为renderer要和canvas大小一致
   const resizeRendererToDisplaySize = renderer => {
     const canvas = renderer.domElement
@@ -877,5 +889,8 @@ export const useThree = () => {
     LoadIges,
     resizeRendererToDisplaySize,
     addPotlightOfCamera,
+    totastMesh,
+    savedRotation,
+    savedPosition,
   }
 }

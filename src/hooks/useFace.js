@@ -22,7 +22,7 @@ let intersects
 //   new THREE.Vector3(1, 0, 0), // 右面
 // ]
 
-export const useFace = () => {
+export const useFace = camera => {
   const createviewBox = () => {
     viewBox = new THREE.Mesh(new THREE.BoxGeometry(90, 90, 90, 1, 1, 1), createMaterial())
     // const axes = new THREE.AxesHelper(100)
@@ -102,9 +102,15 @@ export const useFace = () => {
   //   return controls
   // }
   // 创建文字
-  const createTextTexture = text => {
+  const createTextTexture = (text, index) => {
     // 创建一个 <canvas> 元素，用于绘制文本
-    var canvas = document.createElement("canvas")
+    const canvas = document.createElement("canvas")
+    // console.log("🚀 ~ file: useFace.js:110 ~ click:")
+
+    // canvas.addEventListener("click", function (event) {
+    //   console.log("🚀 ~ file: useFace.js:111 ~ click:")
+    //   changeFace(camera, index)
+    // })
     // 设置画布的宽度为 256 像素
     canvas.width = 256
     // 设置画布的高度为 256 像素
@@ -162,8 +168,8 @@ export const useFace = () => {
     // map 给当前面 添加文字
     const text = ["右视图", "左视图", "后视图", "前视图", "顶视图", "底视图"]
     // let i = 0
-    text.map(item => {
-      materialArr.push(new THREE.MeshBasicMaterial({ map: createTextTexture(item) }))
+    text.map((item, index) => {
+      materialArr.push(new THREE.MeshBasicMaterial({ map: createTextTexture(item, index) }))
       // i++
     })
     //  调整文字 统一 水平方向
