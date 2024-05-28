@@ -1,6 +1,6 @@
 <template>
   <div ref="container" id="threecontainer">
-    <AxisLine :camera2="camera" @backCarmera="backCarmera" @totastMesh="totastMesh(controls)" />
+    <AxisLine v-if="mesh" :camera2="camera" @backCarmera="backCarmera" @totastMesh="totastMesh(controls)" />
   </div>
   <div v-if="mesh">
     <button id="button" @click="toggleLabel">{{ labelStatus ? "开启" : "关闭" }}三维信息</button>
@@ -24,12 +24,10 @@ import { useLoading } from "../hooks/useLoading.js"
 
 import AxisLine from "./AxisLine.vue"
 
-import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js"
-import { RenderPass } from "three/addons/postprocessing/RenderPass.js"
-import { GlitchPass } from "three/addons/postprocessing/GlitchPass.js"
-import { OutputPass } from "three/addons/postprocessing/OutputPass.js"
-import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js"
+import { calVolume } from "../utils/calVolume.js"
+import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper.js"
 
+// import { checkThickness } from "../utils/checkThickness.js"
 // 接收props
 const props = defineProps({
   modelPath: {
@@ -45,17 +43,18 @@ const props = defineProps({
 
 const container = ref(null)
 const labelStatus = ref(false)
-let mesh, pointLight, labelArr, gui, planeItem, pmremGenerator
+let mesh, pointLight, labelArr
 let modelView = ref({})
-
 const camera = ref(null)
 let {
   scene,
   renderer,
   controls,
+  gui,
   addBox,
   addArrow,
   addAxes,
+  addGui,
   // addFaceGui,
   addEnvironment,
   changeFace,
@@ -89,7 +88,8 @@ const loadModel = async (path, type) => {
 
   if (loadView) {
     const { geometry, material } = loadView
-
+    geometry.computeVertexNormals()
+    geometry.mergeVertices()
     mesh = new THREE.Mesh(geometry, material)
 
     const { box, center, size } = getMeshAndSize(mesh)
@@ -101,6 +101,7 @@ const loadModel = async (path, type) => {
     labelArr = addBox(mesh)
 
     scene.add(mesh)
+
     createLight(size) // 添加光源
 
     // 添加一个跟随相机的点光源
@@ -136,6 +137,7 @@ const loadModel = async (path, type) => {
         color: 0xffffff,
         roughness: 1,
         metalness: 0,
+        side: THREE.DoubleSide,
         // flatShading: true, // 显示线框
         // reflectivity: 0.3,
 
@@ -148,39 +150,13 @@ const loadModel = async (path, type) => {
       } else {
         mesh = new THREE.Mesh(model, material)
       }
-      mesh.castShadow = true // 使文字投射阴影
-      console.log("🚀 ~ file: ThreeViewer.vue:132 ~ loadModel ~ mesh:", mesh)
+
+      calVolume(model)
+      // mesh.castShadow = true // 使文字投射阴影
+      // console.log("🚀 ~ file: ThreeViewer.vue:132 ~ loadModel ~ mesh:", mesh)
 
       // 设置剖面平面
       // const plane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0)
-      // // 设置模型材质
-      // model.traverse(function (child) {
-      //   if (child.isMesh) {
-      //     // 外部材质
-      //     child.material = new THREE.MeshStandardMaterial({
-      //       color: 0xff00ff,
-      //       side: THREE.BackSide,
-      //       clippingPlanes: [plane],
-      //       opacity: 1,
-      //       depthWrite: true,
-      //       depthTest: true, // 启用深度测试
-      //       clipShadows: true,
-      //     })
-      //     // 内部材质
-      //     const innerMaterial = new THREE.MeshStandardMaterial({
-      //       color: 0x808080,
-      //       side: THREE.FrontSide,
-      //       clippingPlanes: [plane],
-      //       opacity: 1,
-      //       clipShadows: true,
-      //       depthWrite: true,
-      //       depthTest: true, // 启用深度测试
-      //     })
-      //     const innerMesh = child.clone()
-      //     innerMesh.material = innerMaterial
-      //     scene.add(innerMesh)
-      //   }
-      // })
 
       // mesh.position.set(0, 0, 0)
       // 计算模型的中心点
@@ -199,9 +175,15 @@ const loadModel = async (path, type) => {
 
       camera.value = createCarmera(size, center, mesh.up) // 创建相机
 
+      addGui(mesh, material)
+
       // addEnvironment()
       // addFaceGui(camera)
       scene.add(mesh)
+      // const aa = getThickness(center, new THREE.Vector3(100, 100, 100), model)
+      // console.log("🚀 ~ file: ThreeViewer.vue:208 ~ loadModel ~ aa:", aa)
+
+      // checkThickness(mesh)
 
       // 有了渲染器之后   一定要先创建相机   再创建控制器
       controls = createControls(camera.value, renderer.domElement)
@@ -209,8 +191,8 @@ const loadModel = async (path, type) => {
 
       // addArrow()
       animate()
-
-      // addGui(material)
+      // const helper33 = new VertexNormalsHelper(mesh, 2, 0x00ff00, 1)
+      // scene.add(helper33)
 
       closeLoading()
       // 获取模型的三维信息
@@ -247,7 +229,6 @@ const animate = () => {
     renderer.autoClear = false //【scene.autoClear一定要关闭】
     renderer.render(scene, camera.value)
     // 旋转
-
     // viewBox.rotation.x += 0.01;
     // viewBox.rotation.y += 0.01;
     //次场景:1.复制主场景相机的位置、四元数，2.设置场景视区，3.渲染
@@ -274,58 +255,6 @@ const toggleLabel = () => {
     })
   }
   labelStatus.value = !labelStatus.value
-}
-
-const addGui = material => {
-  // 创建一个剪裁平面  此处 可以控制轴向剖面
-  const plane = new THREE.Plane(new THREE.Vector3(1, 0, 0), 0)
-
-  // 启用全局剪裁平面
-  // material.clippingPlanes = [plane]
-  // material.clipShadows = true
-  renderer.localClippingEnabled = true
-  // renderer.clippingPlanes = [plane]
-  // 清除上一次gui添加的plane
-  if (gui && planeItem) {
-    // planeItem  清除已有的gui操控实例
-    gui.remove(planeItem)
-    gui.add(plane, "constant", -1, 1).name("剖面图")
-    return
-  }
-
-  gui = new dat.GUI()
-  const options = {
-    // clipIntersection: true,
-    // displayHelper: false,
-    solid: true,
-  }
-
-  gui
-    .add(options, "solid")
-    .name("实心/空心")
-    .onChange(value => {
-      if (value) {
-        material.transparent = false
-        material.opacity = 1.0
-        material.depthWrite = true
-        material.depthTest = true
-        material.side = THREE.DoubleSide
-      } else {
-        material.transparent = true
-        material.opacity = 1
-        material.depthWrite = false
-        material.depthTest = false
-        material.side = THREE.DoubleSide
-      }
-    })
-
-  planeItem = gui.add(plane, "constant", -10, 10).name("剖面图")
-  gui.add({ speed: 1 }, "speed", 0, 5).name("速度")
-  const cubeFolder = gui.addFolder("Cube")
-  cubeFolder.add(mesh.rotation, "x", 0, Math.PI * 2)
-  cubeFolder.add(mesh.rotation, "y", 0, Math.PI * 2)
-  cubeFolder.add(mesh.rotation, "z", 0, Math.PI * 2)
-  cubeFolder.open()
 }
 
 // 一键还原模型初始状态

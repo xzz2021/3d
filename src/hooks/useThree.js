@@ -19,6 +19,9 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 import { TransformControls } from "three/addons/controls/TransformControls.js"
 
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js"
+
+// threejs 内置了lil-gui  不需要引入其他模块
+import { GUI } from "three/examples/jsm/libs/lil-gui.module.min.js"
 export const useThree = () => {
   // const ll = 0.6
   // const aspect = window.innerWidth / window.innerHeight  * 0.6// 窗口宽高比
@@ -29,9 +32,9 @@ export const useThree = () => {
 
   // let d = 75 // 控制视锥的尺寸  //  控制相机与模型中心的距离
   // let camera = new THREE.OrthographicCamera(-d, d, d, -d, 1, 1000);
-  let renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" })
+  let renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance", logarithmicDepthBuffer: true })
   // let controls =  new OrbitControls(camera, renderer.domElement)
-  let gridHelper, savedPosition, savedRotation, controls, savedTarget, savedZoom
+  let gridHelper, savedPosition, savedRotation, controls, savedTarget, savedZoom, gui
 
   const init = () => {
     //  在此处初始化的模块 才能避免二次加载叠加
@@ -106,7 +109,7 @@ export const useThree = () => {
     // 右前
     const directionLight22 = new THREE.DirectionalLight(0xffffff, intensity)
     directionLight22.position.set(lightX, lightY, lightZ)
-    // directionLight22.target.position.set(0, 0, 0)
+    // directionLight22.castShadow = true //  设定当前光可用投射阴影  注意 不要设置过多，否则会导致性能问题
     const directionLight22Helper = new THREE.DirectionalLightHelper(directionLight22)
     scene.add(directionLight22Helper)
     scene.add(directionLight22)
@@ -283,7 +286,7 @@ export const useThree = () => {
   const createCarmera = (size, center) => {
     // const { x, y, z } = up || { x: 0, y: 0, z: 1 } //  元素自带基底面  用于相机视角 默认为Z轴
     const d = Math.sqrt(size.x * size.x + size.y * size.y)
-    let camera = new THREE.OrthographicCamera(-d, d, d, -d, 1, 1000) //  直接展示物体每个面的真实 映射  眼 = 物体
+    let camera = new THREE.OrthographicCamera(-d, d, d, -d, 0.1, 1000) //  直接展示物体每个面的真实 映射  眼 = 物体
     // const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000)  //  模拟人眼  以点看物体  眼 < 物体
     // 计算相机位置
     // 定位相机到左上角
@@ -329,6 +332,7 @@ export const useThree = () => {
     for (const [key, value] of Object.entries(model)) {
       model[key] = Math.round(value * 1000) / 1000
     }
+
     return model
   }
 
@@ -370,7 +374,7 @@ export const useThree = () => {
   // 添加一个跟随相机的平行光源
   const addLightOfCamera = () => {
     const pointLight = new THREE.DirectionalLight(0xffffff, 0.5, 100)
-    pointLight.castShadow = true
+    // pointLight.castShadow = true
     scene.add(pointLight)
     return pointLight
   }
@@ -724,6 +728,80 @@ export const useThree = () => {
     renderer.toneMappingExposure = 1.0
   }
 
+  const addGui = (mesh, material) => {
+    // 创建一个剪裁平面  此处 可以控制轴向剖面
+    const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 30)
+    // const helper = new THREE.PlaneHelper(plane, 300, 0xffff00)
+    // scene.add(helper)
+
+    // // 设置模型材质
+    mesh &&
+      mesh.traverse(function (child) {
+        if (child.isMesh) {
+          // 外部材质
+          child.material = new THREE.MeshStandardMaterial({
+            color: 0xff00ff,
+            side: THREE.BackSide,
+            // clippingPlanes: [plane],
+            transparent: false, // 确保透明度为false
+            opacity: 1,
+            depthWrite: false, //  此处一定要关闭  不然会有穿透
+            depthTest: true, // 启用深度测试
+            clipShadows: true,
+          })
+          // 内部材质
+          const innerMaterial = new THREE.MeshStandardMaterial({
+            color: 0xffffff,
+            side: THREE.FrontSide,
+            // clippingPlanes: [plane],
+            opacity: 1,
+            transparent: false, // 确保透明度为false
+            clipShadows: true,
+            depthWrite: true,
+            depthTest: true, // 启用深度测试
+          })
+          const innerMesh = child.clone()
+          innerMesh.material = innerMaterial
+          // child.renderOrder = 1
+          // innerMesh.renderOrder = 2
+          scene.add(innerMesh)
+        }
+      })
+    // 启用全局剪裁平面
+    renderer.localClippingEnabled = true
+    renderer.clippingPlanes = [plane]
+    // 清除上一次gui添加的元素
+    gui && gui.destroy()
+    gui = new GUI()
+
+    const options = {
+      // clipIntersection: true,
+      // displayHelper: false,
+      solid: true,
+    }
+
+    gui
+      .add(options, "solid")
+      .name("实心/空心")
+      .onChange(value => {
+        if (value) {
+          material.transparent = false
+          material.opacity = 1
+          material.depthWrite = true
+          material.depthTest = true
+          material.side = THREE.DoubleSide
+        } else {
+          material.transparent = true
+          material.opacity = 1
+          material.depthWrite = false
+          material.depthTest = false
+          material.side = THREE.DoubleSide
+        }
+      })
+
+    gui.add(plane, "constant", -30, 30).name("剖面图")
+  }
+
   const changeFace = (camera, i) => {
     const distanceToOrigin = camera.position.distanceTo(new THREE.Vector3(0, 0, 0))
     const positionArr = [
@@ -866,12 +944,14 @@ export const useThree = () => {
     scene,
     renderer,
     controls,
+    gui,
     // pointLight,
     // camera,
     // controls,
     addBox,
     addArrow,
     addLightOfCamera,
+    addGui,
     // addFaceGui,
     changeFace,
     restoreCarmera,
