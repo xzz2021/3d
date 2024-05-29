@@ -684,7 +684,7 @@ export const useThree = () => {
     positions.forEach(dimension => {
       const sprite = createTextSprite(dimension.text, scale)
       sprite.position.copy(dimension.position)
-      // sprite.material.depthTest = false; // 确保文本不被遮挡
+      sprite.material.depthTest = false // 确保文本不被遮挡
       scene.add(sprite) // 添加到场景中
       labelArr.push(sprite)
     })
@@ -868,6 +868,7 @@ export const useThree = () => {
     // 重新绘制文本到调整过大小的canvas上
     context.font = `Bold ${fontSize}px Arial`
     context.fillStyle = "rgba(255, 255, 255, 1.0)"
+    // canvas.zIndex = 9999999
     context.fillText(text, padding, fontSize + padding)
 
     const texture = new THREE.CanvasTexture(canvas)

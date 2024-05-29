@@ -16,7 +16,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue"
+import { onMounted, ref } from "vue"
 import * as THREE from "three"
 import { useThree } from "../hooks/useThree.js"
 import { useFace } from "../hooks/useFace.js"
@@ -73,10 +73,20 @@ let {
 } = useThree()
 let { sceneOrtho, cameraOrtho } = useFace(camera)
 
+const raycaster = new THREE.Raycaster()
+const mouse = new THREE.Vector2()
+const selectedPoints = []
+
+const measureDistance = (point1, point2) => {
+  const distance = point1.distanceTo(point2)
+  console.log("截面尺寸:", distance)
+}
+
 const { openLoading, closeLoading } = useLoading()
 const loadModel = async (path, type) => {
   openLoading() // 开启加载效果
   clearScene() //  加载新模型前先清除旧场景所有对象
+  window.removeEventListener("click", onMouseClick)
   let loadView
   //  特殊3d文件类型判断, 使用自定义的加载方法, 不走官方loader判断
   if (type == "stp") {
@@ -193,7 +203,7 @@ const loadModel = async (path, type) => {
       animate()
       // const helper33 = new VertexNormalsHelper(mesh, 2, 0x00ff00, 1)
       // scene.add(helper33)
-
+      window.addEventListener("click", onMouseClick)
       closeLoading()
       // 获取模型的三维信息
       modelView.value = getModelView(box)
@@ -204,7 +214,37 @@ const loadModel = async (path, type) => {
     },
   )
 }
+const onMouseClick = event => {
+  console.log("🚀 ~ file: ThreeViewer.vue:217 ~ onMouseClick ~ event:", event)
+  // 将鼠标位置转换到归一化设备坐标 (NDC) 中 (-1 to +1)
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
 
+  // 通过摄像机和鼠标位置更新射线
+  raycaster.setFromCamera(mouse, camera.value)
+
+  // 计算物体和射线的相交点
+  console.log("🚀 ~ file: ThreeViewer.vue:230 ~ onMouseClick ~ scene:", scene)
+  console.log("🚀 ~ file: ThreeViewer.vue:230 ~ onMouseClick ~ mesh:", mesh)
+  const intersects = raycaster.intersectObject(scene, true)
+
+  if (intersects.length > 0) {
+    const intersect = intersects[0]
+    const point = intersect.point
+    selectedPoints.push(point)
+
+    // 可视化选中的点
+    const sphere = new THREE.SphereGeometry(1, 32, 32)
+    const material = new THREE.MeshBasicMaterial({ color: 0xff0000 })
+    const sphereMesh = new THREE.Mesh(sphere, material)
+    sphereMesh.position.copy(point)
+    scene.add(sphereMesh)
+
+    if (selectedPoints.length === 2) {
+      measureDistance(selectedPoints[0], selectedPoints[1])
+    }
+  }
+}
 const backCarmera = () => {
   //  为何要传递参数？  因为数据不是响应式的， 模型加载后 变更后的参数只能实时传递？？
   restoreCarmera(camera.value, controls)
