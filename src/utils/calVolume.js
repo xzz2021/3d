@@ -34,7 +34,33 @@ export const calVolume = geometry => {
     Area += AreaOfTriangle(V3, V2, V1)
   }
   let SurfaceArea = (Area / 100).toFixed(2)
-  console.log("表面积:" + SurfaceArea)
+  console.log("表面积:", SurfaceArea)
   let loadedObjectVolume = (volumes / 1000).toFixed(3)
-  console.log("体积:" + loadedObjectVolume > 0 ? loadedObjectVolume : -loadedObjectVolume)
+  //  此处计算的就是实际 体积  空心模型 内部三角不存在 不会计算
+  console.log("体积:", loadedObjectVolume > 0 ? loadedObjectVolume : -loadedObjectVolume, "cm³")
+}
+
+export const detectWallThickness = mesh => {
+  const raycaster = new THREE.Raycaster()
+  const position = geometry.attributes.position
+  const faces = position.count / 3
+  let minDistance = Number.MAX_VALUE
+
+  for (let i = 0; i < faces; i++) {
+    const a = new THREE.Vector3().fromBufferAttribute(position, i * 3)
+    const b = new THREE.Vector3().fromBufferAttribute(position, i * 3 + 1)
+    const c = new THREE.Vector3().fromBufferAttribute(position, i * 3 + 2)
+
+    const midpoint = new THREE.Vector3().addVectors(a, b).add(c).divideScalar(3)
+    const normal = new THREE.Triangle(a, b, c).getNormal()
+
+    raycaster.set(midpoint, normal.negate())
+    const intersects = raycaster.intersectObject(mesh)
+
+    if (intersects.length > 0 && intersects[0].distance < minDistance) {
+      minDistance = intersects[0].distance
+    }
+  }
+
+  console.log(`Minimum wall thickness: ${minDistance}`)
 }

@@ -16,7 +16,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue"
+import { ref } from "vue"
 import * as THREE from "three"
 import { useThree } from "../hooks/useThree.js"
 import { useFace } from "../hooks/useFace.js"
@@ -25,7 +25,7 @@ import { useLoading } from "../hooks/useLoading.js"
 import AxisLine from "./AxisLine.vue"
 
 import { calVolume } from "../utils/calVolume.js"
-import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper.js"
+// import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper.js"
 
 // import { checkThickness } from "../utils/checkThickness.js"
 // 接收props
@@ -95,118 +95,42 @@ const loadModel = async (path, type) => {
     loadView = await LoadIges(path)
   } else {
   }
-
   if (loadView) {
     const { geometry, material } = loadView
     geometry.computeVertexNormals()
-    geometry.mergeVertices()
+    // geometry.mergeVertices()
     mesh = new THREE.Mesh(geometry, material)
-
-    const { box, center, size } = getMeshAndSize(mesh)
-
-    // createGridHelper(size)   // 创建网格底座
-    // addAxes(size) // 添加轴辅助器  原点坐标指示
-
-    // 添加可视化包围盒
-    labelArr = addBox(mesh)
-
-    scene.add(mesh)
-
-    createLight(size) // 添加光源
-
-    // 添加一个跟随相机的点光源
-    pointLight = addLightOfCamera()
-
-    camera.value = createCarmera(size, center) // 创建相机
-
-    // scene.add(mesh)
-    // 有了渲染器之后   一定要先创建相机   再创建控制器
-    controls = createControls(camera.value, renderer.domElement)
-
-    // const { x, y, z } = size
-
-    container.value.appendChild(renderer.domElement) // 挂载
-
-    animate()
-
-    // addGui(material)
-
-    closeLoading()
-    // 获取模型的三维信息
-    modelView.value = getModelView(box)
+    commonFn(material)
     return
   }
-  // 其他常规3d文件走这里
-  // 获取对应的模型加载器
+  // 其他常规3d文件走这里   // 获取对应的模型加载器
   const loader = chooseLoader(type)
   loader.load(
     path,
-    model => {
+    geometry => {
       const simpleArr = ["obj", "dae", "3ds"]
-      let material = new THREE.MeshStandardMaterial({
-        color: 0xffffff,
-        roughness: 1,
-        metalness: 0,
-        side: THREE.DoubleSide,
-        // flatShading: true, // 显示线框
-        // reflectivity: 0.3,
+      let material = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, metalness: 0, side: THREE.DoubleSide })
+      mesh = simpleArr.includes(type) ? geometry.scene || geometry : new THREE.Mesh(geometry, material)
 
-        // side: THREE.FrontSide,
-        // clippingPlanes: [new THREE.Plane(new THREE.Vector3(1, 0, 0), 0)], // 添加裁剪平面
-        // clipShadows: true,
-      })
-      if (simpleArr.includes(type)) {
-        mesh = model.scene || model
-      } else {
-        mesh = new THREE.Mesh(model, material)
-      }
+      const shellGeometry = createShell(geometry, -0.05) // 向内偏移 0.05
+      const shellMesh = new THREE.Mesh(shellGeometry, material)
+      scene.add(shellMesh)
 
-      calVolume(model)
-      // mesh.castShadow = true // 使文字投射阴影
-      // console.log("🚀 ~ file: ThreeViewer.vue:132 ~ loadModel ~ mesh:", mesh)
+      // // 使用布尔运算生成抽壳几何体
+      // const cubeCSG = CSG.fromMesh(mesh)
+      // const shellCSG = CSG.fromMesh(shellMesh)
+      // const hollowCSG = cubeCSG.subtract(shellCSG)
 
-      // 设置剖面平面
-      // const plane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0)
+      // const hollowMesh = CSG.toMesh(hollowCSG, new THREE.Matrix4(), material)
+      // scene.add(hollowMesh)
 
-      // mesh.position.set(0, 0, 0)
-      // 计算模型的中心点
-      const { box, center, size } = getMeshAndSize(mesh)
-      // createGridHelper(size)   // 创建网格底座
+      // // 释放不再使用的几何体内存
+      // mesh.geometry.dispose()
+      // shellGeometry.dispose()
+      // cubeCSG.mesh.geometry.dispose()
+      // shellCSG.mesh.geometry.dispose()
 
-      addAxes(size) // 添加轴辅助器  原点坐标指示
-
-      // 添加可视化包围盒
-      labelArr = addBox(mesh)
-
-      createLight(size) // 添加光源
-
-      // 添加一个跟随相机的点光源 此处必须添加
-      pointLight = addLightOfCamera()
-
-      camera.value = createCarmera(size, center, mesh.up) // 创建相机
-
-      addGui(mesh, material)
-
-      // addEnvironment()
-      // addFaceGui(camera)
-      scene.add(mesh)
-      // const aa = getThickness(center, new THREE.Vector3(100, 100, 100), model)
-      // console.log("🚀 ~ file: ThreeViewer.vue:208 ~ loadModel ~ aa:", aa)
-
-      // checkThickness(mesh)
-
-      // 有了渲染器之后   一定要先创建相机   再创建控制器
-      controls = createControls(camera.value, renderer.domElement)
-      container.value.appendChild(renderer.domElement) // 挂载
-
-      // addArrow()
-      animate()
-      // const helper33 = new VertexNormalsHelper(mesh, 2, 0x00ff00, 1)
-      // scene.add(helper33)
-      window.addEventListener("click", onMouseClick)
-      closeLoading()
-      // 获取模型的三维信息
-      modelView.value = getModelView(box)
+      commonFn(material)
     },
     undefined,
     error => {
@@ -214,8 +138,45 @@ const loadModel = async (path, type) => {
     },
   )
 }
+
+const detectWallThickness = (mesh, threshold) => {
+  const raycaster = new THREE.Raycaster()
+  const position = mesh.geometry.attributes.position
+  const faces = position.count / 3
+
+  for (let i = 0; i < faces; i++) {
+    const a = new THREE.Vector3().fromBufferAttribute(position, i * 3)
+    const b = new THREE.Vector3().fromBufferAttribute(position, i * 3 + 1)
+    const c = new THREE.Vector3().fromBufferAttribute(position, i * 3 + 2)
+
+    const midpoint = new THREE.Vector3().addVectors(a, b).add(c).divideScalar(3)
+    const normal = new THREE.Triangle(a, b, c).getNormal(new THREE.Vector3())
+
+    raycaster.set(midpoint, normal.negate())
+    const intersects = raycaster.intersectObject(mesh)
+
+    if (intersects.length > 0 && intersects[0].distance < threshold) {
+      highlightFace(mesh, i, 0xff0000) // 高亮颜色为红色
+    }
+  }
+}
+
+const highlightFace = (mesh, faceIndex, color) => {
+  const position = mesh.geometry.attributes.position
+  const colors = new Float32Array(position.count * 3)
+  const colorVec = new THREE.Color(color)
+
+  for (let i = 0; i < 3; i++) {
+    colors[(faceIndex * 3 + i) * 3] = colorVec.r
+    colors[(faceIndex * 3 + i) * 3 + 1] = colorVec.g
+    colors[(faceIndex * 3 + i) * 3 + 2] = colorVec.b
+  }
+
+  mesh.geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3))
+  mesh.material = new THREE.MeshPhongMaterial({ vertexColors: true, side: THREE.DoubleSide })
+}
+
 const onMouseClick = event => {
-  console.log("🚀 ~ file: ThreeViewer.vue:217 ~ onMouseClick ~ event:", event)
   // 将鼠标位置转换到归一化设备坐标 (NDC) 中 (-1 to +1)
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
@@ -224,8 +185,6 @@ const onMouseClick = event => {
   raycaster.setFromCamera(mouse, camera.value)
 
   // 计算物体和射线的相交点
-  console.log("🚀 ~ file: ThreeViewer.vue:230 ~ onMouseClick ~ scene:", scene)
-  console.log("🚀 ~ file: ThreeViewer.vue:230 ~ onMouseClick ~ mesh:", mesh)
   const intersects = raycaster.intersectObject(scene, true)
 
   if (intersects.length > 0) {
@@ -250,6 +209,69 @@ const backCarmera = () => {
   restoreCarmera(camera.value, controls)
 }
 
+const commonFn = material => {
+  // 此函数最好放当前模块
+  // 计算模型的中心点
+  const { box, center, size } = getMeshAndSize(mesh)
+  // createGridHelper(size)   // 创建网格底座
+
+  addAxes(size) // 添加轴辅助器  原点坐标指示
+
+  // 添加可视化包围盒
+  labelArr = addBox(mesh)
+
+  createLight(size) // 添加光源
+
+  // 添加一个跟随相机的点光源 此处必须添加
+  pointLight = addLightOfCamera()
+
+  camera.value = createCarmera(size, center, mesh.up) // 创建相机
+
+  addGui(mesh, material)
+
+  // addEnvironment()
+  // addFaceGui(camera)
+
+  scene.add(mesh)
+  // const aa = getThickness(center, new THREE.Vector3(100, 100, 100), model)
+  // console.log("🚀 ~ file: ThreeViewer.vue:208 ~ loadModel ~ aa:", aa)
+
+  // checkThickness(mesh)
+  // detectWallThickness(mesh)
+  // 有了渲染器之后   一定要先创建相机   再创建控制器
+  controls = createControls(camera.value, renderer.domElement)
+  container.value.appendChild(renderer.domElement) // 挂载
+
+  // addArrow()
+  closeLoading()
+  animate()
+  // const helper33 = new VertexNormalsHelper(mesh, 2, 0x00ff00, 1)
+  // scene.add(helper33)
+  detectWallThickness(mesh, 10)
+  window.addEventListener("click", onMouseClick)
+  calVolume(mesh.geometry)
+  // 获取模型的三维信息
+  modelView.value = getModelView(box)
+}
+
+const createShell = (geometry, offset) => {
+  const shellGeometry = geometry.clone()
+  const position = shellGeometry.attributes.position
+  const normal = new THREE.Vector3()
+
+  for (let i = 0; i < position.count; i++) {
+    normal.fromBufferAttribute(geometry.attributes.normal, i)
+    position.setXYZ(
+      i,
+      position.getX(i) + normal.x * offset,
+      position.getY(i) + normal.y * offset,
+      position.getZ(i) + normal.z * offset,
+    )
+  }
+  shellGeometry.attributes.position.needsUpdate = true
+
+  return shellGeometry
+}
 const animate = () => {
   // if (!WebGL.isWebGLAvailable()) {
   //   //  webgl支持检查
@@ -302,7 +324,7 @@ const autoBack = () => {}
 defineExpose({ loadModel })
 </script>
 
-<style>
+<style lang="scss">
 #container {
   width: 100%;
   height: 100%;
@@ -337,5 +359,10 @@ defineExpose({ loadModel })
   /* border: 1px solid black;
   width: 50px;
   height: 50px; */
+}
+.ii {
+  .oo {
+    color: #ff9800;
+  }
 }
 </style>
