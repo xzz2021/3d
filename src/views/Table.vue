@@ -9,7 +9,7 @@
     <el-table :data="tableData" height="350" style="width: 100%" stripe border>
       <el-table-column label="文件预览" width="180">
         <template #default="scope">
-          <el-image style="width: 100px; height: 100px" :src="scope.row.image" fit="fill" />
+          <el-image style="width: 100px; height: 100px; cursor: pointer" :src="scope.row.image" fit="fill" @click="openPreview" />
         </template>
       </el-table-column>
       <el-table-column label="材料" width="180">
@@ -30,6 +30,13 @@
               </el-option>
             </template> -->
           </el-select>
+          <div style="margin-bottom: 10px"></div>
+
+          <el-select v-model="scope.row.material.color" @visible-change="visibleChange2">
+            <template #empty>
+              <el-card>颜色选择</el-card>
+            </template>
+          </el-select>
         </template>
       </el-table-column>
       <el-table-column label="表面处理" min-width="100">
@@ -43,23 +50,29 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="数量">
+      <el-table-column label="数量" min-width="105">
         <template #default="scope">
-          <el-input-number v-model="scope.row.count" :min="1" :max="10" @change="handleChange" size="small" />
+          <el-input-number
+            v-model="scope.row.count"
+            :min="1"
+            :max="10"
+            @change="handleChange1($event, scope.$index)"
+            size="small"
+          />
         </template>
       </el-table-column>
       <el-table-column prop="deliveryTime" label="交期">
         <template #default="scope">
-          <el-radio-group v-model="scope.row.deliveryTime">
-            <el-radio value="1" size="small" border>24小时</el-radio>
-            <el-radio value="2" size="small" border>48小时</el-radio>
-            <el-radio value="3" size="small" border>72小时</el-radio>
+          <el-radio-group v-model="scope.row.deliveryTime" @change="handleChange2($event, scope.$index)">
+            <el-radio :value="0" size="small" border>24小时</el-radio>
+            <el-radio :value="22" size="small" border>48小时</el-radio>
+            <el-radio :value="33" size="small" border>72小时</el-radio>
           </el-radio-group>
         </template>
       </el-table-column>
       <el-table-column label="价格">
         <template #default="scope">
-          <div style="color: red">{{ scope.row.price }} 元</div>
+          <div style="color: red">{{ scope.row.finalPrice }} 元</div>
         </template>
       </el-table-column>
       <el-table-column prop="operation" label="操作">
@@ -77,17 +90,33 @@
 
 <script setup>
 import { Delete, CopyDocument, ShoppingCartFull } from "@element-plus/icons-vue"
-import { ref } from "vue"
+import { ref, watch } from "vue"
+
+import { useMitt } from "../hooks/mitt"
+import { Volume } from "three/examples/jsm/Addons.js"
+
+const { emitEvent } = useMitt("openPreview")
+
+// const rawPrice = ref(168)
+// const finalPrice =
+const handleChange1 = (val, index) => {
+  tableData.value[index].finalPrice = (tableData.value[index].rawPrice + tableData.value[index].deliveryTime) * val
+}
+const handleChange2 = (val, index) => {
+  tableData.value[index].finalPrice = (tableData.value[index].rawPrice + val) * tableData.value[index].count
+}
 const tableData = ref([
   {
     image: "https://img2.imgtp.com/2024/05/31/qBd2EEAr.png",
+    volume: 26.47,
     material: {
       name: "8200树脂",
       img: "",
       advantages: "高精度,高韧性, 高稳定性",
       disAdvantages: "保存温度不宜超过60摄氏度",
-      color: "白色",
+      color: "#658715",
       deviation: "±200微米或±0.2%",
+      price: 14.6,
     },
     processing: {
       a: true,
@@ -95,11 +124,19 @@ const tableData = ref([
       c: true,
     },
     count: 1,
-    deliveryTime: "2",
-    price: "168.00",
+    deliveryTime: 0,
+    rawPrice: 168,
+    finalPrice: 168,
     operation: "",
   },
 ])
+
+watch(tableData, (cur, prev) => {
+  console.log("🚀 ~ file: Table.vue:128 ~ cur:", cur)
+  // tableData.value.forEach((item, index) => {
+  //   item.finalPrice = item.rawPrice + item.deliveryTime
+  // })
+})
 
 const materialOptions = [
   {
@@ -109,6 +146,7 @@ const materialOptions = [
     disAdvantages: "保存温度不宜超过60摄氏度",
     color: "白色",
     deviation: "±200微米或±0.2%",
+    price: 14.6,
   },
   {
     name: "r4600树脂",
@@ -117,14 +155,14 @@ const materialOptions = [
     disAdvantages: "保存温度不宜超过60摄氏度",
     color: "黑色",
     deviation: "±200微米或±0.2%",
+    price: 20,
   },
 ]
 
 const handleChange = () => {}
 
-const visibleChange = bool => {
-  console.log("🚀 ~ file: Table.vue:95 ~ bool:", bool)
-}
+const visibleChange = bool => {}
+const visibleChange2 = bool => {}
 
 const copyItem = item => {
   // console.log("🚀 ~ file: Table.vue:129 ~ item:", item)
@@ -134,6 +172,10 @@ const copyItem = item => {
 
 const deleteItem = index => {
   tableData.value.splice(index, 1)
+}
+
+const openPreview = () => {
+  emitEvent()
 }
 </script>
 
@@ -188,5 +230,8 @@ const deleteItem = index => {
 }
 :deep(.operateBox .el-icon) {
   font-size: 18px;
+}
+:deep(.el-input-number--small) {
+  width: 79px;
 }
 </style>

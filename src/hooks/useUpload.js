@@ -18,7 +18,7 @@ export const useUpload = () => {
     }
   }
 
-  const onUpload = async file => {
+  const onUpload = file => {
     clearFiles()
     modelName.value = file.name
     const filePath = URL.createObjectURL(file.raw)

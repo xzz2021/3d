@@ -1,22 +1,39 @@
 <template>
-  <div ref="container" id="threecontainer">
-    <AxisLine v-if="mesh" :camera2="camera" @backCarmera="backCarmera" @totastMesh="totastMesh(controls)" />
-  </div>
-  <div v-if="mesh">
-    <button id="button" @click="toggleLabel">{{ labelStatus ? "开启" : "关闭" }}三维信息</button>
-  </div>
+  <teleport to="body">
+    <el-dialog
+      v-model="dialogTableVisible"
+      v-if="isMounted"
+      :fullscreen="isFullscreen"
+      class="dialogCss"
+      width="700px"
+      :z-index="2001"
+      ref="dialogRef"
+    >
+      <template #header>
+        <!-- <el-icon @click="toggleFullscreen"><FullScreen /></el-icon> -->
+        <el-button class="el-dialog__headerbtn el-dialog__fullbtn" @click="toggleFullscreen" link :icon="FullScreen" />
+      </template>
 
-  <div>模型信息:</div>
-  <div>长: {{ modelView.height }}</div>
-  <div>宽: {{ modelView.width }}</div>
-  <div>高: {{ modelView.depth }}</div>
-  <div>包装盒体积: {{ modelView.volume }}</div>
-  <div>真实体积: {{ modelView.trueVolume }}</div>
-  <div>重量: {{ modelView.weight }}</div>
+      <div ref="container" id="threecontainer">
+        <AxisLine v-if="mesh" :camera2="camera" @backCarmera="backCarmera" @totastMesh="totastMesh(controls)" />
+      </div>
+      <div v-if="mesh">
+        <button id="button" @click="toggleLabel">{{ labelStatus ? "开启" : "关闭" }}三维信息</button>
+      </div>
+      <!-- 
+    <div>模型信息:</div>
+    <div>长: {{ modelView.height }}</div>
+    <div>宽: {{ modelView.width }}</div>
+    <div>高: {{ modelView.depth }}</div>
+    <div>包装盒体积: {{ modelView.volume }}</div>
+    <div>真实体积: {{ modelView.trueVolume }}</div>
+    <div>重量: {{ modelView.weight }}</div> -->
+    </el-dialog>
+  </teleport>
 </template>
 
 <script setup>
-import { ref } from "vue"
+import { ref, onMounted } from "vue"
 import * as THREE from "three"
 import { useThree } from "../hooks/useThree.js"
 import { useFace } from "../hooks/useFace.js"
@@ -26,8 +43,19 @@ import AxisLine from "./AxisLine.vue"
 
 import { calVolume } from "../utils/calVolume.js"
 // import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper.js"
-
+import { useMitt } from "../hooks/mitt"
+import { FullScreen } from "@element-plus/icons-vue"
 // import { checkThickness } from "../utils/checkThickness.js"
+const isFullscreen = ref(false)
+const toggleFullscreen = () => {
+  isFullscreen.value = !isFullscreen.value
+}
+
+const dialogRef = ref(null)
+onMounted(() => {
+  // dialogRef.value.rendered = ture
+  console.log("🚀 ~ file: ThreeViewer.vue:52 ~ dialogRef.value:", dialogRef.value)
+})
 // 接收props
 const props = defineProps({
   modelPath: {
@@ -40,7 +68,11 @@ const props = defineProps({
   },
 })
 // threejs   scene、mesh camera、renderer、controls 内部有只读属性的value  无法使用vue的响应式  ref 包裹
-
+const dialogTableVisible = ref(false)
+const { onEvent, emitEvent } = useMitt("openPreview")
+onEvent(() => {
+  dialogTableVisible.value = true
+})
 const container = ref(null)
 const labelStatus = ref(false)
 let mesh, pointLight, labelArr
@@ -50,7 +82,6 @@ let {
   scene,
   renderer,
   controls,
-  gui,
   addBox,
   addArrow,
   addAxes,
@@ -84,9 +115,10 @@ const measureDistance = (point1, point2) => {
 
 const { openLoading, closeLoading } = useLoading()
 const loadModel = async (path, type) => {
-  openLoading() // 开启加载效果
   clearScene() //  加载新模型前先清除旧场景所有对象
-  window.removeEventListener("click", onMouseClick)
+  openLoading() // 开启加载效果
+
+  // window.removeEventListener("click", onMouseClick)
   let loadView
   //  特殊3d文件类型判断, 使用自定义的加载方法, 不走官方loader判断
   if (type == "stp") {
@@ -244,11 +276,13 @@ const commonFn = material => {
 
   // addArrow()
   closeLoading()
+  emitEvent()
+
   animate()
   // const helper33 = new VertexNormalsHelper(mesh, 2, 0x00ff00, 1)
   // scene.add(helper33)
   detectWallThickness(mesh, 10)
-  window.addEventListener("click", onMouseClick)
+  // window.addEventListener("click", onMouseClick)
   calVolume(mesh.geometry)
   // 获取模型的三维信息
   modelView.value = getModelView(box)
@@ -321,10 +355,28 @@ const toggleLabel = () => {
 
 // 一键还原模型初始状态
 const autoBack = () => {}
+
+// const onWindowResize = () => {
+//   console.log("🚀 ~ file: ThreeViewer.vue:338 ~ container:", container.clientWidth)
+//   return
+//   const width = container.clientWidth
+//   const height = container.clientHeight
+//   renderer.setSize(width, height)
+//   camera.aspect = width / height
+//   camera.updateProjectionMatrix()
+// }
+
+// // onWindowResize()
+// // 监听窗口大小变化
+// window.addEventListener("resize", onWindowResize, false)
+const isMounted = ref(false)
+onMounted(() => {
+  isMounted.value = true
+})
 defineExpose({ loadModel })
 </script>
 
-<style lang="scss">
+<style lang="scss" scope>
 #container {
   width: 100%;
   height: 100%;
@@ -332,9 +384,12 @@ defineExpose({ loadModel })
 #threecontainer {
   position: relative;
   border: 1px solid black;
+  text-align: center;
+  text-align: -webkit-center;
   margin: 20px;
-  width: 600px;
-  height: 600px;
+  // margin: 20px;
+  // width: 600px;
+  // height: 600px;
 }
 #button {
   /* position: absolute;
@@ -360,9 +415,15 @@ defineExpose({ loadModel })
   width: 50px;
   height: 50px; */
 }
-.ii {
-  .oo {
-    color: #ff9800;
-  }
+
+.el-dialog__fullbtn {
+  // background: transparent;
+  border: none;
+  // height: 48px;
+  outline: none;
+  // padding: 0;
+  position: absolute;
+  top: 12px;
+  right: 45px;
 }
 </style>

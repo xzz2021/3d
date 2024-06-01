@@ -2,6 +2,7 @@
 import Steps from "./views/Steps.vue"
 import Table from "./views/Table.vue"
 import Upload from "./components/Upload.vue"
+import ShopCard from "./views/ShopCard.vue"
 </script>
 
 <template>
@@ -9,9 +10,9 @@ import Upload from "./components/Upload.vue"
     <el-card>
       <Steps />
       <Table />
-      <div style="margin: 20px">
+      <div class="upload_shop_box" style="margin: 20px">
         <Upload />
-        <el-card>0007777777</el-card>
+        <ShopCard />
       </div>
     </el-card>
   </div>
@@ -23,9 +24,8 @@ import Upload from "./components/Upload.vue"
   min-width: 600px;
   // margin: 0 auto;
 }
-.oo {
-  .ii {
-    color: aqua;
-  }
+.upload_shop_box {
+  display: flex;
+  justify-content: space-around;
 }
 </style>
