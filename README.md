@@ -1,4 +1,10 @@
-此项目使用vite + vue3 + js + elementPlus构建，为了方便转移到odoo，没有使用ts!
+此项目用于在线3d预览各种文件,使用threejs + occt-import-js 解析
+
+> 已确定支持的文件格式包括: `gltf` `glb` `obj` `stl` `dae` `3ds` `stp` `igs` `iges`
+> 待验证的格式: `ply` `collada` `svg` `vrml` `wrl` `pcd` `xyz` `pdb` `ktx2` `json`
+> 不支持老版本 `fbx`
+
+项目使用vite + vue3 + js + elementPlus + sass构建，为了方便转移到odoo，没有使用ts!
 同时加入了eslint和prettier进行代码校验和格式化，编译器可安装相应插件搭配使用！
 
 1. 项目使用pnpm管理，首次运行需执行以下安装命令

@@ -14,15 +14,13 @@
       直接拖拽文件 或者
       <em>点击选择</em>
     </div>
-    <template #tip>
-      <div class="el-upload__tip">文件类型: STL, OBJ, STEP, STP, IGES, IGS, DAE, 3DS, GLTF, GLB,</div>
-    </template>
+    <div>
+      <p>支持STP、STEP、STL、IGS、GLTF、OBJ等格式,一次最多上传5个文件,单个文件最多200M</p>
+      <p>不同格式文件，材料费用计算可能有所偏差,建议优先选择STL</p>
+    </div>
   </el-upload>
-  <div style="margin: 20px">========</div>
-  <div>预览:</div>
+
   <three-viewer :model-path="modelPath" :model-type="modelType" ref="threeRef"></three-viewer>
-  <div style="margin: 20px">========</div>
-  <div>测试demo:</div>
 </template>
 <script setup>
 import ThreeViewer from "./ThreeViewer.vue"
