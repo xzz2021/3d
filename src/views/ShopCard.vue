@@ -24,7 +24,8 @@
 
 <style lang="scss" scoped>
 .shop_box {
-  height: 220px;
+  height: 232px;
+  min-width: 234px;
   display: flex;
   flex-direction: column;
   justify-content: space-around;

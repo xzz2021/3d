@@ -7,10 +7,11 @@ import ShopCard from "./views/ShopCard.vue"
 
 <template>
   <div id="xzzapp">
+    <!-- <el-card style="width: 1036px"> -->
     <el-card>
       <Steps />
       <Table />
-      <div class="upload_shop_box" style="margin: 20px">
+      <div class="upload_shop_box">
         <Upload />
         <ShopCard />
       </div>
@@ -25,7 +26,8 @@ import ShopCard from "./views/ShopCard.vue"
   // margin: 0 auto;
 }
 .upload_shop_box {
+  margin: 20px 0;
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
 }
 </style>

@@ -15,7 +15,8 @@
     "mitt": "^3.0.1",
     "occt-import-js": "^0.0.22",
     "three": "^0.164.1",
-    "vue": "^3.4.21"
+    "vue": "^3.4.21",
+    "vue-pick-colors": "^1.6.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.3.0",

@@ -1,6 +1,5 @@
 <template>
   <el-upload
-    class=""
     ref="uploadForm"
     drag
     action=""
@@ -28,8 +27,4 @@ import { useUpload } from "../hooks/useUpload"
 import { UploadFilled } from "@element-plus/icons-vue"
 const { onUpload, modelPath, modelType, threeRef, uploadForm } = useUpload()
 </script>
-<style scoped lang="scss">
-// :deep(.el-overlay) {
-//   z-index: 2008 !important;
-// }
-</style>
+<style scoped lang="scss"></style>

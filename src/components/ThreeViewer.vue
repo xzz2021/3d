@@ -1,25 +1,14 @@
 <template>
-  <teleport to="body">
-    <el-dialog
-      v-model="dialogTableVisible"
-      v-if="isMounted"
-      :fullscreen="isFullscreen"
-      class="dialogCss"
-      width="700px"
-      :z-index="2001"
-      ref="dialogRef"
-    >
+  <div v-show="dialogOpen">
+    <el-dialog v-model="dialogTableVisible" :fullscreen="isFullscreen" :z-index="2001" ref="dialogRef" draggable width="674">
       <template #header>
-        <!-- <el-icon @click="toggleFullscreen"><FullScreen /></el-icon> -->
         <el-button class="el-dialog__headerbtn el-dialog__fullbtn" @click="toggleFullscreen" link :icon="FullScreen" />
       </template>
 
       <div ref="container" id="threecontainer">
-        <AxisLine v-if="mesh" :camera2="camera" @backCarmera="backCarmera" @totastMesh="totastMesh(controls)" />
+        <AxisLine v-show="mesh" :camera2="camera" @backCarmera="backCarmera" @totastMesh="totastMesh(controls)" />
       </div>
-      <div v-if="mesh">
-        <button id="button" @click="toggleLabel">{{ labelStatus ? "开启" : "关闭" }}三维信息</button>
-      </div>
+      <button v-show="mesh" id="button" @click="toggleLabel">{{ labelStatus ? "开启" : "关闭" }}三维信息</button>
       <!-- 
     <div>模型信息:</div>
     <div>长: {{ modelView.height }}</div>
@@ -29,7 +18,7 @@
     <div>真实体积: {{ modelView.trueVolume }}</div>
     <div>重量: {{ modelView.weight }}</div> -->
     </el-dialog>
-  </teleport>
+  </div>
 </template>
 
 <script setup>
@@ -54,7 +43,7 @@ const toggleFullscreen = () => {
 const dialogRef = ref(null)
 onMounted(() => {
   // dialogRef.value.rendered = ture
-  console.log("🚀 ~ file: ThreeViewer.vue:52 ~ dialogRef.value:", dialogRef.value)
+  // console.log("🚀 ~ file: ThreeViewer.vue:52 ~ dialogRef.value:", dialogRef.value)
 })
 // 接收props
 const props = defineProps({
@@ -68,10 +57,13 @@ const props = defineProps({
   },
 })
 // threejs   scene、mesh camera、renderer、controls 内部有只读属性的value  无法使用vue的响应式  ref 包裹
-const dialogTableVisible = ref(false)
+const dialogTableVisible = ref(true)
+
+const dialogOpen = ref(false)
 const { onEvent, emitEvent } = useMitt("openPreview")
 onEvent(() => {
   dialogTableVisible.value = true
+  dialogOpen.value = true
 })
 const container = ref(null)
 const labelStatus = ref(false)
@@ -419,7 +411,7 @@ defineExpose({ loadModel })
 .el-dialog__fullbtn {
   // background: transparent;
   border: none;
-  // height: 48px;
+  height: 48px;
   outline: none;
   // padding: 0;
   position: absolute;

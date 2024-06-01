@@ -6,7 +6,8 @@
 -->
 <template>
   <div class="table_container">
-    <el-table :data="tableData" height="350" style="width: 100%" stripe border>
+    <el-table :data="tableData" height="300" style="width: 100%" stripe border @selection-change="handleSelectionChange">
+      <el-table-column type="selection" width="55" />
       <el-table-column label="文件预览" width="180">
         <template #default="scope">
           <el-image style="width: 100px; height: 100px; cursor: pointer" :src="scope.row.image" fit="fill" @click="openPreview" />
@@ -16,7 +17,9 @@
         <template #default="scope">
           <el-select v-model="scope.row.material.name" @visible-change="visibleChange">
             <template #empty>
-              <el-card>reter</el-card>
+              <el-card>
+                <div style="width: 500px; height: 500px"></div>
+              </el-card>
             </template>
             <!-- <template #default>
               <el-option v-for="item in materialOptions" :key="item.name" :label="item.name" :value="item.name">
@@ -30,13 +33,18 @@
               </el-option>
             </template> -->
           </el-select>
-          <div style="margin-bottom: 10px"></div>
 
-          <el-select v-model="scope.row.material.color" @visible-change="visibleChange2">
+          <!-- <el-select v-model="scope.row.material.color" @visible-change="visibleChange2">
             <template #empty>
-              <el-card>颜色选择</el-card>
+              <el-card>
+                颜色选择 -->
+          <div class="color_picker_box">
+            <p>颜色: {{ scope.row.material.color }}</p>
+            <pick-colors v-model:value="scope.row.material.color" />
+          </div>
+          <!-- </el-card>
             </template>
-          </el-select>
+          </el-select> -->
         </template>
       </el-table-column>
       <el-table-column label="表面处理" min-width="100">
@@ -79,8 +87,8 @@
         <template #default="scope">
           <div class="operateBox">
             <el-button type="primary" :icon="ShoppingCartFull" circle></el-button>
-            <el-button type="success" :icon="CopyDocument" circle @click="copyItem(scope.row)"></el-button>
-            <el-button type="danger" :icon="Delete" circle @click="deleteItem(scope.$index)"></el-button>
+            <el-button type="success" style="margin-left: 0" :icon="CopyDocument" circle @click="copyItem(scope.row)"></el-button>
+            <el-button type="danger" style="margin-left: 0" :icon="Delete" circle @click="deleteItem(scope.$index)"></el-button>
           </div>
         </template>
       </el-table-column>
@@ -93,8 +101,7 @@ import { Delete, CopyDocument, ShoppingCartFull } from "@element-plus/icons-vue"
 import { ref, watch } from "vue"
 
 import { useMitt } from "../hooks/mitt"
-import { Volume } from "three/examples/jsm/Addons.js"
-
+import PickColors from "vue-pick-colors"
 const { emitEvent } = useMitt("openPreview")
 
 // const rawPrice = ref(168)
@@ -105,6 +112,11 @@ const handleChange1 = (val, index) => {
 const handleChange2 = (val, index) => {
   tableData.value[index].finalPrice = (tableData.value[index].rawPrice + val) * tableData.value[index].count
 }
+
+const handleSelectionChange = val => {
+  console.log("🚀 ~ file: Table.vue:115 ~ val:", val)
+  //  此处可以获得真实选择的数据  用于发送给购物车
+}
 const tableData = ref([
   {
     image: "https://img2.imgtp.com/2024/05/31/qBd2EEAr.png",
@@ -114,7 +126,7 @@ const tableData = ref([
       img: "",
       advantages: "高精度,高韧性, 高稳定性",
       disAdvantages: "保存温度不宜超过60摄氏度",
-      color: "#658715",
+      color: "#BAFF16",
       deviation: "±200微米或±0.2%",
       price: 14.6,
     },
@@ -191,12 +203,9 @@ const openPreview = () => {
 :deep(.el-radio-group) {
   display: flex;
   flex-direction: column; /* 使 Radio 垂直排列 */
-  // justify-content: center; /* 使 Radio 按钮垂直居中 */
   align-items: center;
 }
-:deep(.el-radio:last-child) {
-  // margin-right: 0;
-}
+
 :deep(.el-table__header .cell) {
   text-align: center;
 }
@@ -233,5 +242,10 @@ const openPreview = () => {
 }
 :deep(.el-input-number--small) {
   width: 79px;
+}
+.color_picker_box {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
 }
 </style>
