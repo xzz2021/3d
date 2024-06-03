@@ -40,7 +40,8 @@
                 颜色选择 -->
           <div class="color_picker_box">
             <p>颜色: {{ scope.row.material.color }}</p>
-            <pick-colors v-model:value="scope.row.material.color" />
+            <!-- <pick-colors v-model:value="scope.row.material.color" /> -->
+            <XzzColorPicker v-model="scope.row.material.color" />
           </div>
           <!-- </el-card>
             </template>
@@ -100,8 +101,10 @@
 import { Delete, CopyDocument, ShoppingCartFull } from "@element-plus/icons-vue"
 import { ref, watch } from "vue"
 
+import XzzColorPicker from "../components/colorPicker/XzzColorPicker.vue"
+
 import { useMitt } from "../hooks/mitt"
-import PickColors from "vue-pick-colors"
+// import PickColors from "vue-pick-colors"
 const { emitEvent } = useMitt("openPreview")
 
 // const rawPrice = ref(168)
