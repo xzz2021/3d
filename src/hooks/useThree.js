@@ -60,18 +60,19 @@ export const useThree = () => {
     const lightX = ll
     const lightY = ll
     // const lightY = size.y + 50
-    const lightZ = size.z * 2
+    const lightZ = size.z + 50
     // const halfZ = lightZ / 2
     const halfZ = lightZ / 4
     // 添加光源  不然模型会是全黑色的
 
     const color = 0xffffff
+    const softLight = 0x404040 // 柔和的白光
     const skyColor = 0xb1e1ff // light blue
     const groundColor = 0xb97a20 // brownish orange
     const intensity = 0.8
 
     //  环境光   没有方向，无法产生阴影   通常的作用是提亮场景，让暗部不要太暗
-    const ambientLight = new THREE.AmbientLight(color, intensity)
+    const ambientLight = new THREE.AmbientLight(softLight, intensity * 3)
     scene.add(ambientLight)
 
     //  点光源
@@ -129,11 +130,11 @@ export const useThree = () => {
     // scene.add(directionLight27)
 
     // 顶部
-    const directionLightBottom = new THREE.DirectionalLight(0xffffff, intensity)
-    directionLightBottom.position.set(0, 0, lightZ + 50)
-    const directionLightBottomHelper = new THREE.DirectionalLightHelper(directionLightBottom)
-    scene.add(directionLightBottomHelper)
-    scene.add(directionLightBottom)
+    // const directionLightBottom = new THREE.DirectionalLight(0xffffff, intensity)
+    // directionLightBottom.position.set(0, 0, lightZ + 50)
+    // const directionLightBottomHelper = new THREE.DirectionalLightHelper(directionLightBottom)
+    // scene.add(directionLightBottomHelper)
+    // scene.add(directionLightBottom)
 
     // 底部
     // const directionLightTop = new THREE.DirectionalLight(0xffffff, intensity)

@@ -133,12 +133,15 @@ const loadModel = async (path, type) => {
     path,
     geometry => {
       const simpleArr = ["obj", "dae", "3ds"]
-      let material = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, metalness: 0, side: THREE.DoubleSide })
+      const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256)
+      cubeRenderTarget.texture.type = THREE.HalfFloatType
+      let material = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1, roughness: 0 })
+      // let material = new THREE.MeshPhongMaterial({ color: 0xff5533, specular: 0x555555, shininess: 30 })
       mesh = simpleArr.includes(type) ? geometry.scene || geometry : new THREE.Mesh(geometry, material)
 
-      const shellGeometry = createShell(geometry, -0.05) // 向内偏移 0.05
-      const shellMesh = new THREE.Mesh(shellGeometry, material)
-      scene.add(shellMesh)
+      // const shellGeometry = createShell(geometry, -0.05) // 向内偏移 0.05
+      // const shellMesh = new THREE.Mesh(shellGeometry, material)
+      // scene.add(shellMesh)
 
       // // 使用布尔运算生成抽壳几何体
       // const cubeCSG = CSG.fromMesh(mesh)
@@ -244,7 +247,7 @@ const commonFn = material => {
   // 添加可视化包围盒
   labelArr = addBox(mesh)
 
-  createLight(size) // 添加光源
+  // createLight(size) // 添加光源
 
   // 添加一个跟随相机的点光源 此处必须添加
   pointLight = addLightOfCamera()
@@ -253,7 +256,7 @@ const commonFn = material => {
 
   addGui(mesh, material)
 
-  // addEnvironment()
+  addEnvironment()
   // addFaceGui(camera)
 
   scene.add(mesh)
