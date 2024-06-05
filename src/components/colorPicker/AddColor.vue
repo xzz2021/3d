@@ -11,11 +11,15 @@
       <p>亮光:</p>
       <el-scrollbar>
         <div class="containe_box">
-          <div class="item_box" v-for="item in addList.c" :key="item" :style="{ 'background-color': item.hex }">
-            <div class="close_btn" @click="deleteItem('c', item)">&#10006</div>
+          <div v-for="item in addList.c" :key="item" >
+            <el-tooltip class="box-item" :content="item.pantone" placement="top" >
+              <div class="item_box" :style="{ 'background-color': item.hex }">
+                 <div class="close_btn" @click="deleteItem('c', item)">&#10006</div>
+              </div>
+            </el-tooltip>
           </div>
-        </div>
-      </el-scrollbar>
+          </div>
+        </el-scrollbar>
     </div>
 
     <div class="list_box">
@@ -23,8 +27,13 @@
       <el-scrollbar>
 
       <div class="containe_box">
-        <div class="item_box" v-for="item in addList.u" :key="item" :style="{ 'background-color': item.hex }">
-          <div class="close_btn" @click="deleteItem('u', item)">&#10006</div></div>
+        <div v-for="item in addList.u" :key="item" >
+            <el-tooltip class="box-item" :content="item.pantone" placement="top" >
+              <div class="item_box" :style="{ 'background-color': item.hex }">
+                 <div class="close_btn" @click="deleteItem('u', item)">&#10006</div>
+              </div>
+            </el-tooltip>
+          </div>
       </div>
     </el-scrollbar>
     </div>
@@ -131,6 +140,9 @@ defineExpose({ addItem })
           // background-color: rgb(16, 240, 146);
 
         }
+        .text {
+          
+        }
         .close_btn {
           display: none;
           // cursor: pointer;
@@ -142,7 +154,7 @@ defineExpose({ addItem })
           color: white;
           // background-color: red;
           &:hover {
-            color: red;
+            // color: red;
           }
         }
       }

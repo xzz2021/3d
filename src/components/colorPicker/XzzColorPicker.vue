@@ -13,7 +13,13 @@
       <template #default>
         <div class="pantone_picker_box">
           <ColorPicker :color="modelValue.hex" @changeColor="changeColor" :sucker-hide="true" />
-          <PantoneList ref="pantoneListRef" :color="modelValue.hex" @changeColor2="changeColor2" :colorList="colorList" />
+          <PantoneList
+            ref="pantoneListRef"
+            :color="modelValue.hex"
+            @changeColor2="changeColor2"
+            @changeColor="changeColor"
+            :colorList="colorList"
+          />
           <AddColor :addList="addList" ref="AddColorRef" @closePopover="closePopover" />
         </div>
       </template>
@@ -59,9 +65,6 @@ const addList = ref({
 const pantoneListRef = ref(null)
 const AddColorRef = ref(null)
 const changeColor2 = color => {
-  const { r, g, b } = color.rgba || color.rgb
-  const arr = getPantoneUC([r, g, b])
-  colorList.value = arr
   if (color.pantone.lastIndexOf("C") == -1 && AddColorRef.value) {
     AddColorRef.value.addItem("u", color)
     addList.value.u.push(color)

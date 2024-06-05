@@ -13,7 +13,7 @@
             class="item_box"
             v-for="item in colorList.pantoneC"
             :key="item"
-            @click="selectColor(item)"
+            @click="pushColor(item)"
             :style="{ 'background-color': item.hex }"
           >
             <p
@@ -36,7 +36,7 @@
             class="item_box"
             v-for="item in colorList.pantoneU"
             :key="item"
-            @click="selectColor(item)"
+            @click="pushColor(item)"
             :style="{ 'background-color': item.hex }"
           >
             <p
@@ -167,12 +167,23 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(["changeColor2"])
+const emit = defineEmits(["changeColor2", "changeColor"])
 
-const selectColor = color => {
-  selectValue.value = color
-
+const pushColor = color => {
   emit("changeColor2", color)
+}
+
+const selectColor = item => {
+  selectValue.value = item
+
+  // 选择颜色后 触发 列表更新
+  // 此处颜色值需要转换
+  const getRgb = item.rgb
+  const r = getRgb[0]
+  const g = getRgb[1]
+  const b = getRgb[2]
+
+  emit("changeColor", { rgb: { r, g, b } })
 }
 
 const options = ref([])
@@ -252,6 +263,7 @@ const changeLineHeight = text => {
   // width: 306px;
   .list_box {
     width: 150px;
+    height: 260px;
     display: flex;
     justify-content: space-around;
     align-items: center;
