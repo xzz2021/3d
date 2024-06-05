@@ -39,7 +39,7 @@
               <el-card>
                 颜色选择 -->
           <div class="color_picker_box">
-            <p>颜色: {{ scope.row.material.color }}</p>
+            <!-- <p>颜色: {{ scope.row.material.color.pantone }}</p> -->
             <!-- <pick-colors v-model:value="scope.row.material.color" /> -->
             <XzzColorPicker v-model="scope.row.material.color" />
           </div>
@@ -129,7 +129,10 @@ const tableData = ref([
       img: "",
       advantages: "高精度,高韧性, 高稳定性",
       disAdvantages: "保存温度不宜超过60摄氏度",
-      color: "#BAFF16",
+      color: {
+        hex: "#F4DA40",
+        pantone: "7404 C",
+      },
       deviation: "±200微米或±0.2%",
       price: 14.6,
     },

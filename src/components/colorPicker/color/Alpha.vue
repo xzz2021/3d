@@ -6,14 +6,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { createAlphaSquare, createLinearGradient } from './composible'
+import { defineComponent } from "vue"
+import { createAlphaSquare, createLinearGradient } from "./composible"
 
 export default defineComponent({
   props: {
     color: {
       type: String,
-      default: '#000000',
+      default: "#000000",
     },
     rgba: {
       type: Object,
@@ -28,7 +28,7 @@ export default defineComponent({
       default: 152,
     },
   },
-  emits: ['selectAlpha'],
+  emits: ["selectAlpha"],
   data() {
     return {
       slideAlphaStyle: {},
@@ -39,7 +39,7 @@ export default defineComponent({
     color() {
       this.renderColor()
     },
-    'rgba.a'() {
+    "rgba.a"() {
       this.renderSlide()
     },
   },
@@ -55,25 +55,18 @@ export default defineComponent({
       const size = this.alphaSize
       const canvasSquare = createAlphaSquare(size)
 
-      const ctx = canvas.getContext('2d')
+      const ctx = canvas.getContext("2d", { willReadFrequently: true })
       canvas.width = width
       canvas.height = height
 
-      ctx.fillStyle = ctx.createPattern(canvasSquare, 'repeat')
+      ctx.fillStyle = ctx.createPattern(canvasSquare, "repeat")
       ctx.fillRect(0, 0, width, height)
 
-      createLinearGradient(
-        'p',
-        ctx,
-        width,
-        height,
-        'rgba(255,255,255,0)',
-        this.color
-      )
+      createLinearGradient("p", ctx, width, height, "rgba(255,255,255,0)", this.color)
     },
     renderSlide() {
       this.slideAlphaStyle = {
-        top: this.rgba.a * this.height - 2 + 'px',
+        top: this.rgba.a * this.height - 2 + "px",
       }
     },
     selectAlpha(e: any) {
@@ -90,18 +83,18 @@ export default defineComponent({
         }
 
         let a = parseFloat((y / this.height).toFixed(2))
-        this.$emit('selectAlpha', a)
+        this.$emit("selectAlpha", a)
       }
 
       mousemove(e)
 
       const mouseup = () => {
-        document.removeEventListener('mousemove', mousemove)
-        document.removeEventListener('mouseup', mouseup)
+        document.removeEventListener("mousemove", mousemove)
+        document.removeEventListener("mouseup", mouseup)
       }
 
-      document.addEventListener('mousemove', mousemove)
-      document.addEventListener('mouseup', mouseup)
+      document.addEventListener("mousemove", mousemove)
+      document.addEventListener("mouseup", mouseup)
     },
   },
 })

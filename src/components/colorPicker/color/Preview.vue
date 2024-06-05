@@ -2,14 +2,14 @@
   <canvas />
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { createAlphaSquare } from './composible'
+import { defineComponent } from "vue"
+import { createAlphaSquare } from "./composible"
 
 export default defineComponent({
   props: {
     color: {
       type: String,
-      default: '#000000',
+      default: "#000000",
     },
     width: {
       type: Number,
@@ -41,11 +41,11 @@ export default defineComponent({
       const size = this.alphaSize
       const canvasSquare = createAlphaSquare(size)
 
-      const ctx = canvas.getContext('2d')
+      const ctx = canvas.getContext("2d", { willReadFrequently: true })
       canvas.width = width
       canvas.height = height
 
-      ctx.fillStyle = ctx.createPattern(canvasSquare, 'repeat')
+      ctx.fillStyle = ctx.createPattern(canvasSquare, "repeat")
       ctx.fillRect(0, 0, width, height)
 
       ctx.fillStyle = this.color

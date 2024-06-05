@@ -12,13 +12,7 @@
         d="M13.1,8.2l5.6,5.6c0.4,0.4,0.5,1.1,0.1,1.5s-1.1,0.5-1.5,0.1c0,0-0.1,0-0.1-0.1l-1.4-1.4l-7.7,7.7C7.9,21.9,7.6,22,7.3,22H3.1C2.5,22,2,21.5,2,20.9l0,0v-4.2c0-0.3,0.1-0.6,0.3-0.8l5.8-5.8C8.5,9.7,9.2,9.6,9.7,10s0.5,1.1,0.1,1.5c0,0,0,0.1-0.1,0.1l-5.5,5.5v2.7h2.7l7.4-7.4L8.7,6.8c-0.5-0.4-0.5-1-0.1-1.5s1.1-0.5,1.5-0.1c0,0,0.1,0,0.1,0.1l1.4,1.4l3.5-3.5c1.6-1.6,4.1-1.6,5.8-0.1c1.6,1.6,1.6,4.1,0.1,5.8L20.9,9l-3.6,3.6c-0.4,0.4-1.1,0.5-1.5,0.1"
       />
     </svg>
-    <svg
-      v-if="isSucking"
-      class="sucker"
-      viewBox="-16 -16 68 68"
-      xmlns="http://www.w3.org/2000/svg"
-      stroke="#9099a4"
-    >
+    <svg v-if="isSucking" class="sucker" viewBox="-16 -16 68 68" xmlns="http://www.w3.org/2000/svg" stroke="#9099a4">
       <g fill="none" fill-rule="evenodd">
         <g transform="translate(1 1)" stroke-width="4">
           <circle stroke-opacity=".5" cx="18" cy="18" r="18" />
@@ -39,7 +33,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent } from "vue"
 // import imgSucker from '../img/sucker.png'
 export default defineComponent({
   props: {
@@ -72,8 +66,8 @@ export default defineComponent({
       if (!this.isOpenSucker) {
         this.isOpenSucker = true
         this.isSucking = true
-        this.$emit('openSucker', true)
-        document.addEventListener('keydown', this.keydownHandler)
+        this.$emit("openSucker", true)
+        document.addEventListener("keydown", this.keydownHandler)
       } else {
         // The processing logic is the same as pressing the esc key
         this.keydownHandler({ keyCode: 27 })
@@ -84,10 +78,10 @@ export default defineComponent({
       if (e.keyCode === 27) {
         this.isOpenSucker = false
         this.isSucking = false
-        this.$emit('openSucker', false)
-        document.removeEventListener('keydown', this.keydownHandler)
-        document.removeEventListener('mousemove', this.mousemoveHandler)
-        document.removeEventListener('mouseup', this.mousemoveHandler)
+        this.$emit("openSucker", false)
+        document.removeEventListener("keydown", this.keydownHandler)
+        document.removeEventListener("mousemove", this.mousemoveHandler)
+        document.removeEventListener("mouseup", this.mousemoveHandler)
         if (this.suckerPreview) {
           // @ts-ignore
           document.body.removeChild(this.suckerPreview)
@@ -97,34 +91,24 @@ export default defineComponent({
     },
     mousemoveHandler(e: any) {
       const { clientX, clientY } = e
-      const {
-        top: domTop,
-        left: domLeft,
-        width,
-        height,
-      } = this.suckerCanvas.getBoundingClientRect()
+      const { top: domTop, left: domLeft, width, height } = this.suckerCanvas.getBoundingClientRect()
       const x = clientX - domLeft
       const y = clientY - domTop
-      const ctx = this.suckerCanvas.getContext('2d')
-      const imgData = ctx.getImageData(
-        Math.min(x, width - 1),
-        Math.min(y, height - 1),
-        1,
-        1
-      )
+      const ctx = this.suckerCanvas.getContext("2d", { willReadFrequently: true })
+      const imgData = ctx.getImageData(Math.min(x, width - 1), Math.min(y, height - 1), 1, 1)
       let [r, g, b, a] = imgData.data
       a = parseFloat((a / 255).toFixed(2))
       // @ts-ignore
       const style = this.suckerPreview.style
       Object.assign(style, {
-        position: 'absolute',
-        left: clientX + 20 + 'px',
-        top: clientY - 36 + 'px',
-        width: '24px',
-        height: '24px',
-        borderRadius: '50%',
-        border: '2px solid #fff',
-        boxShadow: '0 0 8px 0 rgba(0, 0, 0, 0.16)',
+        position: "absolute",
+        left: clientX + 20 + "px",
+        top: clientY - 36 + "px",
+        width: "24px",
+        height: "24px",
+        borderRadius: "50%",
+        border: "2px solid #fff",
+        boxShadow: "0 0 8px 0 rgba(0, 0, 0, 0.16)",
         background: `rgba(${r}, ${g}, ${b}, ${a})`,
         zIndex: 95, // The level of the preview color of the small circle of the eyedropper cannot exceed the color selector
       })
@@ -144,39 +128,34 @@ export default defineComponent({
       ) {
         // @ts-ignore
 
-        style.display = ''
+        style.display = ""
       } else {
         // @ts-ignore
-        style.display = 'none'
+        style.display = "none"
       }
     },
     suckColor(dom: any) {
-      if (dom && dom.tagName !== 'CANVAS') {
+      if (dom && dom.tagName !== "CANVAS") {
         return
       }
       // @ts-ignore
-      this.suckerPreview = document.createElement('div')
+      this.suckerPreview = document.createElement("div")
       // @ts-ignore
       if (this.suckerPreview) document.body.appendChild(this.suckerPreview)
 
-      document.addEventListener('mousemove', this.mousemoveHandler)
-      document.addEventListener('mouseup', this.mousemoveHandler)
+      document.addEventListener("mousemove", this.mousemoveHandler)
+      document.addEventListener("mouseup", this.mousemoveHandler)
 
-      dom.addEventListener('click', (e: any) => {
+      dom.addEventListener("click", (e: any) => {
         const { clientX, clientY } = e
         const { top, left, width, height } = dom.getBoundingClientRect()
         const x = clientX - left
         const y = clientY - top
-        const ctx = dom.getContext('2d')
-        const imgData = ctx.getImageData(
-          Math.min(x, width - 1),
-          Math.min(y, height - 1),
-          1,
-          1
-        )
+        const ctx = dom.getContext("2d", { willReadFrequently: true })
+        const imgData = ctx.getImageData(Math.min(x, width - 1), Math.min(y, height - 1), 1, 1)
         let [r, g, b, a] = imgData.data
         a = parseFloat((a / 255).toFixed(2))
-        this.$emit('selectSucker', { r, g, b, a })
+        this.$emit("selectSucker", { r, g, b, a })
       })
     },
   },

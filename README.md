@@ -24,3 +24,7 @@
 ```js
    pnpm run dev
 ```
+
+备注: 补充说明使用到的相关依赖
+
+1. 潘通色模块, [选择器源码](https://github.com/anish2690/vue-color-kit), [潘通标准色库](https://www.pantoneshop.cn/home/Color/index)

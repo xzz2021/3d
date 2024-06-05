@@ -1,39 +1,12 @@
 <template>
-  <div
-    class="hu-color-picker"
-    :class="{ light: isLightTheme }"
-    :style="{ width: totalWidth + 'px' }"
-  >
+  <div class="hu-color-picker" :class="{ light: isLightTheme }" :style="{ width: totalWidth + 'px' }">
     <div class="color-set">
-      <Saturation
-        ref="saturation"
-        :color="rgbString"
-        :hsv="hsv"
-        :size="hueHeight"
-        @selectSaturation="selectSaturation"
-      />
-      <Hue
-        ref="hue"
-        :hsv="hsv"
-        :width="hueWidth"
-        :height="hueHeight"
-        @selectHue="selectHue"
-      />
-      <Alpha
-        ref="alpha"
-        :color="rgbString"
-        :rgba="rgba"
-        :width="hueWidth"
-        :height="hueHeight"
-        @selectAlpha="selectAlpha"
-      />
+      <Saturation ref="saturation" :color="rgbString" :hsv="hsv" :size="hueHeight" @selectSaturation="selectSaturation" />
+      <Hue ref="hue" :hsv="hsv" :width="hueWidth" :height="hueHeight" @selectHue="selectHue" />
+      <Alpha ref="alpha" :color="rgbString" :rgba="rgba" :width="hueWidth" :height="hueHeight" @selectAlpha="selectAlpha" />
     </div>
     <div :style="{ height: previewHeight + 'px' }" class="color-show">
-      <Preview
-        :color="rgbaString"
-        :width="previewWidth"
-        :height="previewHeight"
-      />
+      <Preview :color="rgbaString" :width="previewWidth" :height="previewHeight" />
       <Sucker
         v-if="!suckerHide"
         :sucker-canvas="suckerCanvas"
@@ -42,20 +15,9 @@
         @selectSucker="selectSucker"
       />
     </div>
-    <Box
-      name="HEX"
-      :color="modelHex"
-      @inputColor="inputHex"
-      @inputFocus="handleFocus"
-      @inputBlur="handleBlur"
-    />
-    <Box
-      name="RGBA"
-      :color="modelRgba"
-      @inputColor="inputRgba"
-      @inputFocus="handleFocus"
-      @inputBlur="handleBlur"
-    />
+    <Box name="HEX" :color="modelHex" @inputColor="inputHex" @inputFocus="handleFocus" @inputBlur="handleBlur" />
+    <Box name="RGBA" :color="modelRgba" @inputColor="inputRgba" @inputFocus="handleFocus" @inputBlur="handleBlur" />
+    <!-- <Box name="PANTONE" :color="modelPantone" @inputColor="inputRgba" @inputFocus="handleFocus" @inputBlur="handleBlur" /> -->
     <Colors
       :color="rgbaString"
       :colors-default="colorsDefault"
@@ -68,16 +30,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { setColorValue, rgb2hex } from './composible'
+import { defineComponent } from "vue"
+import { setColorValue, rgb2hex } from "./composible"
 
-import Saturation from './Saturation.vue'
-import Hue from './Hue.vue'
-import Alpha from './Alpha.vue'
-import Preview from './Preview.vue'
-import Sucker from './Sucker.vue'
-import Box from './Box.vue'
-import Colors from './Colors.vue'
+import Saturation from "./Saturation.vue"
+import Hue from "./Hue.vue"
+import Alpha from "./Alpha.vue"
+import Preview from "./Preview.vue"
+import Sucker from "./Sucker.vue"
+import Box from "./Box.vue"
+import Colors from "./Colors.vue"
 
 export default defineComponent({
   components: {
@@ -89,15 +51,15 @@ export default defineComponent({
     Box,
     Colors,
   },
-  emits: ['changeColor', 'openSucker', 'inputFocus', 'inputBlur'],
+  emits: ["changeColor", "openSucker", "inputFocus", "inputBlur"],
   props: {
     color: {
       type: String,
-      default: '#000000',
+      default: "#000000",
     },
     theme: {
       type: String,
-      default: 'dark',
+      default: "dark",
     },
     suckerHide: {
       type: Boolean,
@@ -114,27 +76,27 @@ export default defineComponent({
     colorsDefault: {
       type: Array,
       default: () => [
-        '#000000',
-        '#FFFFFF',
-        '#FF1900',
-        '#F47365',
-        '#FFB243',
-        '#FFE623',
-        '#6EFF2A',
-        '#1BC7B1',
-        '#00BEFF',
-        '#2E81FF',
-        '#5D61FF',
-        '#FF89CF',
-        '#FC3CAD',
-        '#BF3DCE',
-        '#8E00A7',
-        'rgba(0,0,0,0)',
+        "#000000",
+        "#FFFFFF",
+        "#FF1900",
+        "#F47365",
+        "#FFB243",
+        "#FFE623",
+        "#6EFF2A",
+        "#1BC7B1",
+        "#00BEFF",
+        "#2E81FF",
+        "#5D61FF",
+        "#FF89CF",
+        "#FC3CAD",
+        "#BF3DCE",
+        "#8E00A7",
+        "rgba(0,0,0,0)",
       ],
     },
     colorsHistoryKey: {
       type: String,
-      default: 'vue-colorpicker-history',
+      default: "vue-colorpicker-history",
     },
   },
   data() {
@@ -142,8 +104,8 @@ export default defineComponent({
       hueWidth: 15,
       hueHeight: 152,
       previewHeight: 30,
-      modelRgba: '',
-      modelHex: '',
+      modelRgba: "",
+      modelHex: "",
       r: 0,
       g: 0,
       b: 0,
@@ -155,7 +117,7 @@ export default defineComponent({
   },
   computed: {
     isLightTheme(): boolean {
-      return this.theme === 'light'
+      return this.theme === "light"
     },
     totalWidth(): number {
       return this.hueHeight + (this.hueWidth + 8) * 2
@@ -195,8 +157,8 @@ export default defineComponent({
     Object.assign(this, setColorValue(this.color))
     this.setText()
 
-    this.$watch('rgba', () => {
-      this.$emit('changeColor', {
+    this.$watch("rgba", () => {
+      this.$emit("changeColor", {
         rgba: this.rgba,
         hsv: this.hsv,
         hex: this.modelHex,
@@ -210,10 +172,10 @@ export default defineComponent({
       this.setText()
     },
     handleFocus(event: FocusEvent) {
-      this.$emit('inputFocus', event)
+      this.$emit("inputFocus", event)
     },
     handleBlur(event: FocusEvent) {
-      this.$emit('inputBlur', event)
+      this.$emit("inputBlur", event)
     },
     selectHue(color: any) {
       const { r, g, b, h, s, v } = setColorValue(color)
@@ -267,7 +229,7 @@ export default defineComponent({
       this.modelRgba = this.rgbaStringShort
     },
     openSucker(isOpen: boolean) {
-      this.$emit('openSucker', isOpen)
+      this.$emit("openSucker", isOpen)
     },
     selectSucker(color: string) {
       const { r, g, b, a, h, s, v } = setColorValue(color)

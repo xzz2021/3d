@@ -6,14 +6,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { createLinearGradient } from './composible'
+import { defineComponent } from "vue"
+import { createLinearGradient } from "./composible"
 
 export default defineComponent({
   props: {
     color: {
       type: String,
-      default: '#000000',
+      default: "#000000",
     },
     hsv: {
       type: Object,
@@ -24,7 +24,7 @@ export default defineComponent({
       default: 152,
     },
   },
-  emits: ['selectSaturation'],
+  emits: ["selectSaturation"],
   data() {
     return {
       slideSaturationStyle: {},
@@ -44,35 +44,25 @@ export default defineComponent({
     renderColor() {
       const canvas: any = this.$refs.canvasSaturation
       const size = this.size
-      const ctx = canvas.getContext('2d')
+      const ctx = canvas.getContext("2d", { willReadFrequently: true })
       canvas.width = size
       canvas.height = size
 
       ctx.fillStyle = this.color
       ctx.fillRect(0, 0, size, size)
 
-      createLinearGradient(
-        'l',
-        ctx,
-        size,
-        size,
-        '#FFFFFF',
-        'rgba(255,255,255,0)'
-      )
-      createLinearGradient('p', ctx, size, size, 'rgba(0,0,0,0)', '#000000')
+      createLinearGradient("l", ctx, size, size, "#FFFFFF", "rgba(255,255,255,0)")
+      createLinearGradient("p", ctx, size, size, "rgba(0,0,0,0)", "#000000")
     },
     renderSlide() {
       this.slideSaturationStyle = {
-        left: this.hsv.s * this.size - 5 + 'px',
-        top: (1 - this.hsv.v) * this.size - 5 + 'px',
+        left: this.hsv.s * this.size - 5 + "px",
+        top: (1 - this.hsv.v) * this.size - 5 + "px",
       }
     },
     selectSaturation(e: any) {
-      const {
-        top: saturationTop,
-        left: saturationLeft,
-      } = this.$el.getBoundingClientRect()
-      const ctx = e.target.getContext('2d')
+      const { top: saturationTop, left: saturationLeft } = this.$el.getBoundingClientRect()
+      const ctx = e.target.getContext("2d", { willReadFrequently: true })
 
       const mousemove = (e: any) => {
         let x = e.clientX - saturationLeft
@@ -93,29 +83,24 @@ export default defineComponent({
 
         // Do not modify the dom by monitoring data changes, otherwise when the color is #ffffff, the slide will go to the lower left corner
         this.slideSaturationStyle = {
-          left: x - 5 + 'px',
-          top: y - 5 + 'px',
+          left: x - 5 + "px",
+          top: y - 5 + "px",
         }
         // If you use the maximum value, the selected pixel will be empty, and the empty default is black
-        const imgData = ctx.getImageData(
-          Math.min(x, this.size - 1),
-          Math.min(y, this.size - 1),
-          1,
-          1
-        )
+        const imgData = ctx.getImageData(Math.min(x, this.size - 1), Math.min(y, this.size - 1), 1, 1)
         const [r, g, b] = imgData.data
-        this.$emit('selectSaturation', { r, g, b })
+        this.$emit("selectSaturation", { r, g, b })
       }
 
       mousemove(e)
 
       const mouseup = () => {
-        document.removeEventListener('mousemove', mousemove)
-        document.removeEventListener('mouseup', mouseup)
+        document.removeEventListener("mousemove", mousemove)
+        document.removeEventListener("mouseup", mouseup)
       }
 
-      document.addEventListener('mousemove', mousemove)
-      document.addEventListener('mouseup', mouseup)
+      document.addEventListener("mousemove", mousemove)
+      document.addEventListener("mouseup", mouseup)
     },
   },
 })

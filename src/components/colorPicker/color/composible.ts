@@ -4,9 +4,9 @@ export function setColorValue(color: string) {
     rgba = hex2rgb(color)
   } else if (/rgb/.test(color)) {
     rgba = rgb2rgba(color)
-  } else if (typeof color === 'string') {
+  } else if (typeof color === "string") {
     rgba = rgb2rgba(`rgba(${color})`)
-  } else if (Object.prototype.toString.call(color) === '[object Object]') {
+  } else if (Object.prototype.toString.call(color) === "[object Object]") {
     rgba = color
   }
   const { r, g, b, a } = rgba
@@ -14,43 +14,31 @@ export function setColorValue(color: string) {
   return { r, g, b, a: a === undefined ? 1 : a, h, s, v }
 }
 export function createAlphaSquare(size: number) {
-  const canvas = document.createElement('canvas')
-  const ctx: any = canvas.getContext('2d')
+  const canvas = document.createElement("canvas")
+  const ctx: any = canvas.getContext("2d", { willReadFrequently: true })
   const doubleSize = size * 2
   canvas.width = doubleSize
   canvas.height = doubleSize
 
-  ctx.fillStyle = '#ffffff'
+  ctx.fillStyle = "#ffffff"
   ctx.fillRect(0, 0, doubleSize, doubleSize)
-  ctx.fillStyle = '#ccd5db'
+  ctx.fillStyle = "#ccd5db"
   ctx.fillRect(0, 0, size, size)
   ctx.fillRect(size, size, size, size)
 
   return canvas
 }
-export function createLinearGradient(
-  direction: any,
-  ctx: any,
-  width: any,
-  height: any,
-  color1: any,
-  color2: any
-) {
+export function createLinearGradient(direction: any, ctx: any, width: any, height: any, color1: any, color2: any) {
   // l horizontal p vertical
-  const isL = direction === 'l'
-  const gradient = ctx.createLinearGradient(
-    0,
-    0,
-    isL ? width : 0,
-    isL ? 0 : height
-  )
+  const isL = direction === "l"
+  const gradient = ctx.createLinearGradient(0, 0, isL ? width : 0, isL ? 0 : height)
   gradient.addColorStop(0.01, color1)
   gradient.addColorStop(0.99, color2)
   ctx.fillStyle = gradient
   ctx.fillRect(0, 0, width, height)
 }
 export function rgb2hex({ r, g, b }: any, toUpper: boolean) {
-  const change = (val: any) => ('0' + Number(val).toString(16)).slice(-2)
+  const change = (val: any) => ("0" + Number(val).toString(16)).slice(-2)
   const color = `#${change(r)}${change(g)}${change(b)}`
   return toUpper ? color.toUpperCase() : color
 }
@@ -64,8 +52,8 @@ export function hex2rgb(hex: any) {
   }
 }
 export function rgb2rgba(rgba: any) {
-  if (typeof rgba === 'string') {
-    rgba = (/rgba?\((.*?)\)/.exec(rgba) || ['', '0,0,0,1'])[1].split(',')
+  if (typeof rgba === "string") {
+    rgba = (/rgba?\((.*?)\)/.exec(rgba) || ["", "0,0,0,1"])[1].split(",")
     return {
       r: Number(rgba[0]) || 0,
       g: Number(rgba[1]) || 0,
