@@ -61,7 +61,15 @@
               牙套
               <BracesPanel ref="bracesPanelRef" :index="scope.$index" @changeBraces="updateBraces" />
             </el-checkbox>
-            <el-checkbox v-model="scope.row.processing.c" label="铜螺母" size="small" />
+            <el-checkbox
+              v-model="scope.row.nuts.status"
+              label="铜螺母"
+              size="small"
+              @change="handleChangeNuts($event, scope.$index)"
+            >
+              铜螺母
+              <NutsPanel ref="NutsPanelRef" :index="scope.$index" @changeNuts="updateNuts" />
+            </el-checkbox>
             <el-checkbox v-model="scope.row.grinding.status" size="small">
               {{ scope.row.grinding.status ? "精打磨 价格: " + scope.row.grinding.price + "元" : "精打磨" }}
             </el-checkbox>
@@ -114,7 +122,7 @@ import { Delete, CopyDocument, ShoppingCartFull } from "@element-plus/icons-vue"
 import XzzColorPicker from "../components/colorPicker/XzzColorPicker.vue"
 
 import { useMitt } from "../hooks/mitt"
-import BracesPanel from "../components/BracesPanel.vue"
+// import BracesPanel from "../components/BracesPanel.vue"
 // import PickColors from "vue-pick-colors"
 const { emitEvent } = useMitt("openPreview")
 
@@ -159,6 +167,11 @@ const tableData = ref([
       status: false,
       total: [],
       price: "23",
+    },
+    nuts: {
+      status: false,
+      price: "23",
+      total: [],
     },
     count: 1,
     deliveryTime: 0,
@@ -210,14 +223,16 @@ const bracesPanelRef = ref(null)
 const handleChangeBraces = (bool, index) => {
   // 拦截点击事件  不主动勾选
   tableData.value[index].braces.status = false
-  if (bool) {
-    // 打开面板 进行数据更改
-    bracesPanelRef.value && bracesPanelRef.value.handleOpen()
-  } else {
-    // 取消时 置空数据
-    bracesPanelRef.value && bracesPanelRef.value.handleOpen()
-  }
-  // tableData.value[index].braces. = bool
+  // 打开面板 进行数据更改
+  bracesPanelRef.value && bracesPanelRef.value.handleOpen()
+}
+
+const NutsPanelRef = ref(null)
+const handleChangeNuts = (bool, index) => {
+  // 拦截点击事件  不主动勾选
+  tableData.value[index].nuts.status = false
+  // 打开面板 进行数据更改
+  NutsPanelRef.value && NutsPanelRef.value.handleOpen()
 }
 const deleteItem = index => {
   tableData.value.splice(index, 1)
@@ -231,6 +246,12 @@ const updateBraces = msg => {
   const { index, total, status } = msg
   tableData.value[index].braces.total = total
   tableData.value[index].braces.status = status
+}
+
+const updateNuts = msg => {
+  const { index, total, status } = msg
+  tableData.value[index].nuts.total = total
+  tableData.value[index].nuts.status = status
 }
 </script>
 
