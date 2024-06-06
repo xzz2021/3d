@@ -6,7 +6,7 @@
 -->
 <template>
   <div class="container">
-    <el-dialog v-model="dialogVisible" width="780" draggable :append-to-body="true">
+    <el-dialog v-model="dialogVisible" width="780" draggable :append-to-body="true" top="5vh">
       <div class="title">填写铜螺母数量</div>
       <div class="content_box">
         <div class="select_box">
@@ -51,6 +51,8 @@
 </template>
 
 <script setup>
+import { triplanarTextures } from "three/examples/jsm/nodes/Nodes.js"
+
 const props = defineProps({
   index: {
     type: Number,
@@ -59,6 +61,7 @@ const props = defineProps({
 })
 
 const dialogVisible = ref(false)
+
 const nutsType = ref([
   { type: "M1.6*3", length: "4.5", diameter: "2.2", outerDiameter: "5.2", num: 0 },
   { type: "M2*2", length: "3.5", diameter: "3.2", outerDiameter: "6.2", num: 0 },
@@ -88,14 +91,6 @@ const confirm = () => {
   emit("changeNuts", { index: props.index, total, status })
 }
 
-const handleOpen = () => {
-  // 取消时 关闭 面板  并置空数据
-  dialogVisible.value = true
-  // nutsType.value.map(item => {
-  //   item.num = 0
-  // })
-}
-
 const handleClose = () => {
   // 取消时 关闭 面板  并置空数据
   dialogVisible.value = !true
@@ -109,7 +104,9 @@ const handleCancel = () => {
   })
   emit("changeNuts", { index: props.index, total: [], status: false })
 }
-
+const handleOpen = () => {
+  dialogVisible.value = true
+}
 defineExpose({ handleOpen })
 </script>
 

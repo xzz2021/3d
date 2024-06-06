@@ -86,17 +86,13 @@ const confirm = () => {
 }
 
 const handleOpen = () => {
-  // 取消时 关闭 面板  并置空数据
   dialogVisible.value = true
-  // bracesType.value.map(item => {
-  //   item.num = 0
-  // })
 }
 
-const handleClose = () => {
-  // 取消时 关闭 面板  并置空数据
-  dialogVisible.value = !true
-}
+// const handleClose = () => {
+//   // 取消时 关闭 面板  并置空数据
+//   dialogVisible.value = !true
+// }
 
 const handleCancel = () => {
   // 取消 需要把数据全部 置空
@@ -121,7 +117,7 @@ defineExpose({ handleOpen })
     display: flex;
     flex-direction: column;
     justify-content: space-around;
-    height: 250px;
+    // height: 250px;
     .num_box {
       display: flex;
       justify-content: space-between;

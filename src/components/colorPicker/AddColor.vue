@@ -6,7 +6,7 @@
 -->
 <template>
   <div class="container">
-    <p>已选择的颜色: {{ addList.c.length + addList.u.length }}</p>
+    <p>已选择的颜色: {{ colorSum }}</p>
     <div class="list_box">
       <p>亮光:</p>
       <el-scrollbar>
@@ -52,6 +52,8 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
+
 // const props = defineProps({
 //   addList: {
 //     type: Object,
@@ -87,6 +89,10 @@
 //     },
 //   },
 // })
+
+const colorSum = computed(() => {
+  return addList.value.c.length + addList.value.u.length
+})
 const addList = ref({
   c: [],
   u: [],
@@ -108,7 +114,7 @@ const closePopover = () => {
 const deleteItem = (type,item) => {
   addList.value[type] = addList.value[type].filter(i => i !== item)
 }
-defineExpose({ addItem })
+defineExpose({ addItem,colorSum })
 </script>
 
 <style lang="scss" scoped>

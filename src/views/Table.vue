@@ -41,7 +41,7 @@
           <div class="color_picker_box">
             <!-- <p>颜色: {{ scope.row.material.color.pantone }}</p> -->
             <!-- <pick-colors v-model:value="scope.row.material.color" /> -->
-            <XzzColorPicker v-model="scope.row.material.color" />
+            <!-- <XzzColorPicker v-model="scope.row.material.color" /> -->
           </div>
           <!-- </el-card>
             </template>
@@ -51,7 +51,16 @@
       <el-table-column label="表面处理" min-width="100">
         <template #default="scope">
           <div class="process_box">
-            <el-checkbox v-model="scope.row.processing.a" label="喷漆" size="small" />
+            <el-checkbox
+              v-model="scope.row.paint.status"
+              label="喷漆"
+              size="small"
+              @change="handleChangePicker($event, scope.$index)"
+            >
+              喷漆
+              <XzzColorPicker ref="colorPickerRef" @changePaint="bool => updatePaint(bool, scope.$index)" />
+            </el-checkbox>
+
             <el-checkbox
               v-model="scope.row.braces.status"
               label="牙套"
@@ -68,7 +77,7 @@
               @change="handleChangeNuts($event, scope.$index)"
             >
               铜螺母
-              <NutsPanel ref="NutsPanelRef" :index="scope.$index" @changeNuts="updateNuts" />
+              <NutsPanel ref="nutsPanelRef" :index="scope.$index" @changeNuts="updateNuts" />
             </el-checkbox>
             <el-checkbox v-model="scope.row.grinding.status" size="small">
               {{ scope.row.grinding.status ? "精打磨 价格: " + scope.row.grinding.price + "元" : "精打磨" }}
@@ -173,6 +182,10 @@ const tableData = ref([
       price: "23",
       total: [],
     },
+    paint: {
+      status: false,
+      price: "23",
+    },
     count: 1,
     deliveryTime: 0,
     rawPrice: 168,
@@ -219,6 +232,13 @@ const copyItem = item => {
   tableData.value.push(deepCopy)
 }
 
+const colorPickerRef = ref(null)
+
+const handleChangePicker = (bool, index) => {
+  tableData.value[index].paint.status = false
+  // 打开面板 进行数据更改
+  colorPickerRef.value && colorPickerRef.value.handleOpen()
+}
 const bracesPanelRef = ref(null)
 const handleChangeBraces = (bool, index) => {
   // 拦截点击事件  不主动勾选
@@ -227,12 +247,12 @@ const handleChangeBraces = (bool, index) => {
   bracesPanelRef.value && bracesPanelRef.value.handleOpen()
 }
 
-const NutsPanelRef = ref(null)
+const nutsPanelRef = ref(null)
 const handleChangeNuts = (bool, index) => {
   // 拦截点击事件  不主动勾选
   tableData.value[index].nuts.status = false
   // 打开面板 进行数据更改
-  NutsPanelRef.value && NutsPanelRef.value.handleOpen()
+  nutsPanelRef.value && nutsPanelRef.value.handleOpen()
 }
 const deleteItem = index => {
   tableData.value.splice(index, 1)
@@ -252,6 +272,10 @@ const updateNuts = msg => {
   const { index, total, status } = msg
   tableData.value[index].nuts.total = total
   tableData.value[index].nuts.status = status
+}
+
+const updatePaint = (bool, index) => {
+  tableData.value[index].paint.status = bool
 }
 </script>
 
