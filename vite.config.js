@@ -4,14 +4,14 @@ import vue from "@vitejs/plugin-vue"
 import AutoImport from "unplugin-auto-import/vite"
 import Components from "unplugin-vue-components/vite"
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers"
-
+import path from "path"
 // import postcssPresetEnv from "postcss-preset-env"
 
 export default defineConfig({
   plugins: [
     vue(),
     AutoImport({
-      imports: ["vue"],
+      imports: ["vue", "pinia"],
       resolvers: [ElementPlusResolver()],
     }),
     Components({
@@ -21,9 +21,9 @@ export default defineConfig({
   server: {
     open: true,
   },
-  // css: {
-  //   postcss: {
-  //     plugins: [postcssPresetEnv()],
-  //   },
-  // },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "src"),
+    },
+  },
 })

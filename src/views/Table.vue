@@ -133,6 +133,12 @@ import XzzColorPicker from "../components/colorPicker/XzzColorPicker.vue"
 import { useMitt } from "../hooks/mitt"
 // import BracesPanel from "../components/BracesPanel.vue"
 // import PickColors from "vue-pick-colors"
+import { useShopStore } from "@/pinia/shopTable.js"
+// 可以在组件中的任意位置访问 `store` 变量 ✨
+const store = useShopStore()
+
+const { tableData } = storeToRefs(store)
+
 const { emitEvent } = useMitt("openPreview")
 
 // const rawPrice = ref(168)
@@ -148,58 +154,6 @@ const handleSelectionChange = val => {
   console.log("🚀 ~ file: Table.vue:115 ~ val:", val)
   //  此处可以获得真实选择的数据  用于发送给购物车
 }
-const tableData = ref([
-  {
-    image: "https://img2.imgtp.com/2024/05/31/qBd2EEAr.png",
-    volume: 26.47,
-    material: {
-      name: "8200树脂",
-      img: "",
-      advantages: "高精度,高韧性, 高稳定性",
-      disAdvantages: "保存温度不宜超过60摄氏度",
-      color: {
-        hex: "#F4DA40",
-        pantone: "7404 C",
-      },
-      deviation: "±200微米或±0.2%",
-      price: 14.6,
-    },
-    processing: {
-      a: true,
-      b: false,
-    },
-    grinding: {
-      status: true,
-      price: "23",
-    },
-    braces: {
-      status: false,
-      total: [],
-      price: "23",
-    },
-    nuts: {
-      status: false,
-      price: "23",
-      total: [],
-    },
-    paint: {
-      status: false,
-      price: "23",
-    },
-    count: 1,
-    deliveryTime: 0,
-    rawPrice: 168,
-    finalPrice: 168,
-    operation: "",
-  },
-])
-
-// watch(tableData, (cur, prev) => {
-//   console.log("🚀 ~ file: Table.vue:128 ~ cur:", cur)
-//   // tableData.value.forEach((item, index) => {
-//   //   item.finalPrice = item.rawPrice + item.deliveryTime
-//   // })
-// })
 
 const materialOptions = [
   {
