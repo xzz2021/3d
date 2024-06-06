@@ -51,7 +51,7 @@
             </p>
           </div>
         </div>
-        <el-button type="primary">哑 光 U</el-button>
+        <el-button type="primary" color="#1e22aa">哑 光 U</el-button>
       </div>
     </div>
 

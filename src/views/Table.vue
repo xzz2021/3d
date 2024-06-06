@@ -52,9 +52,19 @@
         <template #default="scope">
           <div class="process_box">
             <el-checkbox v-model="scope.row.processing.a" label="喷漆" size="small" />
-            <el-checkbox v-model="scope.row.processing.b" label="牙套" size="small" />
+            <el-checkbox
+              v-model="scope.row.braces.status"
+              label="牙套"
+              size="small"
+              @change="handleChangeBraces($event, scope.$index)"
+            >
+              牙套
+              <BracesPanel ref="bracesPanelRef" :index="scope.$index" @changeBraces="updateBraces" />
+            </el-checkbox>
             <el-checkbox v-model="scope.row.processing.c" label="铜螺母" size="small" />
-            <el-checkbox v-model="scope.row.processing.d" label="精打磨" size="small" />
+            <el-checkbox v-model="scope.row.grinding.status" size="small">
+              {{ scope.row.grinding.status ? "精打磨 价格: " + scope.row.grinding.price + "元" : "精打磨" }}
+            </el-checkbox>
           </div>
         </template>
       </el-table-column>
@@ -99,11 +109,12 @@
 
 <script setup>
 import { Delete, CopyDocument, ShoppingCartFull } from "@element-plus/icons-vue"
-import { ref, watch } from "vue"
+// import { ref, watch } from "vue"
 
 import XzzColorPicker from "../components/colorPicker/XzzColorPicker.vue"
 
 import { useMitt } from "../hooks/mitt"
+import BracesPanel from "../components/BracesPanel.vue"
 // import PickColors from "vue-pick-colors"
 const { emitEvent } = useMitt("openPreview")
 
@@ -139,7 +150,15 @@ const tableData = ref([
     processing: {
       a: true,
       b: false,
-      c: true,
+    },
+    grinding: {
+      status: true,
+      price: "23",
+    },
+    braces: {
+      status: false,
+      total: [],
+      price: "23",
     },
     count: 1,
     deliveryTime: 0,
@@ -149,12 +168,12 @@ const tableData = ref([
   },
 ])
 
-watch(tableData, (cur, prev) => {
-  console.log("🚀 ~ file: Table.vue:128 ~ cur:", cur)
-  // tableData.value.forEach((item, index) => {
-  //   item.finalPrice = item.rawPrice + item.deliveryTime
-  // })
-})
+// watch(tableData, (cur, prev) => {
+//   console.log("🚀 ~ file: Table.vue:128 ~ cur:", cur)
+//   // tableData.value.forEach((item, index) => {
+//   //   item.finalPrice = item.rawPrice + item.deliveryTime
+//   // })
+// })
 
 const materialOptions = [
   {
@@ -183,17 +202,35 @@ const visibleChange = bool => {}
 const visibleChange2 = bool => {}
 
 const copyItem = item => {
-  // console.log("🚀 ~ file: Table.vue:129 ~ item:", item)
   const deepCopy = JSON.parse(JSON.stringify(item))
   tableData.value.push(deepCopy)
 }
 
+const bracesPanelRef = ref(null)
+const handleChangeBraces = (bool, index) => {
+  // 拦截点击事件  不主动勾选
+  tableData.value[index].braces.status = false
+  if (bool) {
+    // 打开面板 进行数据更改
+    bracesPanelRef.value && bracesPanelRef.value.handleOpen()
+  } else {
+    // 取消时 置空数据
+    bracesPanelRef.value && bracesPanelRef.value.handleOpen()
+  }
+  // tableData.value[index].braces. = bool
+}
 const deleteItem = index => {
   tableData.value.splice(index, 1)
 }
 
 const openPreview = () => {
   emitEvent()
+}
+
+const updateBraces = msg => {
+  const { index, total, status } = msg
+  tableData.value[index].braces.total = total
+  tableData.value[index].braces.status = status
 }
 </script>
 
