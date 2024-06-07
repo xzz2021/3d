@@ -301,23 +301,39 @@ const createShell = (geometry, offset) => {
 
   return shellGeometry
 }
-const animate = () => {
+const animate = time => {
+  // time 默认为1秒时长
   // if (!WebGL.isWebGLAvailable()) {
   //   //  webgl支持检查
   //   const warning = WebGL.getWebGLErrorMessage()
   //   container.value.appendChild(warning)
   //   return
   // }
+  //显示屏每一帧 执行一次
+  // 由于性能或运行差异 每一帧相隔的时间不一样
+  //  需要匀速的话 使用 conts t = time /60 根据时间 精确控制动画
+
   requestAnimationFrame(animate)
+  //requestAnimationFrame 是浏览器提供的一个方法，用来在下一次重绘前调用指定的回调函数 render。
+  //  这会创建一个递归调用，使得 render 函数在每一帧都被调用，从而实现连续的动画效果。
+
+  // ★★★★  控制循环 厉害的方法 ★★★★ ===>  let t = a % 5; 每5秒  循环回到0
+
+  /*
+  let time = new THREE.Clock().getElapsedTime()
+  //  两次获取时间的间隔 
+  */
 
   if (mesh && camera.value) {
-    controls.update() // 更新控制器
+    controls.update() // enableDamping 启用阻尼效果 必须更新控制器
     // 使点光源跟随相机
     const vector = camera.value.position.clone()
     pointLight.position.set(vector.x, vector.y, vector.z) //点光源位置
     //主场景
     renderer.setViewport(0, 0, 600, 600) //主场景视区
     renderer.autoClear = false //【scene.autoClear一定要关闭】
+    // 显示器每刷新一次就重新render一次  相当于实时刷新渲染的场景
+    // 也就是这里定义的方法 会随显示屏每一帧刷新率而刷新
     renderer.render(scene, camera.value)
     // 旋转
     // viewBox.rotation.x += 0.01;

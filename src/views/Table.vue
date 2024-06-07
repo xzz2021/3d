@@ -151,7 +151,7 @@ const handleChange2 = (val, index) => {
 }
 
 const handleSelectionChange = val => {
-  console.log("🚀 ~ file: Table.vue:115 ~ val:", val)
+  // console.log("🚀 ~ file: Table.vue:115 ~ val:", val)
   //  此处可以获得真实选择的数据  用于发送给购物车
 }
 

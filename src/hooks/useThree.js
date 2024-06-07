@@ -345,7 +345,7 @@ export const useThree = () => {
       controls = new OrbitControls(camera, dom)
     }
     // controls.size = 20
-    controls.enableDamping = true // 启用阻尼效果
+    controls.enableDamping = true // 启用阻尼效果  必须调用update()
     controls.dampingFactor = 0.25 // 阻尼系数
     controls.enableZoom = true // 启用缩放
     // controls.enablePan = !true;
@@ -801,6 +801,7 @@ export const useThree = () => {
       })
 
     gui.add(plane, "constant", -30, 30).name("剖面图")
+    gui.addColor({ color: 0xffff00 }, "color").name("颜色")
   }
 
   const changeFace = (camera, i) => {
@@ -922,7 +923,15 @@ export const useThree = () => {
     controls.autoRotateSpeed = 6
     controls.autoRotate = controls?.autoRotate ? false : true
   }
-
+  const toggleFullScreen = renderer => {
+    // 切换 全屏 展示  控制canvas
+    const fullScreenElement = document.fullscreenElement || document.webkitFullscreenElement
+    if (!fullScreenElement) {
+      renderer.domElement.requestFullscreen()
+    } else {
+      renderer.domElement.exitFullscreen()
+    }
+  }
   //  检查是否要调整renderer   因为renderer要和canvas大小一致
   const resizeRendererToDisplaySize = renderer => {
     const canvas = renderer.domElement
