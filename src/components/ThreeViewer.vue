@@ -135,7 +135,7 @@ const loadModel = async (path, type) => {
       const simpleArr = ["obj", "dae", "3ds"]
       const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256)
       cubeRenderTarget.texture.type = THREE.HalfFloatType
-      let material = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1, roughness: 0 })
+      let material = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0, roughness: 1 })
       // let material = new THREE.MeshPhongMaterial({ color: 0xff5533, specular: 0x555555, shininess: 30 })
       mesh = simpleArr.includes(type) ? geometry.scene || geometry : new THREE.Mesh(geometry, material)
 
@@ -254,7 +254,7 @@ const commonFn = material => {
 
   camera.value = createCarmera(size, center, mesh.up) // 创建相机
 
-  addGui(mesh, material)
+  // addGui(mesh, material)
 
   addEnvironment()
   // addFaceGui(camera)

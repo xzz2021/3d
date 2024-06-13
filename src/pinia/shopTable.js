@@ -7,8 +7,9 @@ export const useShopStore = defineStore("shopStore", () => {
   // 其他配置...
   const tableData = ref([
     {
-      image: "https://img2.imgtp.com/2024/05/31/qBd2EEAr.png",
+      image: "",
       volume: 26.47,
+      rawPrice: 168,
       material: {
         name: "8200树脂",
         img: "",
@@ -20,10 +21,6 @@ export const useShopStore = defineStore("shopStore", () => {
         },
         deviation: "±200微米或±0.2%",
         price: 14.6,
-      },
-      processing: {
-        a: true,
-        b: false,
       },
       grinding: {
         status: true,
@@ -45,9 +42,7 @@ export const useShopStore = defineStore("shopStore", () => {
       },
       count: 1,
       deliveryTime: 0,
-      rawPrice: 168,
       finalPrice: 168,
-      operation: "",
     },
   ])
 

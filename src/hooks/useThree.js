@@ -801,7 +801,21 @@ export const useThree = () => {
       })
 
     gui.add(plane, "constant", -30, 30).name("剖面图")
-    gui.addColor({ color: 0xffff00 }, "color").name("颜色")
+    const params = {
+      color: 0xffff00,
+      fn: () => {
+        gsap.to(cube.position, { x: 5, duration: 2, yoyo: true, repeat: -1 })
+      },
+    }
+
+    gui.addColor(params, "color").name("颜色")
+
+    // 添加函数 点击执行
+    // gui.addColor(params, "fn").name("运动")
+
+    // 添加文件夹
+    // const folder = gui.addFolder('设置文件夹')
+    // folder.add(params, 'fn').name('运动')
   }
 
   const changeFace = (camera, i) => {
