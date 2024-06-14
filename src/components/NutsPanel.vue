@@ -51,8 +51,6 @@
 </template>
 
 <script setup>
-import { triplanarTextures } from "three/examples/jsm/nodes/Nodes.js"
-
 const props = defineProps({
   index: {
     type: Number,

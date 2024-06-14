@@ -7,10 +7,21 @@
 <template>
   <div class="table_container">
     <el-table :data="tableData" height="300" style="width: 100%" stripe border @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" />
+      <!-- <el-table-column type="selection" width="55" /> -->
       <el-table-column label="文件预览" width="180">
         <template #default="scope">
-          <el-image style="width: 100px; height: 100px; cursor: pointer" :src="scope.row.image" fit="fill" @click="openPreview" />
+          <el-image
+            style="width: 100px; height: 100px; cursor: pointer"
+            :src="scope.row.imageUrl"
+            fit="fill"
+            @click="openPreview(scope.$index)"
+          >
+            <template #error>
+              <div class="image-slot">
+                <el-icon><icon-picture /></el-icon>
+              </div>
+            </template>
+          </el-image>
         </template>
       </el-table-column>
       <el-table-column label="材料" width="180">
@@ -126,11 +137,13 @@
 
 <script setup>
 import { Delete, CopyDocument, ShoppingCartFull } from "@element-plus/icons-vue"
+import { Picture as IconPicture } from "@element-plus/icons-vue"
 // import { ref, watch } from "vue"
 
 import XzzColorPicker from "../components/colorPicker/XzzColorPicker.vue"
 
 import { useMitt } from "../hooks/mitt"
+
 // import BracesPanel from "../components/BracesPanel.vue"
 // import PickColors from "vue-pick-colors"
 import { useShopStore } from "@/pinia/shopTable.js"
@@ -138,8 +151,9 @@ import { useShopStore } from "@/pinia/shopTable.js"
 const store = useShopStore()
 
 const { tableData } = storeToRefs(store)
+// const { updateImgUrl } = store
 
-const { emitEvent } = useMitt("openPreview")
+const { onEvent, emitEvent } = useMitt()
 
 // const rawPrice = ref(168)
 // const finalPrice =
@@ -212,8 +226,12 @@ const deleteItem = index => {
   tableData.value.splice(index, 1)
 }
 
-const openPreview = () => {
-  emitEvent()
+const openPreview = index => {
+  // onEvent("screenshot", url => {
+  //   updateImgUrl(index, url)
+  // })
+  // console.log("🚀 ~ file: Table.vue:233 ~ url:", url)
+  emitEvent("openPreview")
 }
 
 const updateBraces = msg => {
@@ -289,5 +307,19 @@ const updatePaint = (bool, index) => {
   display: flex;
   align-items: center;
   justify-content: space-around;
+}
+
+.image-slot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background: var(--el-fill-color-light);
+  color: var(--el-text-color-secondary);
+  font-size: 30px;
+  .image-slot .el-icon {
+    font-size: 30px;
+  }
 }
 </style>

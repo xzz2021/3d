@@ -20,6 +20,8 @@ import { TransformControls } from "three/addons/controls/TransformControls.js"
 
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js"
 
+// import  occtimportjs  from "occt-import-js"
+
 // threejs 内置了lil-gui  不需要引入其他模块
 import { GUI } from "three/examples/jsm/libs/lil-gui.module.min.js"
 export const useThree = () => {
@@ -32,7 +34,12 @@ export const useThree = () => {
 
   // let d = 75 // 控制视锥的尺寸  //  控制相机与模型中心的距离
   // let camera = new THREE.OrthographicCamera(-d, d, d, -d, 1, 1000);
-  let renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance", logarithmicDepthBuffer: true })
+  let renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    powerPreference: "high-performance",
+    logarithmicDepthBuffer: true,
+    // preserveDrawingBuffer: true,
+  })
   // let controls =  new OrbitControls(camera, renderer.domElement)
   let gridHelper, savedPosition, savedRotation, controls, savedTarget, savedZoom, gui
 

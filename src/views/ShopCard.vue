@@ -21,7 +21,7 @@
           元
         </p>
         <!-- <div> -->
-        <el-button color="#409eff" size="large" :icon="ShoppingCart" style="color: aliceblue">加入购物车</el-button>
+        <el-button color="#409eff" size="large" :icon="Goods" style="color: aliceblue" @click="goToCheckout">去结算</el-button>
         <!-- <el-button color="#d72242" size="large" style="width: 110px">去结算</el-button> -->
         <!-- </div> -->
         <p>预计发货时间: 2024-06-01 前发货</p>
@@ -32,11 +32,15 @@
 
 <script setup>
 import { useShopStore } from "@/pinia/shopTable.js"
-import { ShoppingCart } from "@element-plus/icons-vue"
+import { Goods } from "@element-plus/icons-vue"
 // 可以在组件中的任意位置访问 `store` 变量 ✨
 const store = useShopStore()
 
 const { totalPrice, sum, productNum } = storeToRefs(store)
+
+const goToCheckout = () => {
+  window.location.href = window.location.origin + "/shop/cart"
+}
 </script>
 
 <style lang="scss" scoped>

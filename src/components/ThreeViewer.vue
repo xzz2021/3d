@@ -9,6 +9,7 @@
         <AxisLine v-show="mesh" :camera2="camera" @backCarmera="backCarmera" @totastMesh="totastMesh(controls)" />
       </div>
       <button v-show="mesh" id="button" @click="toggleLabel">{{ labelStatus ? "开启" : "关闭" }}三维信息</button>
+
       <!-- 
     <div>模型信息:</div>
     <div>长: {{ modelView.height }}</div>
@@ -35,11 +36,16 @@ import { calVolume } from "../utils/calVolume.js"
 import { useMitt } from "../hooks/mitt"
 import { FullScreen } from "@element-plus/icons-vue"
 // import { checkThickness } from "../utils/checkThickness.js"
+
+import { useShopStore } from "@/pinia/shopTable.js"
+// 可以在组件中的任意位置访问 `store` 变量 ✨
+const store = useShopStore()
+const { updateImgUrl } = store
 const isFullscreen = ref(false)
 const toggleFullscreen = () => {
   isFullscreen.value = !isFullscreen.value
 }
-
+// let imgUrl = ref("")
 const dialogRef = ref(null)
 onMounted(() => {
   // dialogRef.value.rendered = ture
@@ -60,8 +66,8 @@ const props = defineProps({
 const dialogTableVisible = ref(true)
 
 const dialogOpen = ref(false)
-const { onEvent, emitEvent } = useMitt("openPreview")
-onEvent(() => {
+const { onEvent, emitEvent } = useMitt()
+onEvent("openPreview", () => {
   dialogTableVisible.value = true
   dialogOpen.value = true
 })
@@ -242,11 +248,6 @@ const commonFn = material => {
   const { box, center, size } = getMeshAndSize(mesh)
   // createGridHelper(size)   // 创建网格底座
 
-  addAxes(size) // 添加轴辅助器  原点坐标指示
-
-  // 添加可视化包围盒
-  labelArr = addBox(mesh)
-
   // createLight(size) // 添加光源
 
   // 添加一个跟随相机的点光源 此处必须添加
@@ -260,6 +261,7 @@ const commonFn = material => {
   // addFaceGui(camera)
 
   scene.add(mesh)
+
   // const aa = getThickness(center, new THREE.Vector3(100, 100, 100), model)
   // console.log("🚀 ~ file: ThreeViewer.vue:208 ~ loadModel ~ aa:", aa)
 
@@ -268,10 +270,14 @@ const commonFn = material => {
   // 有了渲染器之后   一定要先创建相机   再创建控制器
   controls = createControls(camera.value, renderer.domElement)
   container.value.appendChild(renderer.domElement) // 挂载
+  captureScreenshot()
+  addAxes(size) // 添加轴辅助器  原点坐标指示
 
+  // 添加可视化包围盒
+  labelArr = addBox(mesh)
   // addArrow()
   closeLoading()
-  emitEvent()
+  emitEvent("openPreview")
 
   animate()
   // const helper33 = new VertexNormalsHelper(mesh, 2, 0x00ff00, 1)
@@ -332,6 +338,8 @@ const animate = time => {
     //主场景
     renderer.setViewport(0, 0, 600, 600) //主场景视区
     renderer.autoClear = false //【scene.autoClear一定要关闭】
+
+    // renderer.autoClearColor = false
     // 显示器每刷新一次就重新render一次  相当于实时刷新渲染的场景
     // 也就是这里定义的方法 会随显示屏每一帧刷新率而刷新
     renderer.render(scene, camera.value)
@@ -366,6 +374,14 @@ const toggleLabel = () => {
 
 // 一键还原模型初始状态
 const autoBack = () => {}
+
+const captureScreenshot = () => {
+  renderer.render(scene, camera.value)
+  const dataURL = renderer.domElement.toDataURL("image/jpeg")
+  // imgUrl.value = dataURL
+  updateImgUrl(0, dataURL)
+  // emitEvent("screenshot", dataURL)
+}
 
 // const onWindowResize = () => {
 //   console.log("🚀 ~ file: ThreeViewer.vue:338 ~ container:", container.clientWidth)

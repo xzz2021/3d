@@ -3,16 +3,16 @@ import { onUnmounted } from "vue"
 
 const emitter = mitt()
 
-export const useMitt = name => {
-  const emitEvent = (...args) => {
+export const useMitt = () => {
+  const emitEvent = (name, ...args) => {
     emitter.emit(name, ...args)
   }
 
-  const onEvent = callback => {
+  const onEvent = (name, callback) => {
     emitter.on(name, callback)
   }
 
-  onUnmounted(() => emitter.off(name))
+  // onUnmounted(() => emitter.off(name))
   return {
     emitEvent,
     onEvent,

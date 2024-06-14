@@ -7,7 +7,7 @@ export const useShopStore = defineStore("shopStore", () => {
   // 其他配置...
   const tableData = ref([
     {
-      image: "",
+      imageUrl: "",
       volume: 26.47,
       rawPrice: 168,
       material: {
@@ -65,10 +65,15 @@ export const useShopStore = defineStore("shopStore", () => {
     return tableData.value.length
   })
 
+  const updateImgUrl = (index, url) => {
+    tableData.value[index].imageUrl = url
+  }
+
   return {
     tableData,
     totalPrice,
     sum,
     productNum,
+    updateImgUrl,
   }
 })
