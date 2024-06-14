@@ -25,15 +25,15 @@
 <script setup>
 import { ref, onMounted } from "vue"
 import * as THREE from "three"
-import { useThree } from "../hooks/useThree.js"
-import { useFace } from "../hooks/useFace.js"
-import { useLoading } from "../hooks/useLoading.js"
+import { useThree } from "@/hooks/useThree.js"
+import { useFace } from "@/hooks/useFace.js"
+import { useLoading } from "@/hooks/useLoading.js"
 
 import AxisLine from "./AxisLine.vue"
 
-import { calVolume } from "../utils/calVolume.js"
+import { calVolume } from "@/utils/calVolume.js"
 // import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper.js"
-import { useMitt } from "../hooks/mitt"
+import { useMitt } from "@/hooks/mitt.js"
 import { FullScreen } from "@element-plus/icons-vue"
 // import { checkThickness } from "../utils/checkThickness.js"
 

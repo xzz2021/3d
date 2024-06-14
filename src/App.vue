@@ -1,8 +1,8 @@
 <script setup>
-import Steps from "./views/Steps.vue"
-import Table from "./views/Table.vue"
-import Upload from "./components/Upload.vue"
-import ShopCard from "./views/ShopCard.vue"
+import Steps from "@/views/Steps.vue"
+import Table from "@/views/Table.vue"
+import Upload from "@/views/Upload.vue"
+import ShopCard from "@/views/ShopCard.vue"
 </script>
 
 <template>

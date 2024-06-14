@@ -1,6 +1,6 @@
 <template>
   <el-upload
-    ref="uploadForm"
+    ref="uploadFormRef"
     drag
     action=""
     :limit="1"
@@ -18,13 +18,12 @@
       <p>不同格式文件，材料费用计算可能有所偏差,建议优先选择STL</p>
     </div>
   </el-upload>
-
   <three-viewer :model-path="modelPath" :model-type="modelType" ref="threeRef"></three-viewer>
 </template>
 <script setup>
-import ThreeViewer from "./ThreeViewer.vue"
-import { useUpload } from "../hooks/useUpload"
+import ThreeViewer from "@/components/modelViewer/ThreeViewer.vue"
+import { useUpload } from "@/hooks/useUpload"
 import { UploadFilled } from "@element-plus/icons-vue"
-const { onUpload, modelPath, modelType, threeRef, uploadForm } = useUpload()
+const { onUpload, modelPath, modelType, threeRef, uploadFormRef } = useUpload()
 </script>
 <style scoped lang="scss"></style>

@@ -5,7 +5,7 @@ const getFileType = fileName => {
   return fileExtension
 }
 export const useUpload = () => {
-  const uploadForm = ref(null)
+  const uploadFormRef = ref(null)
   const forgeRef = ref(null)
   const modelName = ref("")
   const modelPath = ref("")
@@ -22,23 +22,22 @@ export const useUpload = () => {
     clearFiles()
     modelName.value = file.name
     const filePath = URL.createObjectURL(file.raw)
-    // forgeRef.value.init(file)
-    // return
     const model = {
       filePath,
       fileType: getFileType(file.name),
     }
     modelType.value = model.fileType
     modelPath.value = filePath
+    // 触发模型加载
     updateModel(model)
   }
   const clearFiles = () => {
-    uploadForm.value && uploadForm.value.clearFiles()
+    uploadFormRef.value && uploadFormRef.value.clearFiles()
     // threeRef.value && threeRef.value.clearMesh()
   }
   return {
     onUpload,
-    uploadForm,
+    uploadFormRef,
     modelType,
     modelPath,
     threeRef,
