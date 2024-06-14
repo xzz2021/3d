@@ -5,46 +5,8 @@ import { defineStore } from "pinia"
 // 第一个参数是你的应用中 Store 的唯一 ID。
 export const useShopStore = defineStore("shopStore", () => {
   // 其他配置...
-  const tableData = ref([
-    {
-      imageUrl: "",
-      volume: 26.47,
-      rawPrice: 168,
-      material: {
-        name: "8200树脂",
-        img: "",
-        advantages: "高精度,高韧性, 高稳定性",
-        disAdvantages: "保存温度不宜超过60摄氏度",
-        color: {
-          hex: "#F4DA40",
-          pantone: "7404 C",
-        },
-        deviation: "±200微米或±0.2%",
-        price: 14.6,
-      },
-      grinding: {
-        status: true,
-        price: "23",
-      },
-      braces: {
-        status: false,
-        total: [],
-        price: "23",
-      },
-      nuts: {
-        status: false,
-        price: "23",
-        total: [],
-      },
-      paint: {
-        status: false,
-        price: "23",
-      },
-      count: 1,
-      deliveryTime: 0,
-      finalPrice: 168,
-    },
-  ])
+
+  const tableData = ref([])
 
   const totalPrice = computed(() => {
     let price = 0
@@ -69,11 +31,22 @@ export const useShopStore = defineStore("shopStore", () => {
     tableData.value[index].imageUrl = url
   }
 
+  const addItem = rawData => {
+    tableData.value.push(JSON.parse(JSON.stringify(rawData)))
+  }
+
+  const IsExist = filePath => {
+    // modelFileInfo.filePath
+    return tableData.value.some(item => item.modelFileInfo.filePath === filePath)
+  }
+
   return {
     tableData,
     totalPrice,
     sum,
     productNum,
     updateImgUrl,
+    addItem,
+    IsExist,
   }
 })

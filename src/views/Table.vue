@@ -14,7 +14,7 @@
             style="width: 100px; height: 100px; cursor: pointer"
             :src="scope.row.imageUrl"
             fit="fill"
-            @click="openPreview(scope.$index)"
+            @click="openPreview(scope.row.modelFileInfo)"
           >
             <template #error>
               <div class="image-slot">
@@ -226,12 +226,8 @@ const deleteItem = index => {
   tableData.value.splice(index, 1)
 }
 
-const openPreview = index => {
-  // onEvent("screenshot", url => {
-  //   updateImgUrl(index, url)
-  // })
-  // console.log("🚀 ~ file: Table.vue:233 ~ url:", url)
-  emitEvent("openPreview")
+const openPreview = modelFileInfo => {
+  emitEvent("openPreview", modelFileInfo)
 }
 
 const updateBraces = msg => {
