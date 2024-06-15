@@ -28,6 +28,7 @@ export const useThree = () => {
   // const winW = window.innerWidth
   // const winH = window.innerHeight
   let scene = new THREE.Scene()
+  // scene.background = new THREE.Color(0x8c8aff) //  设置场景的背景色0x8c8aff
   scene.background = new THREE.Color(0xf2f2f2) //  设置场景的背景色0x8c8aff
 
   // let d = 75 // 控制视锥的尺寸  //  控制相机与模型中心的距离

@@ -118,7 +118,7 @@ const loadModel = async modelFileInfo => {
       const simpleArr = ["obj", "dae", "3ds"]
       const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256)
       cubeRenderTarget.texture.type = THREE.HalfFloatType
-      let material = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0, roughness: 1 })
+      let material = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.4, roughness: 0.3 })
       // let material = new THREE.MeshPhongMaterial({ color: 0xff5533, specular: 0x555555, shininess: 30 })
       mesh = simpleArr.includes(fileType) ? geometry.scene || geometry : new THREE.Mesh(geometry, material)
       commonFn(material, modelFileInfo)
@@ -141,7 +141,7 @@ const commonFn = (material, modelFileInfo) => {
   const { box, center, size } = getMeshAndSize(mesh)
   // createGridHelper(size)   // 创建网格底座
 
-  // createLight(size) // 添加光源
+  createLight(size) // 添加光源
 
   // 添加一个跟随相机的点光源 此处必须添加
   pointLight = addLightOfCamera()
@@ -150,8 +150,15 @@ const commonFn = (material, modelFileInfo) => {
 
   // addGui(mesh, material)
 
-  addEnvironment()
+  // addEnvironment()
   // addFaceGui(camera)
+  mesh.traverse(function (child) {
+    if (child.isMesh) {
+      const edges = new THREE.EdgesGeometry(child.geometry)
+      const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000 }))
+      child.add(line)
+    }
+  })
 
   scene.add(mesh)
 
@@ -161,10 +168,10 @@ const commonFn = (material, modelFileInfo) => {
   controls = createControls(camera.value, renderer.domElement)
   containerRef.value.appendChild(renderer.domElement) // 挂载
   // captureScreenshot()
-  addAxes(size) // 添加轴辅助器  原点坐标指示
+  // addAxes(size) // 添加轴辅助器  原点坐标指示
 
   // 添加可视化包围盒
-  labelArr = addBox(mesh)
+  // labelArr = addBox(mesh)
   // addArrow()
   closeLoading()
 
