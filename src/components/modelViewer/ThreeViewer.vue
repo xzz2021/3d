@@ -16,7 +16,7 @@
       <div ref="containerRef" id="threecontainer">
         <AxisLine v-show="mesh" :camera2="camera" @backCarmera="backCarmera" @totastMesh="totastMesh(controls)" />
       </div>
-      <button v-show="mesh" id="button" @click="toggleLabel">{{ labelStatus ? "开启" : "关闭" }}三维信息</button>
+      <!-- <button v-show="mesh" id="button" @click="toggleLabel">{{ labelStatus ? "开启" : "关闭" }}三维信息</button> -->
     </el-dialog>
   </div>
 </template>
@@ -152,13 +152,15 @@ const commonFn = (material, modelFileInfo) => {
 
   // addEnvironment()
   // addFaceGui(camera)
-  mesh.traverse(function (child) {
-    if (child.isMesh) {
-      const edges = new THREE.EdgesGeometry(child.geometry)
-      const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000 }))
-      child.add(line)
-    }
-  })
+  // mesh.traverse(function (child) {
+  //   if (child.isMesh) {
+  //     const edges = new THREE.EdgesGeometry(child.geometry)
+  //     const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000 }))
+  //     child.add(line)
+  //   }
+  // })
+
+  // scene.background = new THREE.Color( 0xAAAAAA );
 
   scene.add(mesh)
 
@@ -194,7 +196,7 @@ const getInfoAndPushItem = (box, modelFileInfo) => {
   // 获取预览图片
   renderer.render(scene, camera.value)
   const imageUrl = renderer.domElement.toDataURL("image/jpeg")
-  const newItem = { ...RAWDATA, ...allInfo, imageUrl, modelFileInfo }
+  const newItem = { ...RAWDATA, ...allInfo, imageUrl, modelFileInfo, ...modelFileInfo.resData }
   addItem(newItem)
 }
 const animate = () => {

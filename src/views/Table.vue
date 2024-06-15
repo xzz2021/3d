@@ -100,7 +100,7 @@
       <el-table-column label="数量" min-width="105">
         <template #default="scope">
           <el-input-number
-            v-model="scope.row.count"
+            v-model="scope.row.count.val"
             :min="1"
             :max="10"
             @change="handleChange1($event, scope.$index)"
@@ -110,11 +110,26 @@
       </el-table-column>
       <el-table-column prop="deliveryTime" label="交期">
         <template #default="scope">
-          <el-radio-group v-model="scope.row.deliveryTime" @change="handleChange2($event, scope.$index)">
-            <el-radio :value="0" size="small" border>24小时</el-radio>
-            <el-radio :value="22" size="small" border>48小时</el-radio>
-            <el-radio :value="33" size="small" border>72小时</el-radio>
-          </el-radio-group>
+          <!-- <el-radio-group v-model="scope.row.deliveryTime" @change="handleChange2($event, scope.$index)">
+            <el-radio :value="{ name: '交期', key: 'deliveryTime', price: 0, value: 0 }" size="small" border>24小时</el-radio>
+            <el-radio :value="{ name: '交期', key: 'deliveryTime', price: 23, value: 23 }" size="small" border>48小时</el-radio>
+            <el-radio :value="{ name: '交期', key: 'deliveryTime', price: 56, value: 56 }" size="small" border>72小时</el-radio>
+          </el-radio-group> -->
+          <!-- <el-checkbox-group v-model="scope.row.deliveryTime" size="small" :max="1">
+            <el-checkbox label="24小时" :value="{ name: '交期', key: 'deliveryTime', price: 0, value: '24小时' }" border />
+            <el-checkbox label="48小时" :value="{ name: '交期', key: 'deliveryTime', price: 23, value: '48小时' }" border />
+            <el-checkbox label="72小时" :value="{ name: '交期', key: 'deliveryTime', price: 56, value: '48小时' }" border />
+          </el-checkbox-group> -->
+
+          <el-select
+            v-model="scope.row.deliveryTime"
+            placeholder="Select"
+            @change="handleChange2($event, scope.$index)"
+            style="width: 100px"
+            value-key="val"
+          >
+            <el-option v-for="item in deliveryTimeArr" :key="item.val" :label="item.val" :value="item" />
+          </el-select>
         </template>
       </el-table-column>
       <el-table-column label="价格">
@@ -125,7 +140,9 @@
       <el-table-column prop="operation" label="操作">
         <template #default="scope">
           <div class="operateBox">
-            <el-button type="primary" :icon="ShoppingCartFull" circle></el-button>
+            <!-- <el-badge :value="scope.row." class="item">
+            </el-badge> -->
+            <el-button type="primary" :icon="ShoppingCartFull" circle @click="addToCart(scope.row)"></el-button>
             <el-button type="success" style="margin-left: 0" :icon="CopyDocument" circle @click="copyItem(scope.row)"></el-button>
             <el-button type="danger" style="margin-left: 0" :icon="Delete" circle @click="deleteItem(scope.$index)"></el-button>
           </div>
@@ -155,13 +172,18 @@ const { tableData } = storeToRefs(store)
 
 const { onEvent, emitEvent } = useMitt()
 
+const deliveryTimeArr = ref([
+  { name: "交期", key: "deliveryTime", price: 0, val: "24小时" },
+  { name: "交期", key: "deliveryTime", price: 23, val: "48小时" },
+  { name: "交期", key: "deliveryTime", price: 56, val: "72小时" },
+])
 // const rawPrice = ref(168)
 // const finalPrice =
-const handleChange1 = (val, index) => {
-  tableData.value[index].finalPrice = (tableData.value[index].rawPrice + tableData.value[index].deliveryTime) * val
+const handleChange1 = (count, index) => {
+  tableData.value[index].finalPrice = (tableData.value[index].rawPrice + tableData.value[index].deliveryTime.price) * count
 }
 const handleChange2 = (val, index) => {
-  tableData.value[index].finalPrice = (tableData.value[index].rawPrice + val) * tableData.value[index].count
+  tableData.value[index].finalPrice = (tableData.value[index].rawPrice + val.price) * tableData.value[index].count.val
 }
 
 const handleSelectionChange = val => {
@@ -244,6 +266,38 @@ const updateNuts = msg => {
 
 const updatePaint = (bool, index) => {
   tableData.value[index].paint.status = bool
+}
+
+const addToCart = async item => {
+  const { count, finalPrice, product_tmpl_id, product_id, file_url, imageUrl, volume, rawPrice, modelFileInfo, ...restParams } =
+    item
+  const variant_info = []
+  Object.values(restParams).forEach(value => {
+    if (value.status != false) {
+      variant_info.push(value)
+    }
+  })
+  const response = await fetch("/shop/cart/update_json", {
+    method: "POST",
+    body: {
+      params: {
+        product_id: 0,
+        product_list: [
+          {
+            product_tmpl_id,
+            product_id,
+            file_url,
+            price: finalPrice,
+            add_qty: count.val,
+            set_qty: null,
+            variant_info,
+          },
+        ],
+      },
+    },
+  })
+  if (response.ok) {
+  }
 }
 </script>
 

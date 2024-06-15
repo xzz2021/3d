@@ -19,7 +19,7 @@ export const useShopStore = defineStore("shopStore", () => {
   const sum = computed(() => {
     let sum = 0
     tableData.value.forEach(item => {
-      sum += item.count
+      sum += item.count.val
     })
     return sum
   })

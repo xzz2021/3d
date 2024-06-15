@@ -42,21 +42,25 @@ export const useThree = () => {
   // let controls =  new OrbitControls(camera, renderer.domElement)
   let gridHelper, savedPosition, savedRotation, controls, savedTarget, savedZoom, gui
 
+  const canvasWidth = window.innerWidth
+  const canvasHeight = window.innerHeight
+
   const init = () => {
     //  在此处初始化的模块 才能避免二次加载叠加
     createRenderer() //  创建渲染器
   }
   const createRenderer = () => {
     renderer.setSize(600, 600)
+    // renderer.setSize(canvasWidth, canvasHeight)
     renderer.shadowMap.enabled = true // 启用阴影
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
     //  此处与renderer.autoClear  冲突
     // renderer.setClearColor(0x8c8aff); // 设置为白色
     // 设置渲染器屏幕像素比  高分辨率屏幕上 渲染更精细  但不建议直接设置  会导致性能问题
-    // renderer.setPixelRatio(window.devicePixelRatio || 1)
+    renderer.setPixelRatio(window.devicePixelRatio || 1)
   }
   // 添加光源  不然模型会是全黑色的
-  const createLight = size => {
+  const createLight000 = size => {
     // 添加灯源前先移除所有的灯光
     removeAllLights(scene)
     //  平行光的距离影响也很大  太远会显得很模糊
@@ -232,6 +236,29 @@ export const useThree = () => {
     // scene.add(spotLightRight);
   }
 
+  const createLight = size => {
+    // 添加灯源前先移除所有的灯光
+    removeAllLights(scene)
+    //  平行光的距离影响也很大  太远会显得很模糊
+    // const lightX = size.x + 50
+    // const lightY = size.y + (lightX / size.y) * 50
+    const ll = size.x + size.y
+    const lightX = ll
+    const lightY = ll
+    // const lightY = size.y + 50
+    const lightZ = size.z + 50
+    // const halfZ = lightZ / 2
+    const halfZ = lightZ / 4
+    // 添加光源  不然模型会是全黑色的
+
+    const ambientLight = new THREE.AmbientLight(0x7c7c7c, 3.0)
+
+    const light = new THREE.DirectionalLight(0xffffff, 3.0)
+    light.position.set(0.32, 0.39, 0.7)
+    scene.add(light)
+    scene.add(ambientLight)
+  }
+
   // 自动选择相应 加载器
   const chooseLoader = type => {
     let loader
@@ -369,6 +396,8 @@ export const useThree = () => {
     // transControl.setScaleSnap(0.25)
     // scene.add(transControl)
     // transControl.attach(mesh)
+
+    // controls.addEventListener( 'change', render );
     return controls
   }
   // 添加轴辅助器  原点坐标指示
@@ -380,7 +409,7 @@ export const useThree = () => {
 
   // 添加一个跟随相机的平行光源
   const addLightOfCamera = () => {
-    const pointLight = new THREE.DirectionalLight(0xffffff, 0.5, 100)
+    const pointLight = new THREE.DirectionalLight(0xffffff, 0.3, 100)
     // pointLight.castShadow = true
     scene.add(pointLight)
     return pointLight
@@ -733,6 +762,10 @@ export const useThree = () => {
     scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture
     renderer.toneMapping = THREE.ACESFilmicToneMapping
     renderer.toneMappingExposure = 1.0
+  }
+
+  const addTextureMap = () => {
+    // TEXTURE MAP
   }
 
   const addGui = (mesh, material) => {
