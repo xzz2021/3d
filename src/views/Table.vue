@@ -164,6 +164,8 @@ import { useMitt } from "../hooks/mitt"
 // import BracesPanel from "../components/BracesPanel.vue"
 // import PickColors from "vue-pick-colors"
 import { useShopStore } from "@/pinia/shopTable.js"
+import { baseUrl } from "@/utils/env"
+// console.log("🚀 ~ file: Table.vue:168 ~ baseUrl:", baseUrl)
 // 可以在组件中的任意位置访问 `store` 变量 ✨
 const store = useShopStore()
 
@@ -177,6 +179,8 @@ const deliveryTimeArr = ref([
   { name: "交期", key: "deliveryTime", price: 23, val: "48小时" },
   { name: "交期", key: "deliveryTime", price: 56, val: "72小时" },
 ])
+
+// console.log("🚀 ~ file: Table.vue:182 ~ isPro:", isPro)
 // const rawPrice = ref(168)
 // const finalPrice =
 const handleChange1 = (count, index) => {
@@ -277,11 +281,15 @@ const addToCart = async item => {
       variant_info.push(value)
     }
   })
-  const response = await fetch("/shop/cart/update_json", {
+  const response = await fetch(`${baseUrl}/shop/cart/update_json`, {
     method: "POST",
-    body: {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
       params: {
-        product_id: 0,
+        // product_tmpl_id,
+        product_id: product_id,
         product_list: [
           {
             product_tmpl_id,
@@ -294,7 +302,7 @@ const addToCart = async item => {
           },
         ],
       },
-    },
+    }),
   })
   if (response.ok) {
   }

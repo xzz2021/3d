@@ -1,6 +1,6 @@
 import { ref } from "vue"
 import { useMitt } from "@/hooks/mitt"
-
+import { baseUrl } from "@/utils/env"
 const getFileType = fileName => {
   const fileExtension = fileName.split(".").pop().toLowerCase()
   return fileExtension
@@ -58,8 +58,8 @@ export const useUpload = () => {
     formData.append("chunkNumber", currentIndex.value)
     formData.append("totalChunks", totalSlices)
     formData.append("filename", file.name)
-    // const response = await fetch("https://yun3d.com/cust_attachment/upload_chunk", {
-    const response = await fetch("/cust_attachment/upload_chunk", {
+    const response = await fetch(`${baseUrl}/cust_attachment/upload_chunk`, {
+      // const response = await fetch("/cust_attachment/upload_chunk", {
       method: "POST",
       body: formData,
     })
