@@ -46,7 +46,6 @@ export const useUpload = () => {
     }
   }
   const uploadSlice = async file => {
-    let res
     const sliceSize = M50 / 50 // 每片大小1MB
     const start = currentIndex.value * sliceSize
     const end = Math.min(start + sliceSize, file.size)

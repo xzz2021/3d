@@ -51,7 +51,7 @@
             </p>
           </div>
         </div>
-        <el-button type="primary" color="#1e22aa">哑 光 U</el-button>
+        <el-button class="titleBtn" type="primary" color="#1e22aa">哑 光 U</el-button>
       </div>
     </div>
 
@@ -258,6 +258,7 @@ const changeLineHeight = text => {
     text-align: center;
     button {
       width: 138px;
+      margin: 5px 0;
     }
   }
   // width: 306px;
@@ -269,7 +270,8 @@ const changeLineHeight = text => {
     align-items: center;
     flex-wrap: wrap;
     // border: 1px solid black;
-    margin-top: 10px;
+    // margin-top: 10px;
+    margin-top: -5px;
     .item_box {
       // color: black;
       cursor: pointer;

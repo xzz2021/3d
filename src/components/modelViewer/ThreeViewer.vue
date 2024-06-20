@@ -152,13 +152,6 @@ const commonFn = (material, modelFileInfo) => {
 
   // addEnvironment()
   // addFaceGui(camera)
-  // mesh.traverse(function (child) {
-  //   if (child.isMesh) {
-  //     const edges = new THREE.EdgesGeometry(child.geometry)
-  //     const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000 }))
-  //     child.add(line)
-  //   }
-  // })
 
   // scene.background = new THREE.Color( 0xAAAAAA );
 
@@ -182,7 +175,7 @@ const commonFn = (material, modelFileInfo) => {
   setTimeout(() => {
     dialogTableVisible.value = true
     dialogOpen.value = true
-  }, 500)
+  }, 300)
 
   //  新增商品推送之前线检查 是否当前项存在
   const check = IsExist(modelFileInfo.filePath)

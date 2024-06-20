@@ -120,8 +120,19 @@
             <el-checkbox label="48小时" :value="{ name: '交期', key: 'deliveryTime', price: 23, value: '48小时' }" border />
             <el-checkbox label="72小时" :value="{ name: '交期', key: 'deliveryTime', price: 56, value: '48小时' }" border />
           </el-checkbox-group> -->
+          <div>
+            <el-button
+              v-for="(item, index) in deliveryTimeArr"
+              :key="index"
+              @click="handleChange3(scope.$index, index)"
+              :type="currentIndex == index ? 'primary' : ''"
+              size="small"
+            >
+              {{ item.val }}
+            </el-button>
+          </div>
 
-          <el-select
+          <!-- <el-select
             v-model="scope.row.deliveryTime"
             placeholder="Select"
             @change="handleChange2($event, scope.$index)"
@@ -129,7 +140,7 @@
             value-key="val"
           >
             <el-option v-for="item in deliveryTimeArr" :key="item.val" :label="item.val" :value="item" />
-          </el-select>
+          </el-select> -->
         </template>
       </el-table-column>
       <el-table-column label="价格">
@@ -171,7 +182,7 @@ const store = useShopStore()
 
 const { tableData } = storeToRefs(store)
 // const { updateImgUrl } = store
-
+const currentIndex = ref(0)
 const { onEvent, emitEvent } = useMitt()
 
 const deliveryTimeArr = ref([
@@ -180,41 +191,25 @@ const deliveryTimeArr = ref([
   { name: "交期", key: "deliveryTime", price: 56, val: "72小时" },
 ])
 
-// console.log("🚀 ~ file: Table.vue:182 ~ isPro:", isPro)
-// const rawPrice = ref(168)
-// const finalPrice =
 const handleChange1 = (count, index) => {
   tableData.value[index].finalPrice = (tableData.value[index].rawPrice + tableData.value[index].deliveryTime.price) * count
 }
-const handleChange2 = (val, index) => {
-  tableData.value[index].finalPrice = (tableData.value[index].rawPrice + val.price) * tableData.value[index].count.val
+
+// const handleChange2 = (val, index) => {
+//   tableData.value[index].finalPrice = (tableData.value[index].rawPrice + val.price) * tableData.value[index].count.val
+// }
+
+const handleChange3 = (index, curIndex) => {
+  currentIndex.value = curIndex
+  const currentDeliveryTime = deliveryTimeArr.value[curIndex]
+  tableData.value[index].finalPrice =
+    (tableData.value[index].rawPrice + currentDeliveryTime.price) * tableData.value[index].count.val
 }
 
 const handleSelectionChange = val => {
   // console.log("🚀 ~ file: Table.vue:115 ~ val:", val)
   //  此处可以获得真实选择的数据  用于发送给购物车
 }
-
-const materialOptions = [
-  {
-    name: "8200树脂",
-    img: "",
-    advantages: "高精度,高韧性, 高稳定性",
-    disAdvantages: "保存温度不宜超过60摄氏度",
-    color: "白色",
-    deviation: "±200微米或±0.2%",
-    price: 14.6,
-  },
-  {
-    name: "r4600树脂",
-    img: "",
-    advantages: "高精度,高韧性, 高稳定性",
-    disAdvantages: "保存温度不宜超过60摄氏度",
-    color: "黑色",
-    deviation: "±200微米或±0.2%",
-    price: 20,
-  },
-]
 
 const handleChange = () => {}
 
@@ -269,7 +264,10 @@ const updateNuts = msg => {
 }
 
 const updatePaint = (bool, index) => {
+  //切换选中状态
   tableData.value[index].paint.status = bool
+  // 更新颜色数据
+  console.log("🚀 ~ file: Table.vue:290 ~ tableData.value[index]:", tableData.value[index])
 }
 
 const addToCart = async item => {
@@ -347,13 +345,18 @@ const addToCart = async item => {
   // text-align: left;
   margin-right: 0 !important;
 }
+
+:deep(.el-button + .el-button) {
+  margin-top: 3px;
+  margin-left: 0 !important;
+}
 .operateBox {
   display: flex;
   flex-direction: column; /* 使 Radio 垂直排列 */
   align-items: center; /* 使 Radio 按钮垂直居中 */
-  :deep(.el-button) {
-    margin-bottom: 5px;
-  }
+  // :deep(.el-button) {
+  //   margin-bottom: 2px;
+  // }
 }
 :deep(.operateBox .el-icon) {
   font-size: 18px;

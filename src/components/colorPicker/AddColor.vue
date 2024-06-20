@@ -11,6 +11,12 @@
       <p>亮光:</p>
       <el-scrollbar>
         <div class="containe_box">
+          <div v-if="addList.c.length == 0" class="placeholder_container">
+            <div class="placeholder_box"></div>
+            <div class="placeholder_box"></div>
+            <div class="placeholder_box"></div>
+            <div class="placeholder_box"></div>
+          </div>
           <div v-for="item in addList.c" :key="item" >
             <el-tooltip class="box-item" :content="item.pantone" placement="top" >
               <div class="item_box" :style="{ 'background-color': item.hex }">
@@ -18,6 +24,7 @@
               </div>
             </el-tooltip>
           </div>
+
           </div>
         </el-scrollbar>
     </div>
@@ -27,6 +34,12 @@
       <el-scrollbar>
 
       <div class="containe_box">
+        <div v-if="addList.u.length == 0" class="placeholder_container">
+            <div class="placeholder_box"></div>
+            <div class="placeholder_box"></div>
+            <div class="placeholder_box"></div>
+            <div class="placeholder_box"></div>
+          </div>
         <div v-for="item in addList.u" :key="item" >
             <el-tooltip class="box-item" :content="item.pantone" placement="top" >
               <div class="item_box" :style="{ 'background-color': item.hex }">
@@ -98,6 +111,7 @@ const addList = ref({
   u: [],
 })
 const addItem = (type,item) => {
+  console.log("🚀 ~ file: AddColor.vue:114 ~ item:", item)
   // console.log("🚀 ~ file: AddColor.vue:76 ~ type:", type)
   const isExist = addList.value[type].find(i => i.hex === item.hex)
   if(isExist) return
@@ -129,6 +143,26 @@ defineExpose({ addItem,colorSum })
       // overflow: auto;
       // width: 200px;
       display: flex;
+      .placeholder_container{
+        // width: 200px;
+    display: flex;
+    // justify-content: space-evenly;
+        .placeholder_box{
+          // width: 30px;
+          // height: 30px;
+          border: 1px solid #ccc;
+          width: 28px;
+        height: 28px;
+        margin: 10px 5px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        border-radius: 4px;
+        // position: relative;
+        }
+      }
       .item_box {
         cursor: pointer;
         width: 30px;

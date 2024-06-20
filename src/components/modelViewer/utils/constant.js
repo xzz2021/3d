@@ -40,6 +40,10 @@ export const RAWDATA = {
   paint: {
     name: "喷漆",
     key: "paint",
+    colorList: {
+      c: [],
+      u: [],
+    },
     status: false,
     price: "23",
   },
