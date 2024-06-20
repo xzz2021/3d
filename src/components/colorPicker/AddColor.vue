@@ -1,9 +1,4 @@
-<!--
- * new page
- * @author: xzz2021
- * @since: 2024-06-04
- * AddColor.vue
--->
+
 <template>
   <div class="container">
     <p>已选择的颜色: {{ colorSum }}</p>
@@ -66,42 +61,18 @@
 
 <script setup>
 import { computed } from 'vue';
-
-// const props = defineProps({
-//   addList: {
-//     type: Object,
-//     default: {
-//       c: [
-//         {
-//           hex: "#FF3EB5",
-//           rgb: [255, 62, 181],
-//           pantone: "806 C",
-//         },
-//         {
-//           hex: "#FF7276",
-//           rgb: [255, 114, 118],
-//           pantone: "805 C",
-//         },
-//         {
-//           hex: "#FFAA4D",
-//           rgb: [255, 170, 77],
-//           pantone: "804 C",
-//         },
-//         {
-//           hex: "#FFE900",
-//           rgb: [255, 233, 0],
-//           pantone: "803 C",
-//         },
-//         {
-//           hex: "#44D62C",
-//           rgb: [68, 214, 44],
-//           pantone: "802 C",
-//         },
-//       ],
-//       u: [],
-//     },
-//   },
+import { useShopStore } from "@/pinia/shopTable.js"
+// import { useMitt } from "@/hooks/mitt.js"
+// const { onEvent, emitEvent } = useMitt()
+// onEvent("openModal", modelFileInfo => {
+//   loadModel(modelFileInfo)
 // })
+// console.log("🚀 ~ file: Table.vue:168 ~ baseUrl:", baseUrl)
+// 可以在组件中的任意位置访问 `store` 变量 ✨
+const store = useShopStore()
+const { tableData } = storeToRefs(store)
+const currentIndex = ref(0)
+
 
 const colorSum = computed(() => {
   return addList.value.c.length + addList.value.u.length
@@ -111,7 +82,7 @@ const addList = ref({
   u: [],
 })
 const addItem = (type,item) => {
-  console.log("🚀 ~ file: AddColor.vue:114 ~ item:", item)
+  // console.log("🚀 ~ file: AddColor.vue:114 ~ item:", item)
   // console.log("🚀 ~ file: AddColor.vue:76 ~ type:", type)
   const isExist = addList.value[type].find(i => i.hex === item.hex)
   if(isExist) return
@@ -122,13 +93,21 @@ const addItem = (type,item) => {
 const emit = defineEmits(["closePopover"])
 
 const closePopover = () => {
+   tableData.value[currentIndex.value].paint.colorList = addList.value
+   const bool = colorSum.value != 0
+   tableData.value[currentIndex.value].paint.status = bool
   emit("closePopover")
+}
+
+const openPopover = (index) => {
+  currentIndex.value = index
+  addList.value = tableData.value[index].paint.colorList
 }
 
 const deleteItem = (type,item) => {
   addList.value[type] = addList.value[type].filter(i => i !== item)
 }
-defineExpose({ addItem,colorSum })
+defineExpose({ addItem,colorSum, openPopover, closePopover })
 </script>
 
 <style lang="scss" scoped>

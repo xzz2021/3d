@@ -6,7 +6,7 @@
 -->
 <template>
   <div class="container">
-    <el-dialog v-model="dialogVisible" width="780" draggable :append-to-body="true" @close="closeDialog" destroy-on-close>
+    <el-dialog v-model="dialogVisible" width="780" draggable :append-to-body="true" @close="closeDialog">
       <div class="pantone_picker_box">
         <ColorPicker @changeColor="changeColor" :sucker-hide="true" />
         <!-- <ColorPicker :color="modelValue.hex" @changeColor="changeColor" :sucker-hide="true" /> -->
@@ -186,15 +186,15 @@ const closePopover = () => {
   dialogVisible.value = false
 }
 
-const handleOpen = () => {
+const handleOpen = index => {
   dialogVisible.value = true
+  AddColorRef.value && AddColorRef.value.openPopover(index)
 }
-const closeDialog = () => {
+const closeDialog = index => {
   // 关闭时 根据颜色数量  确定是否 勾选
-  // if (addList.value.c.length > 0 || addList.value.u.length > 0) {
   const bool = (AddColorRef.value && AddColorRef.value.colorSum > 0) || false
-  console.log("🚀 ~ file: XzzColorPicker.vue:86 ~ bool:", bool)
   emit("changePaint", bool)
+  AddColorRef.value && AddColorRef.value.closePopover()
 }
 defineExpose({ handleOpen })
 </script>

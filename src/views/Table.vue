@@ -200,6 +200,7 @@ const handleChange1 = (count, index) => {
 // }
 
 const handleChange3 = (index, curIndex) => {
+  // tableData.value[index].deliveryTime.currentIndex = curIndex
   currentIndex.value = curIndex
   const currentDeliveryTime = deliveryTimeArr.value[curIndex]
   tableData.value[index].finalPrice =
@@ -224,9 +225,10 @@ const copyItem = item => {
 const colorPickerRef = ref(null)
 
 const handleChangePicker = (bool, index) => {
+  // console.log("🚀 ~ file: Table.vue:227 ~ bool:", bool)
   tableData.value[index].paint.status = false
   // 打开面板 进行数据更改
-  colorPickerRef.value && colorPickerRef.value.handleOpen()
+  colorPickerRef.value && colorPickerRef.value.handleOpen(index)
 }
 const bracesPanelRef = ref(null)
 const handleChangeBraces = (bool, index) => {
@@ -266,8 +268,6 @@ const updateNuts = msg => {
 const updatePaint = (bool, index) => {
   //切换选中状态
   tableData.value[index].paint.status = bool
-  // 更新颜色数据
-  console.log("🚀 ~ file: Table.vue:290 ~ tableData.value[index]:", tableData.value[index])
 }
 
 const addToCart = async item => {
