@@ -40,6 +40,14 @@ export const useShopStore = defineStore("shopStore", () => {
     return tableData.value.some(item => item.modelFileInfo.filePath === filePath)
   }
 
+  const getFinalPrice = () => {
+    tableData.value.map(item => {
+      item.finalPrice =
+        (item.rawPrice + item.grinding.price + item.braces.price + item.nuts.price + item.paint.price + item.deliveryTime.price) *
+        item.count.val
+    })
+  }
+
   return {
     tableData,
     totalPrice,
@@ -48,5 +56,6 @@ export const useShopStore = defineStore("shopStore", () => {
     updateImgUrl,
     addItem,
     IsExist,
+    getFinalPrice,
   }
 })

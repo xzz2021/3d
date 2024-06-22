@@ -89,11 +89,6 @@ const handleOpen = () => {
   dialogVisible.value = true
 }
 
-// const handleClose = () => {
-//   // 取消时 关闭 面板  并置空数据
-//   dialogVisible.value = !true
-// }
-
 const handleCancel = () => {
   // 取消 需要把数据全部 置空
   dialogVisible.value = false
