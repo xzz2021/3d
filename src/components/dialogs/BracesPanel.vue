@@ -10,8 +10,10 @@
       <div class="title">填写牙套数量</div>
       <div class="content_box">
         <div class="select_box">
-          <div class="num_box" v-for="item in bracesType" :key="item">
-            <div>{{ item.type }}</div>
+          <!-- <div class="num_box" v-for="item in bracesType" :key="item">
+            <div>{{ item.type }}</div> -->
+            <div class="num_box" v-for="item in props.list" :key="item">
+            <div>{{ item.default_code }}</div>
             <div>
               个数:
               <el-input-number v-model="item.num" :min="0" :max="10" size="small" />
@@ -57,6 +59,10 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
+  list: {
+    type: Array,
+    default: () => []
+  }
 })
 
 const dialogVisible = ref(false)
@@ -76,8 +82,8 @@ const emit = defineEmits(["changeBraces"])
 const confirm = () => {
   const total = []
   let status = true
-  bracesType.value.map(item => {
-    if (item.num != 0) total.push({ ...item })
+  props.list.map(item => {
+    if (item.num != 0) total.push(item)
   })
   dialogVisible.value = false //  不需要关闭面板 本身就包含关闭事件
   // 发送事件 更新牙套数据
@@ -89,10 +95,18 @@ const handleOpen = () => {
   dialogVisible.value = true
 }
 
+// const handleClose = () => {
+//   // 取消时 关闭 面板  并置空数据
+//   dialogVisible.value = !true
+// }
+
 const handleCancel = () => {
   // 取消 需要把数据全部 置空
   dialogVisible.value = false
   bracesType.value.map(item => {
+    item.num = 0
+  })
+  props.list.map(item => {
     item.num = 0
   })
   emit("changeBraces", { index: props.index, total: [], status: false })

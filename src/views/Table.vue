@@ -4,11 +4,10 @@
  * @since: 2024-05-31
  * Table.vue
 -->
-
 <template>
   <div class="table_container">
     <el-table :data="tableData" height="300" style="width: 100%" stripe border @selection-change="handleSelectionChange">
-      <!-- <el-table-column type="index" width="55" /> -->
+      <!-- <el-table-column type="selection" width="55" /> -->
       <el-table-column label="文件预览" width="180">
         <template #default="scope">
           <el-image
@@ -27,30 +26,19 @@
       </el-table-column>
       <el-table-column label="材料" width="180">
         <template #default="scope">
-          <el-select v-model="scope.row.material" @visible-change="visibleChange">
-            <template #empty>
-              <el-card>
-                <div style="width: 500px; height: 500px"></div>
-              </el-card>
-            </template>
-            <!-- <template #default>
-              <el-option v-for="item in materialOptions" :key="item.name" :label="item.name" :value="item.name">
-                <div class="custom-option">
-                  <img :src="item.img" class="option-image" />
-                  <div class="option-details">
-                    <div class="option-title">{{ item.name }}</div>
-                    <div class="option-price">{{ item.color }}</div>
-                  </div>
-                </div>
-              </el-option>
-            </template> -->
-          </el-select>
+          <el-button type="primary" @click="openMaterialPanel(scope.$index)">选择材料</el-button>
+          <MaterialPanel ref="MaterialPanelRef" :materialList="backendData.materials" />
         </template>
       </el-table-column>
       <el-table-column label="表面处理" min-width="100">
         <template #default="scope">
           <div class="process_box">
-            <el-checkbox v-model="scope.row.paint.status" label="喷漆" size="small" @change="getFinalPrice()">
+            <el-checkbox
+              v-model="scope.row.paint.status"
+              label="喷漆"
+              size="small"
+              @change="handleChangePicker($event, scope.$index)"
+            >
               喷漆
               <XzzColorPicker ref="colorPickerRef" @changePaint="bool => updatePaint(bool, scope.$index)" />
             </el-checkbox>
@@ -62,7 +50,7 @@
               @change="handleChangeBraces($event, scope.$index)"
             >
               牙套
-              <BracesPanel ref="bracesPanelRef" :index="scope.$index" @changeBraces="updateBraces" />
+              <BracesPanel ref="bracesPanelRef" :index="scope.$index" @changeBraces="updateBraces" :list="backendData.nuts" />
             </el-checkbox>
             <el-checkbox
               v-model="scope.row.nuts.status"
@@ -71,30 +59,49 @@
               @change="handleChangeNuts($event, scope.$index)"
             >
               铜螺母
-              <NutsPanel ref="nutsPanelRef" @changeNuts="updateNuts" />
+              <NutsPanel ref="nutsPanelRef" :index="scope.$index" @changeNuts="updateNuts" :list="backendData.braces" />
             </el-checkbox>
-            <el-checkbox v-model="scope.row.grinding.status" size="small" @change="getGrindPrice($event, scope.$index)">
+            <el-checkbox v-model="scope.row.grinding.status" size="small" @change="handleChangeGrinding($event)">
               {{ scope.row.grinding.status ? "精打磨 价格: " + scope.row.grinding.price + "元" : "精打磨" }}
             </el-checkbox>
-            <!-- <div>
-              {{ scope.$index }}
-            </div> -->
           </div>
         </template>
       </el-table-column>
 
       <el-table-column label="数量" min-width="105">
         <template #default="scope">
-          <el-input-number v-model="scope.row.count.val" :min="1" :max="10" @change="getFinalPrice()" size="small" />
+          <el-input-number
+            v-model="scope.row.count.val"
+            :min="1"
+            :max="10"
+            @change="handleChange1($event, scope.$index)"
+            size="small"
+          />
         </template>
       </el-table-column>
-      <el-table-column prop="deliveryTime" label="交期">
+      <el-table-column prop="deliveryTime" label="交期" width="120">
         <template #default="scope">
-          <el-radio-group v-model="scope.row.deliveryTime.price" @change="getFinalPrice()">
-            <el-radio :value="0" size="small" border>24小时</el-radio>
-            <el-radio :value="30" size="small" border>48小时</el-radio>
-            <el-radio :value="50" size="small" border>72小时</el-radio>
-          </el-radio-group>
+          <div>
+            <el-button
+              v-for="(item, index) in deliveryTimeArr"
+              :key="index"
+              @click="handleChange3(scope.$index, index)"
+              :type="currentIndex == index ? 'primary' : ''"
+              size="small"
+            >
+              {{ item.val }}
+            </el-button>
+          </div>
+
+          <!-- <el-select
+            v-model="scope.row.deliveryTime"
+            placeholder="Select"
+            @change="handleChange2($event, scope.$index)"
+            style="width: 100px"
+            value-key="val"
+          >
+            <el-option v-for="item in deliveryTimeArr" :key="item.val" :label="item.val" :value="item" />
+          </el-select> -->
         </template>
       </el-table-column>
       <el-table-column label="价格">
@@ -125,43 +132,58 @@ import { Picture as IconPicture } from "@element-plus/icons-vue"
 import XzzColorPicker from "../components/colorPicker/XzzColorPicker.vue"
 
 import { useMitt } from "../hooks/mitt"
-
+import { useTable } from "../hooks/useTable"
 // import BracesPanel from "../components/BracesPanel.vue"
 // import PickColors from "vue-pick-colors"
 import { useShopStore } from "@/pinia/shopTable.js"
 import { baseUrl } from "@/utils/env"
+
+const { backendData } = useTable()
+
 // console.log("🚀 ~ file: Table.vue:168 ~ baseUrl:", baseUrl)
 // 可以在组件中的任意位置访问 `store` 变量 ✨
 const store = useShopStore()
-const { getFinalPrice } = store
+
 const { tableData } = storeToRefs(store)
-// const { updateImgUrl } = store
-const currentIndex = ref(0)
+const { updatePrice } = store
+const currentIndex = ref(2)
 const { onEvent, emitEvent } = useMitt()
 
-// const deliveryTimeArr = ref([
-//   { name: "交期", key: "deliveryTime", price: 0, val: "24小时" },
-//   { name: "交期", key: "deliveryTime", price: 23, val: "48小时" },
-//   { name: "交期", key: "deliveryTime", price: 56, val: "72小时" },
-// ])
+const deliveryTimeArr = ref([
+  { name: "交期", key: "deliveryTime", price: 56, val: "加急" },
+  { name: "交期", key: "deliveryTime", price: 23, val: "标准" },
+  { name: "交期", key: "deliveryTime", price: 0, val: "经济" },
+])
 
-// const getFinalPrice = () => {
-//   tableData.value.map(item => {
-//     item.finalPrice =
-//       (item.rawPrice + item.grinding.price + item.braces.price + item.nuts.price + item.paint.price + item.deliveryTime.price) *
-//       item.count.val
-//   })
-// }
-const getGrindPrice = (event, index) => {
-  tableData.value[index].grinding.price = event ? 23 : 0
-  getFinalPrice()
+const handleChange1 = (count, index) => {
+  // tableData.value[index].finalPrice = (tableData.value[index].rawPrice + tableData.value[index].deliveryTime.price) * count
+  updatePrice()
 }
+
+const handleChangeGrinding = v => {
+  const { surfaceArea } = tableData.value[0]
+  tableData.value[0].grinding.price = v ? surfaceArea / 100 : 0
+  updatePrice()
+}
+// const handleChange2 = (val, index) => {
+//   tableData.value[index].finalPrice = (tableData.value[index].rawPrice + val.price) * tableData.value[index].count.val
+// }
+
+const handleChange3 = (index, curIndex) => {
+  tableData.value[index].deliveryTime = deliveryTimeArr.value[curIndex]
+  currentIndex.value = curIndex
+  updatePrice()
+}
+
 const handleSelectionChange = val => {
   // console.log("🚀 ~ file: Table.vue:115 ~ val:", val)
   //  此处可以获得真实选择的数据  用于发送给购物车
 }
 
-const visibleChange = bool => {}
+const MaterialPanelRef = ref(null)
+const openMaterialPanel = index => {
+  MaterialPanelRef.value && MaterialPanelRef.value.handleOpen(index)
+}
 
 const copyItem = item => {
   const deepCopy = JSON.parse(JSON.stringify(item))
@@ -184,6 +206,13 @@ const handleChangeBraces = (bool, index) => {
   bracesPanelRef.value && bracesPanelRef.value.handleOpen()
 }
 
+const nutsPanelRef = ref(null)
+const handleChangeNuts = (bool, index) => {
+  // 拦截点击事件  不主动勾选
+  tableData.value[index].nuts.status = false
+  // 打开面板 进行数据更改
+  nutsPanelRef.value && nutsPanelRef.value.handleOpen()
+}
 const deleteItem = index => {
   tableData.value.splice(index, 1)
 }
@@ -192,44 +221,28 @@ const openPreview = modelFileInfo => {
   emitEvent("openPreview", modelFileInfo)
 }
 
+const calculatePrice = total => {
+  let price = 0
+  if (total.length == 0) return 0
+  total.forEach(item => {
+    price += item.num * item.list_price
+  })
+  return price
+}
 const updateBraces = msg => {
   const { index, total, status } = msg
   tableData.value[index].braces.total = total
+  tableData.value[index].braces.price = calculatePrice(total)
   tableData.value[index].braces.status = status
-  tableData.value[index].braces.price = caculatePrice(total)
-  getFinalPrice()
+  updatePrice()
 }
 
-const caculatePrice = totalArr => {
-  let sum = 0
-  totalArr.map(item => {
-    sum += item.num
-  })
-  if (sum <= 10) {
-    return sum * 8
-  } else if (sum <= 200) {
-    return 80 + (sum - 10) * 3.5
-  } else if (sum > 200) {
-    return 750 + (sum - 200) * 2.5
-  } else {
-    return 0
-  }
-}
-
-const nutsPanelRef = ref(null)
-const handleChangeNuts = (_bool, index) => {
-  // 拦截点击事件  不主动勾选
-  tableData.value[index].nuts.status = false
-  // 打开面板 进行数据更改
-  nutsPanelRef.value && nutsPanelRef.value.handleOpen(index)
-  //变更数据后重新计算总价
-}
 const updateNuts = msg => {
   const { index, total, status } = msg
   tableData.value[index].nuts.total = total
+  tableData.value[index].nuts.price = calculatePrice(total)
   tableData.value[index].nuts.status = status
-  tableData.value[index].nuts.price = caculatePrice(total)
-  getFinalPrice()
+  updatePrice()
 }
 
 const updatePaint = (bool, index) => {
@@ -238,35 +251,53 @@ const updatePaint = (bool, index) => {
 }
 
 const addToCart = async item => {
-  const { count, finalPrice, product_tmpl_id, product_id, file_url, imageUrl, volume, rawPrice, modelFileInfo, ...restParams } =
-    item
-  const variant_info = []
-  Object.values(restParams).forEach(value => {
-    if (value.status != false) {
-      variant_info.push(value)
-    }
-  })
+  // console.log("🚀 ~ file: Table.vue:244 ~ addToCart ~ item:", item)
+  // return
+  const {
+    count,
+    finalPrice,
+    product_tmpl_id,
+    product_id,
+    file_url,
+    volume,
+    surfaceArea,
+    imageUrl,
+    modelFileInfo,
+    ...restParams
+  } = item
+  // const variant_info = [{name: "表面积", val: surfaceArea}, {name: "体积", val: volume}]
+  // Object.values(restParams).forEach(value => {
+  //   if (value.status != false) {
+  //     variant_info.push(value)
+  //   }
+  // })
+  restParams.model3d = { ...restParams.model3d, volume, surfaceArea }
+
+  const params = {
+    // product_tmpl_id,
+    product_id,
+    product_list: [
+      {
+        product_tmpl_id,
+        product_id,
+        file_url,
+        price: finalPrice,
+        add_qty: count.val,
+        set_qty: null,
+        variant_info: restParams,
+      },
+    ],
+  }
+  // console.log("🚀 ~ file: Table.vue:273 ~ addToCart ~ params:", params)
+  // return
   const response = await fetch(`${baseUrl}/shop/cart/update_json`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
+
     body: JSON.stringify({
-      params: {
-        // product_tmpl_id,
-        product_id: product_id,
-        product_list: [
-          {
-            product_tmpl_id,
-            product_id,
-            file_url,
-            price: finalPrice,
-            add_qty: count.val,
-            set_qty: null,
-            variant_info,
-          },
-        ],
-      },
+      ...params,
     }),
   })
   if (response.ok) {

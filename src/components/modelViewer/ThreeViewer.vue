@@ -35,9 +35,10 @@ import { useShopStore } from "@/pinia/shopTable.js"
 import { getALLInformation } from "./utils/getModelView.js"
 import { RAWDATA } from "./utils/constant"
 
+
 // 可以在组件中的任意位置访问 `store` 变量 ✨
 const store = useShopStore()
-const { addItem, IsExist } = store
+const { addItem, IsExist, updatePrice } = store
 const isFullscreen = ref(false)
 const toggleFullscreen = () => {
   isFullscreen.value = !isFullscreen.value
@@ -121,6 +122,7 @@ const loadModel = async modelFileInfo => {
       let material = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.4, roughness: 0.3 })
       // let material = new THREE.MeshPhongMaterial({ color: 0xff5533, specular: 0x555555, shininess: 30 })
       mesh = simpleArr.includes(fileType) ? geometry.scene || geometry : new THREE.Mesh(geometry, material)
+      
       commonFn(material, modelFileInfo)
     },
     undefined,
@@ -183,15 +185,35 @@ const commonFn = (material, modelFileInfo) => {
 }
 
 const getInfoAndPushItem = (box, modelFileInfo) => {
-  // calVolume(mesh.geometry)
+ const { volume, surfaceArea } =  calVolume(mesh.geometry)
   //  模型加载完之后 获取商品所有详细信息
   const allInfo = getALLInformation({ box })
   // 获取预览图片
   renderer.render(scene, camera.value)
   const imageUrl = renderer.domElement.toDataURL("image/jpeg")
-  const newItem = { ...RAWDATA, ...allInfo, imageUrl, modelFileInfo, ...modelFileInfo.resData }
+  const newItem = { ...RAWDATA, ...allInfo, volume, surfaceArea, imageUrl, modelFileInfo, ...modelFileInfo.resData }
   addItem(newItem)
+
+  setTimeout(() => {
+    updatePrice()
+  }, 1000)
+
 }
+
+// const  roundUp = (num, decimalPlaces) => {
+//     const factor = Math.pow(10, decimalPlaces);
+//     return Math.ceil(num * factor) / factor;
+// }
+// const checkPrice = (newItem) => {
+//   const colorList = newItem.paint.colorList
+//     const model3d = newItem.model3d
+//     const col = colorList.c.length + colorList.u.length
+//     newItem.finalPrice = (model3d.volume *  newItem.material.price * 1.4 / 1000
+//       + model3d.surfaceArea * col / 1000
+//     + newItem.deliveryTime.price) * newItem.count.val
+//     newItem.finalPrice = roundUp(newItem.finalPrice, 2)
+//   return newItem
+// }
 const animate = () => {
   requestAnimationFrame(animate)
 

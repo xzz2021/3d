@@ -71,6 +71,7 @@ import { useShopStore } from "@/pinia/shopTable.js"
 // 可以在组件中的任意位置访问 `store` 变量 ✨
 const store = useShopStore()
 const { tableData } = storeToRefs(store)
+const { updatePrice } = useShopStore()
 const currentIndex = ref(0)
 
 
@@ -96,6 +97,7 @@ const closePopover = () => {
    tableData.value[currentIndex.value].paint.colorList = addList.value
    const bool = colorSum.value != 0
    tableData.value[currentIndex.value].paint.status = bool
+   updatePrice()
   emit("closePopover")
 }
 

@@ -6,15 +6,15 @@
 -->
 <template>
   <div class="container">
-    {{ props.index }}
     <el-dialog v-model="dialogVisible" width="780" draggable :append-to-body="true" top="5vh">
-      {{ props.index }}
-
       <div class="title">填写铜螺母数量</div>
       <div class="content_box">
         <div class="select_box">
-          <div class="num_box" v-for="item in nutsType" :key="item">
-            <div>{{ item.type }}</div>
+          <!-- <div class="num_box" v-for="item in nutsType" :key="item">
+            <div>{{ item.type }}</div> -->
+            <div class="num_box" v-for="item in props.list" :key="item">
+            <div>{{ item.default_code }}</div>
+
             <div>
               个数:
               <el-input-number v-model="item.num" :min="0" :max="10" size="small" />
@@ -46,7 +46,7 @@
         </p>
       </div>
       <div style="text-align: end">
-        <el-button @click.native="handleCancel" size="small">清空</el-button>
+        <el-button @click.native="handleCancel" size="small">取消</el-button>
         <el-button type="primary" @click="confirm" size="small">确定</el-button>
       </div>
     </el-dialog>
@@ -54,15 +54,20 @@
 </template>
 
 <script setup>
-import { useShopStore } from "@/pinia/shopTable.js"
-const store = useShopStore()
-const { tableData } = storeToRefs(store)
+const props = defineProps({
+  index: {
+    type: Number,
+    default: 0,
+  },
+  list: {
+    type: Array,
+    default: () => []
+  }
+})
+
 const dialogVisible = ref(false)
 
-const props = defineProps({
-  index: Number,
-})
-const rawData = [
+const nutsType = ref([
   { type: "M1.6*3", length: "4.5", diameter: "2.2", outerDiameter: "5.2", num: 0 },
   { type: "M2*2", length: "3.5", diameter: "3.2", outerDiameter: "6.2", num: 0 },
   { type: "M2*3", length: "4.5", diameter: "3.2", outerDiameter: "6.2", num: 0 },
@@ -75,35 +80,41 @@ const rawData = [
   { type: "M5*5", length: "6.5", diameter: "5.9", outerDiameter: "9.1", num: 0 },
   { type: "M6*5", length: "7.5", diameter: "7.9", outerDiameter: "11.9", num: 0 },
   { type: "M8*10", length: "11.5", diameter: "9.8", outerDiameter: "13.8", num: 0 },
-]
-const nutsType = ref([])
+  
+])
 
 const emit = defineEmits(["changeNuts"])
 
 const confirm = () => {
-  // const total = []
-  let sum = 0
-  nutsType.value.map(item => {
-    sum += item.num
+  const total = []
+  let status = true
+  props.list.map(item => {
+    if (item.num != 0) total.push(item)
   })
   dialogVisible.value = false //  不需要关闭面板 本身就包含关闭事件
   // 发送事件 更新牙套数据
-  emit("changeNuts", { index: currentIndex.value, total: nutsType.value, status: sum > 0 })
+  if (total.length == 0) status = false
+  emit("changeNuts", { index: props.index, total, status })
+}
+
+const handleClose = () => {
+  // 取消时 关闭 面板  并置空数据
+  dialogVisible.value = !true
 }
 
 const handleCancel = () => {
   // 取消 需要把数据全部 置空
   dialogVisible.value = false
-  const rawObj = JSON.parse(JSON.stringify(rawData)) // 保留rawData
-  nutsType.value = rawObj
-  emit("changeNuts", { index: currentIndex.value, total: rawObj, status: false })
+  nutsType.value.map(item => {
+    item.num = 0
+  })
+  props.list.map(item => {
+    item.num = 0
+  })
+  emit("changeNuts", { index: props.index, total: [], status: false })
 }
-
-const currentIndex = ref(0)
-const handleOpen = index => {
-  currentIndex.value = index
+const handleOpen = () => {
   dialogVisible.value = true
-  nutsType.value = tableData.value[index].nuts.total
 }
 defineExpose({ handleOpen })
 </script>

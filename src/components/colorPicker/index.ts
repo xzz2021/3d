@@ -1,4 +1,4 @@
-import { App } from "vue"
+// import { App } from "vue"
 import ColorPicker from "./color/index"
 // function install(Vue: App) {
 //   Vue.component(ColorPicker.name, ColorPicker)

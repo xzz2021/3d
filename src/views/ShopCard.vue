@@ -33,12 +33,16 @@
 <script setup>
 import { useShopStore } from "@/pinia/shopTable.js"
 import { Goods } from "@element-plus/icons-vue"
+import { ElMessage } from "element-plus"
 // 可以在组件中的任意位置访问 `store` 变量 ✨
 const store = useShopStore()
 
 const { totalPrice, sum, productNum } = storeToRefs(store)
 
 const goToCheckout = () => {
+  if (totalPrice.value == 0) {
+    return ElMessage.error("当前购物车为空,请添加产品后再结算!")
+  }
   window.location.href = window.location.origin + "/shop/cart"
 }
 </script>
