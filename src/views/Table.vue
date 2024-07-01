@@ -26,7 +26,7 @@
       </el-table-column>
       <el-table-column label="材料" width="180">
         <template #default="scope">
-          <el-button type="primary" @click="openMaterialPanel(scope.$index)">选择材料</el-button>
+          <el-button type="primary" @click="openMaterialPanel(scope.$index)" size="small">选择材料</el-button>
           <MaterialPanel ref="MaterialPanelRef" :materialList="backendData.materials" />
         </template>
       </el-table-column>
@@ -61,7 +61,12 @@
               铜螺母
               <!-- <NutsPanel ref="nutsPanelRef" :index="scope.$index" @changeNuts="updateNuts" :list="backendData.braces" /> -->
             </el-checkbox>
-            <el-checkbox v-model="scope.row.grinding.status" size="small" @change="handleChangeGrinding($event, scope.$index)">
+            <el-checkbox
+              v-model="scope.row.grinding.status"
+              size="small"
+              :disabled="checkDisabled"
+              @change="handleChangeGrinding($event, scope.$index)"
+            >
               {{ scope.row.grinding.status ? "精打磨 价格: " + scope.row.grinding.price + "元" : "精打磨" }}
             </el-checkbox>
           </div>
@@ -112,13 +117,15 @@
 </template>
 
 <script setup>
-import { Delete, CopyDocument, ShoppingCartFull } from "@element-plus/icons-vue"
-import { Picture as IconPicture } from "@element-plus/icons-vue"
+import { Delete, CopyDocument, ShoppingCartFull, Picture as IconPicture } from "@element-plus/icons-vue"
+// import { Picture as IconPicture } from "@element-plus/icons-vue"
 import XzzColorPicker from "../components/colorPicker/XzzColorPicker.vue"
 import { useMitt } from "../hooks/mitt"
+import { useMitt2 } from "../hooks/mitt2"
 import { useTable } from "../hooks/useTable"
 import { useShopStore } from "@/pinia/shopTable.js"
 import { baseUrl } from "@/utils/env"
+import { onMounted } from "vue"
 
 const { backendData } = useTable()
 
@@ -126,7 +133,8 @@ const store = useShopStore()
 
 const { tableData, totalPrice } = storeToRefs(store)
 const { updatePrice } = store
-const { onEvent, emitEvent } = useMitt()
+const { emitEvent } = useMitt()
+const { onEvent } = useMitt2("checkColor")
 
 const deliveryTimeArr = ref([
   { name: "交期", key: "deliveryTime", price: 56, val: "加急" },
@@ -135,8 +143,6 @@ const deliveryTimeArr = ref([
 ])
 
 const handleChangeGrinding = (v, index) => {
-  // console.log("🚀 ~ file: Table.vue:164 ~ index:", index)
-  // console.log("🚀 ~ file: Table.vue:164 ~ v:", v)
   const { surfaceArea } = tableData.value[index]
   tableData.value[index].grinding.price = v ? Number((surfaceArea / 100).toFixed(2)) : 0
   updatePrice()
@@ -181,7 +187,7 @@ const handleChangeNuts = (bool, index) => {
   nutsPanelRef.value && nutsPanelRef.value.handleOpen(index)
 }
 const deleteItem = index => {
-  tableData.value.splice(index, 1)
+  tableData.value.length > 1 && tableData.value.splice(index, 1)
 }
 
 const openPreview = modelFileInfo => {
@@ -218,6 +224,22 @@ const updateNuts = msg => {
 //   //切换选中状态
 //   tableData.value[index].paint.status = bool
 // }
+
+const checkDisabled = ref(false)
+// 检查是否选择颜色
+const checkColor = msg => {
+  const { index, v } = msg
+  //  有选择  计算打磨价格  勾选打磨  且禁用按钮
+  const { surfaceArea } = tableData.value[index]
+  tableData.value[index].grinding.price = v ? Number((surfaceArea / 100).toFixed(2)) : 0
+  tableData.value[index].grinding.status = v
+  checkDisabled.value = v
+  // 没有    去除勾选打磨  且启用按钮
+}
+
+onMounted(() => {
+  onEvent(checkColor)
+})
 
 const addToCart = async item => {
   if (totalPrice.value == 0) {

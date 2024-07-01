@@ -5,9 +5,9 @@
  * ColorPicker.vue
 -->
 <template>
-  <div class="container" v-show="dialogVisible">
+  <div class="container">
     <!-- <el-dialog v-model="dialogVisible2" width="780" draggable :append-to-body="true" :show-close="false"> -->
-    <el-dialog v-model="dialogVisible2" width="780" draggable :show-close="false">
+    <el-dialog v-model="dialogVisible" width="780" draggable :show-close="false" :close-on-click-modal="false">
       <div class="pantone_picker_box">
         <ColorPicker @changeColor="updateColorBlock" :sucker-hide="true" />
         <PantoneList
@@ -29,7 +29,7 @@ import AddColor from "./AddColor.vue"
 import { getPantoneUC } from "../../utils/calculateColor"
 
 const dialogVisible = ref(false)
-const dialogVisible2 = ref(true)
+// const dialogVisible2 = ref(true)
 
 const colorList = ref({
   pantoneC: [

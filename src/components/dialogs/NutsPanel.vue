@@ -6,7 +6,7 @@
 -->
 <template>
   <div class="container">
-    <el-dialog v-model="dialogVisible" width="780" draggable :show-close="false" top="5vh">
+    <el-dialog v-model="dialogVisible" width="780" draggable :show-close="false" top="5vh" :close-on-click-modal="false">
       <div class="title">填写铜螺母数量</div>
       <div class="content_box">
         <div class="select_box">

@@ -59,11 +59,9 @@
 <script setup>
 import { computed } from "vue"
 import { useShopStore } from "@/pinia/shopTable.js"
-// import { useMitt } from "@/hooks/mitt.js"
-// const { onEvent, emitEvent } = useMitt()
-// onEvent("openModal", modelFileInfo => {
-//   loadModel(modelFileInfo)
-// })
+import { useMitt2 } from "@/hooks/mitt2.js"
+const { emitEvent } = useMitt2("checkColor")
+
 // console.log("🚀 ~ file: Table.vue:168 ~ baseUrl:", baseUrl)
 // 可以在组件中的任意位置访问 `store` 变量 ✨
 const store = useShopStore()
@@ -90,19 +88,18 @@ const emit = defineEmits(["closeDialog"])
 
 //  关闭面板   给颜色赋值  更新  面板勾选状态
 const closePopover = () => {
-  console.log("🚀 ~ file: AddColor.vue:98 ~ currentIndex.value:", currentIndex.value)
   tableData.value[currentIndex.value].paint.colorList = addList.value
   const bool = colorSum.value != 0
   tableData.value[currentIndex.value].paint.status = bool
+  //  有喷漆 必有打磨 // 触发事件
+  emitEvent({ v: bool, index: currentIndex.value })
   updatePrice()
   emit("closeDialog")
 }
 
 //  开启面板 初始化
 const initPanel = index => {
-  console.log("🚀 ~ file: AddColor.vue:103 ~ index:", index)
   currentIndex.value = index
-  console.log("🚀 ~ file: AddColor.vue:105 ~ currentIndex.value:", currentIndex.value)
   addList.value = tableData.value[index].paint.colorList
 }
 

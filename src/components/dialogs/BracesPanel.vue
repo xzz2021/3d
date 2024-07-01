@@ -6,7 +6,7 @@
 -->
 <template>
   <div class="container">
-    <el-dialog v-model="dialogVisible" width="780" draggable :show-close="false">
+    <el-dialog v-model="dialogVisible" width="780" draggable :show-close="false" :close-on-click-modal="false">
       <div class="title">填写牙套数量</div>
       <div class="content_box">
         <div class="select_box">

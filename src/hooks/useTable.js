@@ -32,6 +32,7 @@ export const useTable = () => {
         }
       })
       backendData.value = { nuts, braces, materials }
+      console.log("🚀 ~ file: useTable.js:35 ~ backendData.value:", backendData.value)
     } else {
       console.error(response)
     }
