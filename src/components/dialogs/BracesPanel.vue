@@ -92,7 +92,12 @@ const confirm = () => {
   emit("changeBraces", { index: curIndex.value, total, status })
 }
 
+//  打开面板
 const handleOpen = index => {
+  // 初始化勾选 项
+  props.list.map(item => {
+    item.num = 0
+  })
   curIndex.value = index
   const total = tableData.value[index].braces.total
   // 遍历  赋值  已有 数据
@@ -103,10 +108,6 @@ const handleOpen = index => {
           item.num = item2.num
         }
       })
-    })
-  } else {
-    props.list.map(item => {
-      item.num = 0
     })
   }
   dialogVisible.value = true

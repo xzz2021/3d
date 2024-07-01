@@ -59,7 +59,7 @@
               @change="handleChangeNuts($event, scope.$index)"
             >
               铜螺母
-              <NutsPanel ref="nutsPanelRef" :index="scope.$index" @changeNuts="updateNuts" :list="backendData.braces" />
+              <!-- <NutsPanel ref="nutsPanelRef" :index="scope.$index" @changeNuts="updateNuts" :list="backendData.braces" /> -->
             </el-checkbox>
             <el-checkbox v-model="scope.row.grinding.status" size="small" @change="handleChangeGrinding($event, scope.$index)">
               {{ scope.row.grinding.status ? "精打磨 价格: " + scope.row.grinding.price + "元" : "精打磨" }}
@@ -107,7 +107,7 @@
     </el-table>
     <XzzColorPicker ref="colorPickerRef" />
     <BracesPanel ref="bracesPanelRef" @changeBraces="updateBraces" :list="backendData.braces" />
-    <!-- <NutsPanel ref="nutsPanelRef" :index="scope.$index" @changeNuts="updateNuts" :list="backendData.nuts" /> -->
+    <NutsPanel ref="nutsPanelRef" @changeNuts="updateNuts" :list="backendData.nuts" />
   </div>
 </template>
 
@@ -178,7 +178,7 @@ const handleChangeNuts = (bool, index) => {
   // 拦截点击事件  不主动勾选
   tableData.value[index].nuts.status = false
   // 打开面板 进行数据更改
-  nutsPanelRef.value && nutsPanelRef.value.handleOpen()
+  nutsPanelRef.value && nutsPanelRef.value.handleOpen(index)
 }
 const deleteItem = index => {
   tableData.value.splice(index, 1)
