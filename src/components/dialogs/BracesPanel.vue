@@ -6,13 +6,13 @@
 -->
 <template>
   <div class="container">
-    <el-dialog v-model="dialogVisible" width="780" draggable :append-to-body="true">
+    <el-dialog v-model="dialogVisible" width="780" draggable :show-close="false">
       <div class="title">填写牙套数量</div>
       <div class="content_box">
         <div class="select_box">
           <!-- <div class="num_box" v-for="item in bracesType" :key="item">
             <div>{{ item.type }}</div> -->
-            <div class="num_box" v-for="item in props.list" :key="item">
+          <div class="num_box" v-for="item in props.list" :key="item">
             <div>{{ item.default_code }}</div>
             <div>
               个数:
@@ -46,7 +46,7 @@
         </p>
       </div>
       <div style="text-align: end">
-        <el-button @click.native="handleCancel" size="small">取消</el-button>
+        <el-button @click="handleCancel" size="small">取消</el-button>
         <el-button type="primary" @click="confirm" size="small">确定</el-button>
       </div>
     </el-dialog>
@@ -54,15 +54,15 @@
 </template>
 
 <script setup>
+import { useShopStore } from "@/pinia/shopTable.js"
+const store = useShopStore()
+const { tableData } = storeToRefs(store)
+
 const props = defineProps({
-  index: {
-    type: Number,
-    default: 0,
-  },
   list: {
     type: Array,
-    default: () => []
-  }
+    default: () => [],
+  },
 })
 
 const dialogVisible = ref(false)
@@ -79,37 +79,46 @@ const bracesType = ref([
 
 const emit = defineEmits(["changeBraces"])
 
+const curIndex = ref(0)
 const confirm = () => {
   const total = []
   let status = true
   props.list.map(item => {
-    if (item.num != 0) total.push(item)
+    if (item.num != 0) total.push(JSON.parse(JSON.stringify(item)))
   })
   dialogVisible.value = false //  不需要关闭面板 本身就包含关闭事件
   // 发送事件 更新牙套数据
   if (total.length == 0) status = false
-  emit("changeBraces", { index: props.index, total, status })
+  emit("changeBraces", { index: curIndex.value, total, status })
 }
 
-const handleOpen = () => {
+const handleOpen = index => {
+  curIndex.value = index
+  const total = tableData.value[index].braces.total
+  // 遍历  赋值  已有 数据
+  if (total.length > 0) {
+    props.list.map(item => {
+      total.map(item2 => {
+        if (item.default_code == item2.default_code) {
+          item.num = item2.num
+        }
+      })
+    })
+  } else {
+    props.list.map(item => {
+      item.num = 0
+    })
+  }
   dialogVisible.value = true
 }
-
-// const handleClose = () => {
-//   // 取消时 关闭 面板  并置空数据
-//   dialogVisible.value = !true
-// }
 
 const handleCancel = () => {
   // 取消 需要把数据全部 置空
   dialogVisible.value = false
-  bracesType.value.map(item => {
-    item.num = 0
-  })
   props.list.map(item => {
     item.num = 0
   })
-  emit("changeBraces", { index: props.index, total: [], status: false })
+  emit("changeBraces", { index: curIndex.value, total: [], status: false })
 }
 
 defineExpose({ handleOpen })

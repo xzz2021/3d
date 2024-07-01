@@ -50,7 +50,7 @@
               @change="handleChangeBraces($event, scope.$index)"
             >
               牙套
-              <BracesPanel ref="bracesPanelRef" :index="scope.$index" @changeBraces="updateBraces" :list="backendData.nuts" />
+              <!-- <BracesPanel ref="bracesPanelRef" :index="scope.$index" @changeBraces="updateBraces" :list="backendData.nuts" /> -->
             </el-checkbox>
             <el-checkbox
               v-model="scope.row.nuts.status"
@@ -106,6 +106,8 @@
       </el-table-column>
     </el-table>
     <XzzColorPicker ref="colorPickerRef" />
+    <BracesPanel ref="bracesPanelRef" @changeBraces="updateBraces" :list="backendData.braces" />
+    <!-- <NutsPanel ref="nutsPanelRef" :index="scope.$index" @changeNuts="updateNuts" :list="backendData.nuts" /> -->
   </div>
 </template>
 
@@ -159,8 +161,6 @@ const copyItem = item => {
 const colorPickerRef = ref(null)
 
 const handleChangePicker = (bool, index) => {
-  console.log("🚀 ~ file: Table.vue:227 ~ bool:", bool)
-  console.log("🚀 ~ file: Table.vue:169 ~ index:", index)
   tableData.value[index].paint.status = false
   // 打开面板 进行数据更改
   colorPickerRef.value && colorPickerRef.value.handleOpen(index)
@@ -170,7 +170,7 @@ const handleChangeBraces = (bool, index) => {
   // 拦截点击事件  不主动勾选
   tableData.value[index].braces.status = false
   // 打开面板 进行数据更改
-  bracesPanelRef.value && bracesPanelRef.value.handleOpen()
+  bracesPanelRef.value && bracesPanelRef.value.handleOpen(index)
 }
 
 const nutsPanelRef = ref(null)
@@ -196,6 +196,8 @@ const calculatePrice = total => {
   })
   return price
 }
+
+//  更新牙套 数据
 const updateBraces = msg => {
   const { index, total, status } = msg
   tableData.value[index].braces.total = total
@@ -315,6 +317,10 @@ const addToCart = async item => {
 }
 
 :deep(.delivery_box .el-button + .el-button) {
+  margin-top: 3px;
+  margin-left: 0 !important;
+}
+:deep(.operateBox .el-button + .el-button) {
   margin-top: 3px;
   margin-left: 0 !important;
 }
