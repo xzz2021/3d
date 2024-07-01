@@ -81,16 +81,17 @@
 import { pantoneColors } from "../../utils/calculateColor"
 
 const props = defineProps({
-  modelValue: {
-    type: Object,
-    default: () => {
-      return {
-        hex: "#F4DA40",
-        pantone: "7404 C",
-        rgb: [244, 218, 64],
-      }
-    },
-  },
+  // modelValue: {
+  //   type: Object,
+  //   default: () => {
+  //     return {
+  //       hex: "#F4DA40",
+  //       pantone: "7404 C",
+  //       rgb: [244, 218, 64],
+  //     }
+  //   },
+  // },
+
   colorList: {
     type: Object,
     default: {
@@ -167,32 +168,26 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(["changeColor2", "changeColor"])
+const emit = defineEmits(["chooseColor", "updateColorBlock"])
 
 const pushColor = color => {
-  emit("changeColor2", color)
+  emit("chooseColor", color)
 }
 
 const selectColor = item => {
   selectValue.value = item
-
   // 选择颜色后 触发 列表更新
   // 此处颜色值需要转换
   const getRgb = item.rgb
-  const r = getRgb[0]
-  const g = getRgb[1]
-  const b = getRgb[2]
-
-  emit("changeColor", { rgb: { r, g, b } })
+  const [r, g, b] = getRgb
+  emit("updateColorBlock", { rgb: { r, g, b } })
 }
 
 const options = ref([])
 const selectValue = ref([])
 const loading = ref(false)
 // 将remoteMethod改造为支持防抖
-
 let timer = null
-
 const remoteMethod = query => {
   if (query) {
     loading.value = true
@@ -202,34 +197,21 @@ const remoteMethod = query => {
       loading.value = false
       options.value = pantoneColors.filter(item => {
         return item.pantone.toLowerCase().includes(query.toLowerCase())
-        // return item.pantone.toLowerCase().replace(/\s+/g, "").includes(query.toLowerCase())
       })
-      console.log("🚀 ~ file: PantoneList.vue:125 ~ options.value:", options.value)
-    }, 800)
+    }, 600)
   } else {
     options.value = []
   }
 }
 
-// const changeSelectColor = color => {
-//   // console.log("🚀 ~ file: PantoneList.vue:178 ~ color:", color)
-//   // selectValue.value = color
-//   emit("changeColor2", color)
-// }
-// defineExpose({ changeSelectColor })
+//    颜色块  内部的 文字颜色 动态变换  高对比度
 const getHighContrastColor = color => {
   const [R, G, B] = color.map(channel => {
     const proportion = channel / 255
     return proportion <= 0.03928 ? proportion / 12.92 : Math.pow((proportion + 0.055) / 1.055, 2.4)
   })
   const luminance = 0.2126 * R + 0.7152 * G + 0.0722 * B
-  // console.log("🚀 ~ file: PantoneList.vue:197 ~ luminance:", luminance)
   return luminance > 0.5 ? "#000000" : "#FFFFFF"
-  // if (luminance > 0.7 || luminance < 0.3) {
-  //   return "#000000"
-  // } else {
-  //   return "#FFFFFF"
-  // }
 }
 
 const changeFontSize = text => {
@@ -237,7 +219,6 @@ const changeFontSize = text => {
 }
 
 const changeLineHeight = text => {
-  // return text.length > 7 ? "11px" : ""
   return text.length > 10 ? "1" : ""
 }
 </script>

@@ -34,14 +34,14 @@ export const calVolume = geometry => {
     Area += AreaOfTriangle(V3, V2, V1)
   }
   const surfaceArea = Number(Area.toFixed(2))
-  // console.log("表面积:", SurfaceArea)
+  // console.log("表面积:", surfaceArea)
   const loadedObjectVolume = volumes.toFixed(2)
   //  此处计算的就是实际 体积  空心模型 内部三角不存在 不会计算
   // console.log("体积:", loadedObjectVolume > 0 ? loadedObjectVolume : -loadedObjectVolume, "cm³")
   const volume = loadedObjectVolume > 0 ? loadedObjectVolume : -loadedObjectVolume
   return {
     volume,
-    surfaceArea
+    surfaceArea,
   }
 }
 

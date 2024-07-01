@@ -38,6 +38,6 @@ export const RAWDATA = {
     price: 0,
   },
   count: { name: "数量", key: "count", val: 1 },
-  deliveryTime: { name: "交期", key: "deliveryTime", price: 0, val: "24小时" },
+  deliveryTime: { name: "交期", key: "deliveryTime", price: 0, val: "24小时", currentIndex: 2 },
   finalPrice: 168,
 }

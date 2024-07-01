@@ -6,7 +6,7 @@
 -->
 <template>
   <div class="table_container">
-    <el-table :data="tableData" height="300" style="width: 100%" stripe border @selection-change="handleSelectionChange">
+    <el-table :data="tableData" height="300" style="width: 100%" stripe border>
       <!-- <el-table-column type="selection" width="55" /> -->
       <el-table-column label="文件预览" width="180">
         <template #default="scope">
@@ -40,7 +40,8 @@
               @change="handleChangePicker($event, scope.$index)"
             >
               喷漆
-              <XzzColorPicker ref="colorPickerRef" @changePaint="bool => updatePaint(bool, scope.$index)" />
+              <!-- <XzzColorPicker ref="colorPickerRef" @changePaint="bool => updatePaint(bool, scope.$index)" /> -->
+              <XzzColorPicker ref="colorPickerRef" />
             </el-checkbox>
 
             <el-checkbox
@@ -61,7 +62,7 @@
               铜螺母
               <NutsPanel ref="nutsPanelRef" :index="scope.$index" @changeNuts="updateNuts" :list="backendData.braces" />
             </el-checkbox>
-            <el-checkbox v-model="scope.row.grinding.status" size="small" @change="handleChangeGrinding($event)">
+            <el-checkbox v-model="scope.row.grinding.status" size="small" @change="handleChangeGrinding($event, scope.$index)">
               {{ scope.row.grinding.status ? "精打磨 价格: " + scope.row.grinding.price + "元" : "精打磨" }}
             </el-checkbox>
           </div>
@@ -70,13 +71,7 @@
 
       <el-table-column label="数量" min-width="105">
         <template #default="scope">
-          <el-input-number
-            v-model="scope.row.count.val"
-            :min="1"
-            :max="10"
-            @change="handleChange1($event, scope.$index)"
-            size="small"
-          />
+          <el-input-number v-model="scope.row.count.val" :min="1" :max="10" @change="updatePrice" size="small" />
         </template>
       </el-table-column>
       <el-table-column prop="deliveryTime" label="交期" width="120">
@@ -85,23 +80,13 @@
             <el-button
               v-for="(item, index) in deliveryTimeArr"
               :key="index"
-              @click="handleChange3(scope.$index, index)"
-              :type="currentIndex == index ? 'primary' : ''"
+              @click="handleDelivery(scope.$index, index)"
+              :type="scope.row.deliveryTime.currentIndex == index ? 'primary' : ''"
               size="small"
             >
               {{ item.val }}
             </el-button>
           </div>
-
-          <!-- <el-select
-            v-model="scope.row.deliveryTime"
-            placeholder="Select"
-            @change="handleChange2($event, scope.$index)"
-            style="width: 100px"
-            value-key="val"
-          >
-            <el-option v-for="item in deliveryTimeArr" :key="item.val" :label="item.val" :value="item" />
-          </el-select> -->
         </template>
       </el-table-column>
       <el-table-column label="价格">
@@ -127,26 +112,18 @@
 <script setup>
 import { Delete, CopyDocument, ShoppingCartFull } from "@element-plus/icons-vue"
 import { Picture as IconPicture } from "@element-plus/icons-vue"
-// import { ref, watch } from "vue"
-
 import XzzColorPicker from "../components/colorPicker/XzzColorPicker.vue"
-
 import { useMitt } from "../hooks/mitt"
 import { useTable } from "../hooks/useTable"
-// import BracesPanel from "../components/BracesPanel.vue"
-// import PickColors from "vue-pick-colors"
 import { useShopStore } from "@/pinia/shopTable.js"
 import { baseUrl } from "@/utils/env"
 
 const { backendData } = useTable()
 
-// console.log("🚀 ~ file: Table.vue:168 ~ baseUrl:", baseUrl)
-// 可以在组件中的任意位置访问 `store` 变量 ✨
 const store = useShopStore()
 
-const { tableData } = storeToRefs(store)
+const { tableData, totalPrice } = storeToRefs(store)
 const { updatePrice } = store
-const currentIndex = ref(2)
 const { onEvent, emitEvent } = useMitt()
 
 const deliveryTimeArr = ref([
@@ -155,29 +132,18 @@ const deliveryTimeArr = ref([
   { name: "交期", key: "deliveryTime", price: 0, val: "经济" },
 ])
 
-const handleChange1 = (count, index) => {
-  // tableData.value[index].finalPrice = (tableData.value[index].rawPrice + tableData.value[index].deliveryTime.price) * count
+const handleChangeGrinding = (v, index) => {
+  // console.log("🚀 ~ file: Table.vue:164 ~ index:", index)
+  // console.log("🚀 ~ file: Table.vue:164 ~ v:", v)
+  const { surfaceArea } = tableData.value[index]
+  tableData.value[index].grinding.price = v ? Number((surfaceArea / 100).toFixed(2)) : 0
   updatePrice()
 }
 
-const handleChangeGrinding = v => {
-  const { surfaceArea } = tableData.value[0]
-  tableData.value[0].grinding.price = v ? surfaceArea / 100 : 0
-  updatePrice()
-}
-// const handleChange2 = (val, index) => {
-//   tableData.value[index].finalPrice = (tableData.value[index].rawPrice + val.price) * tableData.value[index].count.val
-// }
-
-const handleChange3 = (index, curIndex) => {
+const handleDelivery = (index, curIndex) => {
   tableData.value[index].deliveryTime = deliveryTimeArr.value[curIndex]
-  currentIndex.value = curIndex
+  tableData.value[index].deliveryTime.currentIndex = curIndex
   updatePrice()
-}
-
-const handleSelectionChange = val => {
-  // console.log("🚀 ~ file: Table.vue:115 ~ val:", val)
-  //  此处可以获得真实选择的数据  用于发送给购物车
 }
 
 const MaterialPanelRef = ref(null)
@@ -193,7 +159,8 @@ const copyItem = item => {
 const colorPickerRef = ref(null)
 
 const handleChangePicker = (bool, index) => {
-  // console.log("🚀 ~ file: Table.vue:227 ~ bool:", bool)
+  console.log("🚀 ~ file: Table.vue:227 ~ bool:", bool)
+  console.log("🚀 ~ file: Table.vue:169 ~ index:", index)
   tableData.value[index].paint.status = false
   // 打开面板 进行数据更改
   colorPickerRef.value && colorPickerRef.value.handleOpen(index)
@@ -245,12 +212,15 @@ const updateNuts = msg => {
   updatePrice()
 }
 
-const updatePaint = (bool, index) => {
-  //切换选中状态
-  tableData.value[index].paint.status = bool
-}
+// const updatePaint = (bool, index) => {
+//   //切换选中状态
+//   tableData.value[index].paint.status = bool
+// }
 
 const addToCart = async item => {
+  if (totalPrice.value == 0) {
+    return ElMessage.error("请选择材料后再添加购物车!")
+  }
   // console.log("🚀 ~ file: Table.vue:244 ~ addToCart ~ item:", item)
   // return
   const {

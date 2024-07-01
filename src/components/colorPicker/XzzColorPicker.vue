@@ -6,19 +6,16 @@
 -->
 <template>
   <div class="container">
-    <el-dialog v-model="dialogVisible" width="780" draggable :append-to-body="true" @close="closeDialog">
+    <el-dialog v-model="dialogVisible" width="780" draggable :append-to-body="true" :show-close="false">
       <div class="pantone_picker_box">
-        <ColorPicker @changeColor="changeColor" :sucker-hide="true" />
-        <!-- <ColorPicker :color="modelValue.hex" @changeColor="changeColor" :sucker-hide="true" /> -->
-        <PantoneList ref="pantoneListRef" @changeColor2="changeColor2" @changeColor="changeColor" :colorList="colorList" />
-        <!-- <PantoneList
-            ref="pantoneListRef"
-            :color="modelValue.hex"
-            @changeColor2="changeColor2"
-            @changeColor="changeColor"
-            :colorList="colorList"
-          /> -->
-        <AddColor ref="AddColorRef" @closePopover="closePopover" />
+        <ColorPicker @changeColor="updateColorBlock" :sucker-hide="true" />
+        <PantoneList
+          ref="pantoneListRef"
+          @chooseColor="chooseColor"
+          @updateColorBlock="updateColorBlock"
+          :colorList="colorList"
+        />
+        <AddColor ref="AddColorRef" @closeDialog="closeDialog" />
       </div>
     </el-dialog>
   </div>
@@ -29,22 +26,8 @@ import PantoneList from "./PantoneList.vue"
 import ColorPicker from "./color/ColorPicker.vue"
 import AddColor from "./AddColor.vue"
 import { getPantoneUC } from "../../utils/calculateColor"
-// const props = defineProps({
-//   modelValue: {
-//     type: Object,
-//     default: () => {
-//       return {
-//         hex: "#F4DA40",
-//         pantone: "7404 C",
-//         rgb: [244, 218, 64],
-//       }
-//     },
-//   },
-// })
 
 const dialogVisible = ref(false)
-
-// const emit = defineEmits(["update:modelValue"])
 
 const colorList = ref({
   pantoneC: [
@@ -156,14 +139,13 @@ const colorList = ref({
     },
   ],
 })
-const changeColor = color => {
+
+//  更新供选择的  颜色块
+const updateColorBlock = color => {
   const { r, g, b } = color.rgba || color.rgb
   const arr = getPantoneUC([r, g, b])
   colorList.value = arr
-  console.log("🚀 ~ file: XzzColorPicker.vue:54 ~ arr:", arr)
-  // emit("update:modelValue", color)
 }
-const emit = defineEmits(["changePaint"])
 
 const addList = ref({
   c: [],
@@ -172,30 +154,28 @@ const addList = ref({
 
 const pantoneListRef = ref(null)
 const AddColorRef = ref(null)
-const changeColor2 = color => {
+//  选择颜色  推送到右侧
+const chooseColor = color => {
   if (color.pantone.lastIndexOf("C") == -1 && AddColorRef.value) {
     AddColorRef.value.addItem("u", color)
     addList.value.u.push(color)
   } else {
     AddColorRef.value.addItem("c", color)
   }
-  // emit("update:modelValue", color)
 }
 
-const closePopover = () => {
+//  关闭面板
+const closeDialog = () => {
   dialogVisible.value = false
 }
 
+// 打开面板
 const handleOpen = index => {
   dialogVisible.value = true
+  //  更新已有 列表颜色
   AddColorRef.value && AddColorRef.value.openPopover(index)
 }
-const closeDialog = index => {
-  // 关闭时 根据颜色数量  确定是否 勾选
-  const bool = (AddColorRef.value && AddColorRef.value.colorSum > 0) || false
-  emit("changePaint", bool)
-  AddColorRef.value && AddColorRef.value.closePopover()
-}
+
 defineExpose({ handleOpen })
 </script>
 
