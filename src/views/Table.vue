@@ -41,7 +41,6 @@
             >
               喷漆
               <!-- <XzzColorPicker ref="colorPickerRef" @changePaint="bool => updatePaint(bool, scope.$index)" /> -->
-              <XzzColorPicker ref="colorPickerRef" />
             </el-checkbox>
 
             <el-checkbox
@@ -76,7 +75,7 @@
       </el-table-column>
       <el-table-column prop="deliveryTime" label="交期" width="120">
         <template #default="scope">
-          <div>
+          <div class="delivery_box">
             <el-button
               v-for="(item, index) in deliveryTimeArr"
               :key="index"
@@ -106,6 +105,7 @@
         </template>
       </el-table-column>
     </el-table>
+    <XzzColorPicker ref="colorPickerRef" />
   </div>
 </template>
 
@@ -314,7 +314,7 @@ const addToCart = async item => {
   margin-right: 0 !important;
 }
 
-:deep(.el-button + .el-button) {
+:deep(.delivery_box .el-button + .el-button) {
   margin-top: 3px;
   margin-left: 0 !important;
 }

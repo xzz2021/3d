@@ -5,8 +5,9 @@
  * ColorPicker.vue
 -->
 <template>
-  <div class="container">
-    <el-dialog v-model="dialogVisible" width="780" draggable :append-to-body="true" :show-close="false">
+  <div class="container" v-show="dialogVisible">
+    <!-- <el-dialog v-model="dialogVisible2" width="780" draggable :append-to-body="true" :show-close="false"> -->
+    <el-dialog v-model="dialogVisible2" width="780" draggable :show-close="false">
       <div class="pantone_picker_box">
         <ColorPicker @changeColor="updateColorBlock" :sucker-hide="true" />
         <PantoneList
@@ -28,6 +29,7 @@ import AddColor from "./AddColor.vue"
 import { getPantoneUC } from "../../utils/calculateColor"
 
 const dialogVisible = ref(false)
+const dialogVisible2 = ref(true)
 
 const colorList = ref({
   pantoneC: [
@@ -173,7 +175,8 @@ const closeDialog = () => {
 const handleOpen = index => {
   dialogVisible.value = true
   //  更新已有 列表颜色
-  AddColorRef.value && AddColorRef.value.openPopover(index)
+  //  首次打开时 此面板还未挂载  故dom元素不存在
+  AddColorRef.value && AddColorRef.value.initPanel(index)
 }
 
 defineExpose({ handleOpen })

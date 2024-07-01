@@ -81,17 +81,6 @@
 import { pantoneColors } from "../../utils/calculateColor"
 
 const props = defineProps({
-  // modelValue: {
-  //   type: Object,
-  //   default: () => {
-  //     return {
-  //       hex: "#F4DA40",
-  //       pantone: "7404 C",
-  //       rgb: [244, 218, 64],
-  //     }
-  //   },
-  // },
-
   colorList: {
     type: Object,
     default: {

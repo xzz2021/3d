@@ -88,6 +88,7 @@ const addItem = (type, item) => {
 
 const emit = defineEmits(["closeDialog"])
 
+//  关闭面板   给颜色赋值  更新  面板勾选状态
 const closePopover = () => {
   console.log("🚀 ~ file: AddColor.vue:98 ~ currentIndex.value:", currentIndex.value)
   tableData.value[currentIndex.value].paint.colorList = addList.value
@@ -97,8 +98,11 @@ const closePopover = () => {
   emit("closeDialog")
 }
 
-const openPopover = index => {
+//  开启面板 初始化
+const initPanel = index => {
+  console.log("🚀 ~ file: AddColor.vue:103 ~ index:", index)
   currentIndex.value = index
+  console.log("🚀 ~ file: AddColor.vue:105 ~ currentIndex.value:", currentIndex.value)
   addList.value = tableData.value[index].paint.colorList
 }
 
@@ -106,7 +110,7 @@ const openPopover = index => {
 const deleteItem = (type, item) => {
   addList.value[type] = addList.value[type].filter(i => i !== item)
 }
-defineExpose({ addItem, colorSum, openPopover, closePopover })
+defineExpose({ addItem, colorSum, initPanel, closePopover })
 </script>
 
 <style lang="scss" scoped>
