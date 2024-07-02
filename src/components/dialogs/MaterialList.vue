@@ -5,30 +5,40 @@
  * MaterialPanel.vue
 -->
 <template>
-    <div class="container" >
-        <el-button  v-for="(item ,index) in props.list" :type="index == currentIndex? 'primary': ''" 
-        @click="selectItem(item, index)">{{ item.name }}</el-button>
-    </div>
-  </template>
-  
-  <script setup>
-  import { onMounted, ref } from 'vue'
-  import { useShopStore } from "@/pinia/shopTable.js"
-import { storeToRefs } from 'pinia';
+  <div class="container">
+    <el-button
+      v-for="(item, index) in props.list"
+      :key="item.name"
+      :type="index == currentIndex ? 'primary' : ''"
+      @click="selectItem(item, index)"
+    >
+      {{ item.name }}
+    </el-button>
+  </div>
+</template>
+
+<script setup>
+// import { onMounted, ref } from "vue"
+import { useShopStore } from "@/pinia/shopTable.js"
+import { storeToRefs } from "pinia"
 const store = useShopStore()
 
 const { tableData } = storeToRefs(store)
 const { updatePrice } = store
 
- const props = defineProps({
+const props = defineProps({
   list: {
     type: Array,
-    default: [{name: '树脂1', price: 1  }, {name: '树脂2', price: 2  }, {name: '树脂2', price: 3  }]
+    default: [
+      { name: "树脂1", price: 1 },
+      { name: "树脂2", price: 2 },
+      { name: "树脂3", price: 3 },
+    ],
   },
   curlistIndex: {
     type: Number,
-    default: 0
-  }
+    default: 0,
+  },
 })
 
 const currentIndex = ref(5)
@@ -44,10 +54,6 @@ const selectItem = (item, index) => {
 //   tableData.value[props.curlistIndex].material =  props.list[0]
 //   updatePrice()
 // })
-  
-  </script>
-  
-  <style lang="scss" scoped>
+</script>
 
-  </style>
-  
+<style lang="scss" scoped></style>

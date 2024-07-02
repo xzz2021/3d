@@ -10,12 +10,10 @@ export const useTable = () => {
     })
     if (response.ok) {
       const data = await response.json()
+      console.log("🚀 ~ file: useTable.js:13 ~ data:", data)
       const nuts = []
       const braces = []
-      const materials = {
-        tree: [],
-        metal: [],
-      }
+      const materials = []
       data.map(item => {
         if (item.categ_material_name === "铜螺母") {
           item.num = 0
@@ -24,15 +22,27 @@ export const useTable = () => {
           item.num = 0
           braces.push(item)
         } else if (item.categ_big_name === "原材料") {
-          if (item.categ_material_name === "金属") {
-            materials.metal.push(item)
-          } else if (item.categ_material_name === "树脂") {
-            materials.tree.push(item)
-          }
+          materials.push(item)
         }
       })
-      backendData.value = { nuts, braces, materials }
-      console.log("🚀 ~ file: useTable.js:35 ~ backendData.value:", backendData.value)
+      // braces
+      const sortedData = braces.sort((a, b) => {
+        if (a.default_code === "M10(1D-3D)") return 1
+        if (b.default_code === "M10(1D-3D)") return -1
+        return 0
+      })
+      const sortData2 = nuts.sort((a, b) => {
+        const extractNumbers = str => {
+          const match = str.match(/M(\d+(\.\d+)?)\*(\d+)/)
+          return match ? [parseFloat(match[1]), parseFloat(match[3])] : [0, 0]
+        }
+
+        const [numA1, numA2] = extractNumbers(a.default_code)
+        const [numB1, numB2] = extractNumbers(b.default_code)
+
+        return numA1 - numB1 || numA2 - numB2
+      })
+      backendData.value = { nuts: sortData2, braces: sortedData, materials }
     } else {
       console.error(response)
     }

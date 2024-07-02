@@ -76,7 +76,7 @@ export const useShopStore = defineStore("shopStore", () => {
       // grinding.status = colorLength != 0
       // grinding.price = surfaceArea / 100
       const final =
-        ((volume * material.price * (material.material_density || 1.4)) / 1000 +
+        ((((volume * material.list_price) / 1000) * (material.material_density || 1.4)) / 1000 +
           (surfaceArea * colorLength) / 100 +
           braces.price +
           nuts.price +

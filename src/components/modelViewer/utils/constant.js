@@ -2,8 +2,15 @@ export const RAWDATA = {
   imageUrl: "",
   volume: 26.47,
   material: {
-    name: "8200树脂",
-    key: "material",
+    id: 315,
+    name: "光敏树脂",
+    default_code: "C-UV 9400",
+    list_price: 500,
+    categ_big_name: "原材料",
+    categ_material_name: "树脂",
+    starting_price: 0,
+    material_density: 1.4,
+    material_density_uom: "cm²",
     price: 0,
   },
   grinding: {
