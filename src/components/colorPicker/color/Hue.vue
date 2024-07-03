@@ -98,7 +98,7 @@ export default defineComponent({
 <style lang="scss">
 .hue {
   position: relative;
-  margin-left: 8px;
+  margin-left: 20px;
   cursor: pointer;
   .slide {
     position: absolute;

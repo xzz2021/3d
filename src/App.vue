@@ -31,4 +31,7 @@ import ShopCard from "@/views/ShopCard.vue"
   display: flex;
   justify-content: space-between;
 }
+* {
+  box-sizing: content-box;
+}
 </style>

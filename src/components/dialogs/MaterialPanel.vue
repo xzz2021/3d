@@ -164,6 +164,7 @@ defineExpose({
   margin: 5px;
   border-radius: 5px;
   border: 1px solid #15f515;
+  box-sizing: content-box;
   &:hover {
   }
 }

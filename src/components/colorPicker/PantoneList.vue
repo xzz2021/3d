@@ -16,7 +16,7 @@
             @click="pushColor(item)"
             :style="{ 'background-color': item.hex }"
           >
-            <p
+            <div
               class="text"
               :style="{
                 color: getHighContrastColor(item.rgb),
@@ -25,7 +25,7 @@
               }"
             >
               {{ item.pantone }}
-            </p>
+            </div>
           </div>
         </div>
         <el-button type="primary">亮 光 C</el-button>
@@ -39,7 +39,7 @@
             @click="pushColor(item)"
             :style="{ 'background-color': item.hex }"
           >
-            <p
+            <div
               class="text"
               :style="{
                 color: getHighContrastColor(item.rgb),
@@ -48,7 +48,7 @@
               }"
             >
               {{ item.pantone }}
-            </p>
+            </div>
           </div>
         </div>
         <el-button class="titleBtn" type="primary" color="#1e22aa">哑 光 U</el-button>
@@ -56,7 +56,7 @@
     </div>
 
     <div class="color_select_box">
-      <p style="margin: 0 30px 0 5px">潘通色号:</p>
+      <div style="margin: 0 30px 0 5px">潘通色号:</div>
       <el-select
         v-model="selectValue"
         value-key="pantone"
@@ -222,7 +222,6 @@ const changeLineHeight = text => {
 .color_list_box {
   display: flex;
   align-items: center;
-
   .cBox,
   .uBox {
     text-align: center;
@@ -251,6 +250,11 @@ const changeLineHeight = text => {
       margin: 5px;
       font-size: small;
       border: 1px solid #03a9f3;
+      box-sizing: content-box;
+      display: flex;
+      justify-content: center; /* 水平居中 */
+      align-items: center;
+
       .text {
       }
     }

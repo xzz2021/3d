@@ -154,6 +154,7 @@ defineExpose({ addItem, colorSum, initPanel, closePopover })
         text-align: center;
         border-radius: 4px;
         position: relative;
+        box-sizing: content-box;
         &:hover .close_btn {
           display: block;
           // background-color: rgb(16, 240, 146);

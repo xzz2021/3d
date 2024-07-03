@@ -3,7 +3,7 @@
     <div class="color-set">
       <Saturation ref="saturation" :color="rgbString" :hsv="hsv" :size="hueHeight" @selectSaturation="selectSaturation" />
       <Hue ref="hue" :hsv="hsv" :width="hueWidth" :height="hueHeight" @selectHue="selectHue" />
-      <Alpha ref="alpha" :color="rgbString" :rgba="rgba" :width="hueWidth" :height="hueHeight" @selectAlpha="selectAlpha" />
+      <!-- <Alpha ref="alpha" :color="rgbString" :rgba="rgba" :width="hueWidth" :height="hueHeight" @selectAlpha="selectAlpha" /> -->
     </div>
     <div :style="{ height: previewHeight + 'px' }" class="color-show">
       <Preview :color="rgbaString" :width="previewWidth" :height="previewHeight" />
@@ -274,6 +274,7 @@ export default defineComponent({
   border-radius: 4px;
   box-shadow: 0 0 16px 0 rgba(0, 0, 0, 0.16);
   z-index: 1;
+  box-sizing: content-box;
   &.light {
     background: #f7f8f9;
     .color-show {
