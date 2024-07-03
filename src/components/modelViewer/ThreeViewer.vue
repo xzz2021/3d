@@ -35,7 +35,6 @@ import { useShopStore } from "@/pinia/shopTable.js"
 import { getALLInformation } from "./utils/getModelView.js"
 import { RAWDATA } from "./utils/constant"
 
-
 // 可以在组件中的任意位置访问 `store` 变量 ✨
 const store = useShopStore()
 const { addItem, IsExist, updatePrice } = store
@@ -70,7 +69,7 @@ let {
   addBox,
   addArrow,
   addAxes,
-  addGui,
+  addGui2,
   // addFaceGui,
   addEnvironment,
   changeFace,
@@ -122,7 +121,7 @@ const loadModel = async modelFileInfo => {
       let material = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.4, roughness: 0.3 })
       // let material = new THREE.MeshPhongMaterial({ color: 0xff5533, specular: 0x555555, shininess: 30 })
       mesh = simpleArr.includes(fileType) ? geometry.scene || geometry : new THREE.Mesh(geometry, material)
-      
+
       commonFn(material, modelFileInfo)
     },
     undefined,
@@ -149,8 +148,6 @@ const commonFn = (material, modelFileInfo) => {
   pointLight = addLightOfCamera()
 
   camera.value = createCarmera(size, center, mesh.up) // 创建相机
-
-  // addGui(mesh, material)
 
   // addEnvironment()
   // addFaceGui(camera)
@@ -185,7 +182,7 @@ const commonFn = (material, modelFileInfo) => {
 }
 
 const getInfoAndPushItem = (box, modelFileInfo) => {
- const { volume, surfaceArea } =  calVolume(mesh.geometry)
+  const { volume, surfaceArea } = calVolume(mesh.geometry)
   //  模型加载完之后 获取商品所有详细信息
   const allInfo = getALLInformation({ box })
   // 获取预览图片
@@ -197,7 +194,6 @@ const getInfoAndPushItem = (box, modelFileInfo) => {
   setTimeout(() => {
     updatePrice()
   }, 1000)
-
 }
 
 // const  roundUp = (num, decimalPlaces) => {

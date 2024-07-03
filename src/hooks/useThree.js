@@ -318,14 +318,17 @@ export const useThree = () => {
 
   // 设置相机位置和方向
   const createCarmera = (size, center) => {
-    // const { x, y, z } = up || { x: 0, y: 0, z: 1 } //  元素自带基底面  用于相机视角 默认为Z轴
-    const d = Math.sqrt(size.x * size.x + size.y * size.y)
+    const { x, y, z } = size //  元素自带基底面  用于相机视角 默认为Z轴
+    const ll = 1.2
+    const d = Math.sqrt(size.x * size.x + size.y * size.y) / ll
+    // const d = 300
     let camera = new THREE.OrthographicCamera(-d, d, d, -d, 0.1, 1000) //  直接展示物体每个面的真实 映射  眼 = 物体
-    // const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000)  //  模拟人眼  以点看物体  眼 < 物体
+
+    // let camera = new THREE.OrthographicCamera(-y / ll, y / ll, z / ll, -z / ll, 1, 1000) //  直接展示物体每个面的真实 映射  眼 = 物体
+    // const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000) //  模拟人眼  以点看物体  眼 < 物体
     // 计算相机位置
     // 定位相机到左上角
-    // camera.position.set(center.x - size.x, center.y + size.y, center.z)
-    camera.position.set(size.x + size.y, -size.y, center.z)
+    camera.position.set(x + y, -y, center.z)
     camera.lookAt(center)
     camera.up.set(0, 0, 1)
 
@@ -857,6 +860,27 @@ export const useThree = () => {
     // folder.add(params, 'fn').name('运动')
   }
 
+  const addGui2 = (mesh, material) => {
+    // 清除上一次gui添加的元素
+    gui && gui.destroy()
+    gui = new GUI()
+
+    const params = {
+      color: 0xffff00,
+      fn: () => {
+        gsap.to(cube.position, { x: 5, duration: 2, yoyo: true, repeat: -1 })
+      },
+    }
+
+    gui.addColor(params, "color").name("颜色")
+
+    // 添加函数 点击执行
+    // gui.addColor(params, "fn").name("运动")
+
+    // 添加文件夹
+    // const folder = gui.addFolder('设置文件夹')
+    // folder.add(params, 'fn').name('运动')
+  }
   const changeFace = (camera, i) => {
     const distanceToOrigin = camera.position.distanceTo(new THREE.Vector3(0, 0, 0))
     const positionArr = [
@@ -1016,7 +1040,7 @@ export const useThree = () => {
     addBox,
     addArrow,
     addLightOfCamera,
-    addGui,
+    addGui2,
     // addFaceGui,
     changeFace,
     restoreCarmera,
