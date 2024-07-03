@@ -26,6 +26,7 @@
       </el-table-column>
       <el-table-column label="材料" width="180">
         <template #default="scope">
+          <div>{{ scope.row.material.name + scope.row.material.default_code }}</div>
           <el-button type="primary" @click="openMaterialPanel(scope.$index)" size="small">选择材料</el-button>
         </template>
       </el-table-column>
@@ -38,7 +39,11 @@
               size="small"
               @change="handleChangePicker($event, scope.$index)"
             >
-              喷漆
+              <span>喷漆</span>
+
+              <el-tooltip content="喷漆工艺必须进行精打磨" placement="top">
+                <el-icon class="iconBox"><MagicStick /></el-icon>
+              </el-tooltip>
             </el-checkbox>
 
             <el-checkbox
@@ -63,8 +68,16 @@
               :disabled="scope.row.grinding.checkDisabled"
               @change="handleChangeGrinding($event, scope.$index)"
             >
-              精打磨
-              <span>{{ scope.row.grinding.status ? " 价格: " + scope.row.grinding.price + "元" : "" }}</span>
+              <span>精打磨</span>
+              <!-- html换行字符 
+              -->
+              <el-tooltip
+                :content="`所有商品都会免费赠送普通打磨, 当前商品精打磨价格: ${scope.row.grinding.rawPrice}元`"
+                placement="top"
+              >
+                <el-icon class="iconBox"><MagicStick /></el-icon>
+              </el-tooltip>
+              <!-- <span>{{ scope.row.grinding.status ? " 价格: " + scope.row.grinding.price + "元" : "" }}</span> -->
             </el-checkbox>
           </div>
         </template>
@@ -99,8 +112,8 @@
         <template #default="scope">
           <div class="operateBox">
             <!-- <el-badge :value="scope.row." class="item">
-            </el-badge> -->
-            <el-button type="primary" :icon="ShoppingCartFull" circle @click="addToCart(scope.row)"></el-button>
+            <!-- <el-button type="primary" :icon="ShoppingCartFull" circle @click="addToCart(scope.row)"></el-button> -->
+            <el-button type="primary" :icon="Plus" circle @click="addToCart(scope.row)"></el-button>
             <el-button type="success" style="margin-left: 0" :icon="CopyDocument" circle @click="copyItem(scope.row)"></el-button>
             <el-button type="danger" style="margin-left: 0" :icon="Delete" circle @click="deleteItem(scope.$index)"></el-button>
           </div>
@@ -115,8 +128,7 @@
 </template>
 
 <script setup>
-import { Delete, CopyDocument, ShoppingCartFull, Picture as IconPicture } from "@element-plus/icons-vue"
-// import { Picture as IconPicture } from "@element-plus/icons-vue"
+import { Delete, CopyDocument, ShoppingCartFull, Picture as IconPicture, MagicStick, Plus } from "@element-plus/icons-vue"
 import XzzColorPicker from "../components/colorPicker/XzzColorPicker.vue"
 import { useMitt } from "../hooks/mitt"
 import { useMitt2 } from "../hooks/mitt2"
@@ -217,8 +229,8 @@ const deliveryTimeArr = ref([
 ])
 
 const handleChangeGrinding = (v, index) => {
-  const { surfaceArea } = tableData.value[index]
-  tableData.value[index].grinding.price = v ? Number((surfaceArea / 100).toFixed(2)) : 0
+  const { grinding } = tableData.value[index]
+  grinding.price = v ? grinding.rawPrice : 0
   updatePrice()
 }
 
@@ -394,6 +406,10 @@ const addToCart = async item => {
 //   text-align: center;
 // }
 
+.iconBox {
+  cursor: zoom-in;
+  margin: 0 3px;
+}
 .process_box {
   display: flex;
   flex-direction: column; /* 使 Radio 垂直排列 */

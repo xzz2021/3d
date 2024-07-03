@@ -7,8 +7,8 @@
 <template>
   <div class="container">
     <el-dialog v-model="dialogVisible" width="780" draggable>
-      <el-tabs type="border-card" class="demo-tabs" style="height: 500px" @tab-click="tabClick">
-        <el-tab-pane v-for="(item, index) in listType" :key="index" :label="item">
+      <el-tabs type="border-card" class="demo-tabs" style="height: 500px" @tab-click="tabClick" v-model="activeTabName">
+        <el-tab-pane v-for="(item, index) in listType" :key="index" :label="item" :name="item">
           <template #label>
             <span class="custom-tabs-label">{{ item }}</span>
           </template>
@@ -43,7 +43,6 @@
 <script setup>
 import { useShopStore } from "@/pinia/shopTable.js"
 import { storeToRefs } from "pinia"
-import { onMounted } from "vue"
 const store = useShopStore()
 const { tableData } = storeToRefs(store)
 const { updatePrice } = store
@@ -57,7 +56,18 @@ const props = defineProps({
 
 const currentIndex = ref(0)
 
-const selectedItem = ref({})
+const selectedItem = ref({
+  id: 315,
+  name: "光敏树脂",
+  default_code: "C-UV 9400",
+  list_price: 500,
+  categ_big_name: "原材料",
+  categ_material_name: "树脂",
+  starting_price: 0,
+  material_density: 1.4,
+  material_density_uom: "cm²",
+  price: 0,
+})
 const selectItem = (item, index) => {
   // item.price = item.list_price / 1000
   currentIndex.value = index
@@ -68,7 +78,6 @@ const selectItem = (item, index) => {
 
 const confirm = () => {
   dialogVisible.value = false
-  console.log("🚀 ~ file: MaterialPanel.vue:68 ~ selectedItem.value:", selectedItem.value)
   tableData.value[curlistIndex.value].material = selectedItem.value
   updatePrice()
 }
@@ -78,9 +87,23 @@ const curlistIndex = ref(0)
 
 const dialogVisible = ref(false)
 const handleOpen = curIndex => {
-  updateList(0)
-  dialogVisible.value = true
   curlistIndex.value = curIndex
+  // 打开面板时  根据已有的值 主动触发tab切换 高亮选中值
+  autoSelect()
+  dialogVisible.value = true
+}
+
+const activeTabName = ref("树脂")
+const autoSelect = () => {
+  const material = tableData.value[curlistIndex.value].material
+  const tabName = material.categ_material_name
+  activeTabName.value = tabName //  主动触发激活选择tab
+  list.value = props.materialList.filter(item2 => item2.categ_material_name == tabName)
+  list.value.map((item, index) => {
+    if (item.default_code == material.default_code) {
+      currentIndex.value = index
+    }
+  })
 }
 
 const list = ref([])
@@ -100,9 +123,8 @@ const tabClick = (pane, event) => {
 const updateList = i => {
   const curTab = listType[i]
   list.value = props.materialList.filter(item => item.categ_material_name == curTab)
-  console.log("🚀 ~ file: MaterialPanel.vue:86 ~ list.value:", list.value)
 }
-onMounted(() => {})
+
 defineExpose({
   handleOpen,
 })

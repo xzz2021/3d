@@ -100,8 +100,6 @@ const handleOpen = index => {
     item.num = 0
   })
   curIndex.value = index
-  console.log("🚀 ~ file: BracesPanel.vue:103 ~ index:", index)
-  console.log("🚀 ~ file: BracesPanel.vue:104 ~ tableData.value[index]:", tableData.value[index])
   const total = tableData.value[index].braces.total
   // 遍历  赋值  已有 数据
   if (total.length > 0) {
