@@ -52,7 +52,8 @@ export const useThree = () => {
     // preserveDrawingBuffer: true,
   })
   // let controls =  new OrbitControls(camera, renderer.domElement)
-  let gridHelper, savedPosition, savedRotation, controls, savedTarget, savedZoom, gui
+  let gridHelper, savedPosition, savedRotation, controls, savedZoom, gui
+  const savedTarget = ref(null)
 
   const canvasWidth = window.innerWidth
   const canvasHeight = window.innerHeight
@@ -71,7 +72,7 @@ export const useThree = () => {
     // 设置渲染器屏幕像素比  高分辨率屏幕上 渲染更精细  但不建议直接设置  会导致性能问题
     renderer.setPixelRatio(window.devicePixelRatio || 1)
 
-    containerRef.value && containerRef.value.appendChild(renderer.domElement) // 挂载
+    // containerRef.value && containerRef.value.appendChild(renderer.domElement) // 挂载
   }
   // 添加光源  不然模型会是全黑色的
   const createLight000 = size => {
@@ -409,7 +410,7 @@ export const useThree = () => {
     controls.autoRotateSpeed = 3
     controls.autoRotate = true
 
-    savedTarget = controls.target.clone()
+    savedTarget.value = controls.target.clone()
 
     // const transControl = new TransformControls(camera, dom)
     // transControl.setTranslationSnap(1)
@@ -1000,7 +1001,7 @@ export const useThree = () => {
     camera.rotation.copy(savedRotation)
     camera.zoom = savedZoom
     camera.updateProjectionMatrix()
-    controls.target.copy(savedTarget)
+    controls.target.copy(savedTarget.value)
     controls.update()
   }
   //  变换视角

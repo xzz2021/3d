@@ -146,7 +146,7 @@ const commonFn = (material, modelFileInfo) => {
   const { box, center, size } = getMeshAndSize(mesh)
   // createGridHelper(size)   // 创建网格底座
 
-  // scene.background = createTexture()
+  scene.background = createTexture()
 
   createLight(size) // 添加光源
 
