@@ -17,7 +17,7 @@
   </div>
 </template>
 <script setup>
-import { useThree } from "@/hooks/useThree.js"
+import { useThree } from "./hooks/useThree.js"
 
 const props = defineProps({
   camera2: {

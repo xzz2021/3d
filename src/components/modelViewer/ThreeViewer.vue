@@ -24,7 +24,7 @@
 <script setup>
 import { ref } from "vue"
 import * as THREE from "three"
-import { useThree } from "@/hooks/useThree.js"
+import { useThree } from "./hooks/useThree.js"
 import { useFn } from "./hooks/fn.js"
 import { useLoading } from "@/hooks/useLoading.js"
 import AxisLine from "./AxisLine.vue"
