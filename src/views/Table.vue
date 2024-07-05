@@ -295,7 +295,7 @@ const addToCart = async item => {
     },
 
     body: JSON.stringify({
-      ...params,
+      params,
     }),
   })
   if (response.ok) {
