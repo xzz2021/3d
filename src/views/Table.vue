@@ -113,9 +113,25 @@
           <div class="operateBox">
             <!-- <el-badge :value="scope.row." class="item">
              <el-button type="primary" :icon="ShoppingCartFull" circle @click="addToCart(scope.row)"></el-button> -->
-            <el-button type="primary" :icon="Plus" circle @click="addToCart(scope.row)"></el-button>
-            <el-button type="success" style="margin-left: 0" :icon="CopyDocument" circle @click="copyItem(scope.row)"></el-button>
-            <el-button type="danger" style="margin-left: 0" :icon="Delete" circle @click="deleteItem(scope.$index)"></el-button>
+            <div class="btnBox">
+              <el-text class="mx-1" type="primary">加入购物车</el-text>
+              <!-- <span>加入购物车</span> -->
+              <el-button type="primary" :icon="Plus" circle @click="addToCart(scope.row)"></el-button>
+            </div>
+            <div class="btnBox">
+              <el-text class="mx-1" type="success">复制产品</el-text>
+              <el-button
+                type="success"
+                style="margin-left: 0"
+                :icon="CopyDocument"
+                circle
+                @click="copyItem(scope.row)"
+              ></el-button>
+            </div>
+            <div class="btnBox">
+              <el-text class="mx-1" type="danger">删除产品</el-text>
+              <el-button type="danger" style="margin-left: 0" :icon="Delete" circle @click="deleteItem(scope.$index)"></el-button>
+            </div>
           </div>
         </template>
       </el-table-column>
@@ -361,6 +377,13 @@ const addToCart = async item => {
   // :deep(.el-button) {
   //   margin-bottom: 2px;
   // }
+  .btnBox {
+    display: flex;
+    align-items: center;
+    width: 110px;
+    justify-content: space-between;
+    margin-bottom: 2px;
+  }
 }
 :deep(.operateBox .el-icon) {
   font-size: 18px;

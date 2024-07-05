@@ -25,23 +25,20 @@
 import { ref, onMounted } from "vue"
 import * as THREE from "three"
 import { useThree } from "@/hooks/useThree.js"
-// import { useFace } from "@/hooks/useFace.js"
+import { useFn } from "./hooks/fn.js"
 import { useLoading } from "@/hooks/useLoading.js"
 import AxisLine from "./AxisLine.vue"
 import { calVolume } from "@/utils/calVolume.js"
 import { useMitt } from "@/hooks/mitt.js"
 import { FullScreen } from "@element-plus/icons-vue"
 import { useShopStore } from "@/pinia/shopTable.js"
-import { getALLInformation } from "./utils/getModelView.js"
 import { RAWDATA } from "./utils/constant"
 
+let { isFullscreen, toggleFullscreen, dialogTableVisible, dialogOpen, openDialog, restoreCarmera, getALLInformation } = useFn()
 // 可以在组件中的任意位置访问 `store` 变量 ✨
 const store = useShopStore()
 const { addItem, IsExist, updatePrice } = store
-const isFullscreen = ref(false)
-const toggleFullscreen = () => {
-  isFullscreen.value = !isFullscreen.value
-}
+
 const dialogRef = ref(null)
 // 接收props
 const props = defineProps({
@@ -52,9 +49,7 @@ const props = defineProps({
 })
 
 // threejs   scene、mesh 、renderer、controls 内部有只读属性的value  无法使用vue的响应式  ref 包裹
-const dialogTableVisible = ref(true)
 
-const dialogOpen = ref(false)
 const { onEvent, emitEvent } = useMitt()
 onEvent("openPreview", modelFileInfo => {
   loadModel(modelFileInfo)
@@ -73,12 +68,11 @@ let {
   // addFaceGui,
   addEnvironment,
   changeFace,
-  restoreCarmera,
   createLight,
   createControls,
   chooseLoader,
   createCarmera,
-  getModelView,
+
   clearScene,
   LoadStep,
   LoadIges,
@@ -87,6 +81,7 @@ let {
   totastMesh,
   createTexture,
   containerRef,
+  initialStatus,
 } = useThree()
 
 const { openLoading, closeLoading } = useLoading()
@@ -116,16 +111,12 @@ const loadModel = async modelFileInfo => {
     filePath,
     geometry => {
       const simpleArr = ["obj", "dae", "3ds"]
-      // const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256)
-      // cubeRenderTarget.texture.type = THREE.HalfFloatType
-
       let material = new THREE.MeshStandardMaterial({
         color: 0xffffff,
         metalness: 0.4,
         roughness: 0.3,
       })
       mesh = simpleArr.includes(fileType) ? geometry.scene || geometry : new THREE.Mesh(geometry, material)
-
       commonFn(material, modelFileInfo)
     },
     undefined,
@@ -137,7 +128,7 @@ const loadModel = async modelFileInfo => {
 
 const backCarmera = () => {
   //  为何要传递参数？  因为数据不是响应式的， 模型加载后 变更后的参数只能实时传递？？
-  restoreCarmera(camera.value, controls)
+  restoreCarmera(camera.value, controls, initialStatus.value)
 }
 
 const commonFn = (material, modelFileInfo) => {
@@ -163,9 +154,10 @@ const commonFn = (material, modelFileInfo) => {
   // detectWallThickness(mesh)
   // 有了渲染器之后   一定要先创建相机   再创建控制器
   controls = createControls(camera.value, renderer.domElement)
+
   // totastMesh(controls)
   containerRef.value && containerRef.value.appendChild(renderer.domElement) // 挂载
-  // captureScreenshot()
+
   // addAxes(size) // 添加轴辅助器  原点坐标指示
 
   // 添加可视化包围盒
@@ -175,10 +167,7 @@ const commonFn = (material, modelFileInfo) => {
 
   animate()
 
-  setTimeout(() => {
-    dialogTableVisible.value = true
-    dialogOpen.value = true
-  }, 300)
+  openDialog()
 
   //  新增商品推送之前线检查 是否当前项存在
   const check = IsExist(modelFileInfo.filePath)
@@ -186,13 +175,14 @@ const commonFn = (material, modelFileInfo) => {
 }
 
 const getInfoAndPushItem = (box, modelFileInfo) => {
-  const { volume, surfaceArea } = calVolume(mesh.geometry)
   //  模型加载完之后 获取商品所有详细信息
-  const allInfo = getALLInformation({ box })
+  const allInfo = getALLInformation(box, mesh.geometry)
+  console.log("🚀 ~ file: ThreeViewer.vue:180 ~ allInfo:", allInfo)
   // 获取预览图片
   renderer.render(scene, camera.value)
   const imageUrl = renderer.domElement.toDataURL("image/jpeg")
-  const newItem = { ...RAWDATA, ...allInfo, volume, surfaceArea, imageUrl, modelFileInfo, ...modelFileInfo.resData }
+  const newItem = { ...RAWDATA, ...allInfo, imageUrl, modelFileInfo, ...modelFileInfo.resData }
+  console.log("🚀 ~ file: ThreeViewer.vue:185 ~ newItem:", newItem)
   addItem(newItem)
 
   setTimeout(() => {
@@ -200,32 +190,13 @@ const getInfoAndPushItem = (box, modelFileInfo) => {
   }, 1000)
 }
 
-// const  roundUp = (num, decimalPlaces) => {
-//     const factor = Math.pow(10, decimalPlaces);
-//     return Math.ceil(num * factor) / factor;
-// }
-// const checkPrice = (newItem) => {
-//   const colorList = newItem.paint.colorList
-//     const model3d = newItem.model3d
-//     const col = colorList.c.length + colorList.u.length
-//     newItem.finalPrice = (model3d.volume *  newItem.material.price * 1.4 / 1000
-//       + model3d.surfaceArea * col / 1000
-//     + newItem.deliveryTime.price) * newItem.count.val
-//     newItem.finalPrice = roundUp(newItem.finalPrice, 2)
-//   return newItem
-// }
 const animate = () => {
   requestAnimationFrame(animate)
-
   if (mesh && camera.value) {
-    controls.update() // enableDamping 启用阻尼效果 必须更新控制器
+    controls.update()
     // 使点光源跟随相机
     const vector = camera.value.position.clone()
     pointLight.position.set(vector.x, vector.y, vector.z) //点光源位置
-    //主场景
-    renderer.setViewport(0, 0, 600, 600) //主场景视区
-    renderer.autoClear = false //【scene.autoClear一定要关闭】
-
     // 显示器每刷新一次就重新render一次  相当于实时刷新渲染的场景
     // 也就是这里定义的方法 会随显示屏每一帧刷新率而刷新
     renderer.render(scene, camera.value)
@@ -246,11 +217,6 @@ const toggleLabel = () => {
   }
   labelStatus.value = !labelStatus.value
 }
-
-const isMounted = ref(false)
-onMounted(() => {
-  isMounted.value = true
-})
 defineExpose({ loadModel })
 </script>
 

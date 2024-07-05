@@ -31,6 +31,8 @@ import imgUrl5 from "./rural/nz.png"
 import { GUI } from "three/examples/jsm/libs/lil-gui.module.min.js"
 export const useThree = () => {
   const containerRef = ref(null)
+
+  const initialStatus = ref({})
   // const ll = 0.6
   // const aspect = window.innerWidth / window.innerHeight  * 0.6// 窗口宽高比
   // const winW = window.innerWidth
@@ -53,7 +55,6 @@ export const useThree = () => {
   })
   // let controls =  new OrbitControls(camera, renderer.domElement)
   let gridHelper, savedPosition, savedRotation, controls, savedZoom, gui
-  const savedTarget = ref(null)
 
   const canvasWidth = window.innerWidth
   const canvasHeight = window.innerHeight
@@ -71,6 +72,9 @@ export const useThree = () => {
     // renderer.setClearColor(0x8c8aff); // 设置为白色
     // 设置渲染器屏幕像素比  高分辨率屏幕上 渲染更精细  但不建议直接设置  会导致性能问题
     renderer.setPixelRatio(window.devicePixelRatio || 1)
+    renderer.setViewport(0, 0, 600, 600) //主场景视区
+
+    renderer.autoClear = false //【scene.autoClear一定要关闭】
 
     // containerRef.value && containerRef.value.appendChild(renderer.domElement) // 挂载
   }
@@ -349,8 +353,8 @@ export const useThree = () => {
 
     // const helper = new THREE.CameraHelper(camera)
     // scene.add(helper)
-    savedPosition = camera.position.clone()
-    savedRotation = camera.rotation.clone()
+    initialStatus.value.savedPosition = camera.position.clone()
+    initialStatus.value.savedRotation = camera.rotation.clone()
     savedZoom = camera.zoom
     return camera
   }
@@ -370,22 +374,6 @@ export const useThree = () => {
     mesh.position.sub(center) // 将模型居中
     const size = box.getSize(new THREE.Vector3())
     return { box, center, size }
-  }
-
-  //  获取模型信息
-  const getModelView = box => {
-    // 获取模型的宽高
-    const model = {}
-    model.width = box.max.x - box.min.x
-    model.height = box.max.y - box.min.y
-    model.depth = box.max.z - box.min.z
-    // 计算模型的包装盒体积
-    model.volume = model.width * model.height * (box.max.z - box.min.z)
-    for (const [key, value] of Object.entries(model)) {
-      model[key] = Math.round(value * 1000) / 1000
-    }
-
-    return model
   }
 
   const createControls = (camera, dom, type = "orbit") => {
@@ -410,7 +398,7 @@ export const useThree = () => {
     controls.autoRotateSpeed = 3
     controls.autoRotate = true
 
-    savedTarget.value = controls.target.clone()
+    initialStatus.value.controlsarget = controls.target.clone()
 
     // const transControl = new TransformControls(camera, dom)
     // transControl.setTranslationSnap(1)
@@ -994,16 +982,6 @@ export const useThree = () => {
     return sprite
   }
 
-  //  恢复模型（相机） 初始状态
-  const restoreCarmera = (camera, controls) => {
-    //  为何要传递参数？  因为数据不是响应式的， 模型加载后 变更后的参数只能实时传递？？
-    camera.position.copy(savedPosition)
-    camera.rotation.copy(savedRotation)
-    camera.zoom = savedZoom
-    camera.updateProjectionMatrix()
-    controls.target.copy(savedTarget.value)
-    controls.update()
-  }
   //  变换视角
   const changeCamera = face => {
     // 获取相机与原点的距离
@@ -1067,14 +1045,12 @@ export const useThree = () => {
     addGui2,
     // addFaceGui,
     changeFace,
-    restoreCarmera,
     addEnvironment,
     createControls,
     getMeshAndSize,
     createLight,
     chooseLoader,
     createCarmera,
-    getModelView,
     createGridHelper,
     addAxes,
     clearScene,
@@ -1087,5 +1063,6 @@ export const useThree = () => {
     savedPosition,
     createTexture,
     containerRef,
+    initialStatus,
   }
 }
