@@ -128,7 +128,7 @@
 </template>
 
 <script setup>
-import { Delete, CopyDocument, ShoppingCartFull, Picture as IconPicture, MagicStick, Plus } from "@element-plus/icons-vue"
+import { Delete, CopyDocument, Picture as IconPicture, MagicStick, Plus } from "@element-plus/icons-vue"
 import XzzColorPicker from "../components/colorPicker/XzzColorPicker.vue"
 import { useMitt } from "../hooks/mitt"
 import { useMitt2 } from "../hooks/mitt2"

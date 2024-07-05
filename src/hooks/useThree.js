@@ -20,16 +20,28 @@ import { TransformControls } from "three/addons/controls/TransformControls.js"
 
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js"
 
+import imgUrl0 from "./rural/px.png"
+import imgUrl1 from "./rural/nx.png"
+import imgUrl2 from "./rural/py.png"
+import imgUrl3 from "./rural/ny.png"
+import imgUrl4 from "./rural/pz.png"
+import imgUrl5 from "./rural/nz.png"
+
 // threejs 内置了lil-gui  不需要引入其他模块
 import { GUI } from "three/examples/jsm/libs/lil-gui.module.min.js"
 export const useThree = () => {
+  const containerRef = ref(null)
   // const ll = 0.6
   // const aspect = window.innerWidth / window.innerHeight  * 0.6// 窗口宽高比
   // const winW = window.innerWidth
   // const winH = window.innerHeight
   let scene = new THREE.Scene()
+  // const path = "../components/modelViewier/texture/country/"
+  // const urls = [`${path}px.jpg`, `${path}nx.jpg`, `${path}py.jpg`, `${path}ny.jpg`, `${path}pz.jpg`, `${path}nz.jpg`]
+  // const texture = new THREE.CubeTextureLoader().load(urls)
+  // scene.background = texture
   // scene.background = new THREE.Color(0x8c8aff) //  设置场景的背景色0x8c8aff
-  scene.background = new THREE.Color(0xf2f2f2) //  设置场景的背景色0x8c8aff
+  // scene.background = new THREE.Color(0xf2f2f2) //  设置场景的背景色0x8c8aff
 
   // let d = 75 // 控制视锥的尺寸  //  控制相机与模型中心的距离
   // let camera = new THREE.OrthographicCamera(-d, d, d, -d, 1, 1000);
@@ -58,6 +70,8 @@ export const useThree = () => {
     // renderer.setClearColor(0x8c8aff); // 设置为白色
     // 设置渲染器屏幕像素比  高分辨率屏幕上 渲染更精细  但不建议直接设置  会导致性能问题
     renderer.setPixelRatio(window.devicePixelRatio || 1)
+
+    containerRef.value && containerRef.value.appendChild(renderer.domElement) // 挂载
   }
   // 添加光源  不然模型会是全黑色的
   const createLight000 = size => {
@@ -322,15 +336,15 @@ export const useThree = () => {
     const ll = 1.2
     const d = Math.sqrt(size.x * size.x + size.y * size.y) / ll
     // const d = 300
-    let camera = new THREE.OrthographicCamera(-d, d, d, -d, 0.1, 1000) //  直接展示物体每个面的真实 映射  眼 = 物体
+    // let camera = new THREE.OrthographicCamera(-d, d, d, -d, 0.1, 1000) //  直接展示物体每个面的真实 映射  眼 = 物体
 
     // let camera = new THREE.OrthographicCamera(-y / ll, y / ll, z / ll, -z / ll, 1, 1000) //  直接展示物体每个面的真实 映射  眼 = 物体
-    // const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000) //  模拟人眼  以点看物体  眼 < 物体
+    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000) //  模拟人眼  以点看物体  眼 < 物体
     // 计算相机位置
     // 定位相机到左上角
     camera.position.set(x + y, -y, center.z)
     camera.lookAt(center)
-    camera.up.set(0, 0, 1)
+    // camera.up.set(0, 0, 1)
 
     // const helper = new THREE.CameraHelper(camera)
     // scene.add(helper)
@@ -390,6 +404,10 @@ export const useThree = () => {
     controls.target.set(0, 0, 0)
     controls.minDistance = 1
     controls.maxDistance = 1000
+
+    //  默认旋转
+    controls.autoRotateSpeed = 3
+    controls.autoRotate = true
 
     savedTarget = controls.target.clone()
 
@@ -466,7 +484,7 @@ export const useThree = () => {
     while (scene.children.length > 0) {
       // 获取第一个子对象
       const object = scene.children[0]
-
+      // scene.background = null
       // geometry（几何体）或material（材质）可以在3D物体之间共享,所以THREE不会主动移除
       // 如果对象是一个网格
       if (object.isMesh) {
@@ -767,8 +785,19 @@ export const useThree = () => {
     renderer.toneMappingExposure = 1.0
   }
 
-  const addTextureMap = () => {
-    // TEXTURE MAP
+  const createTexture = () => {
+    const urls = [imgUrl0, imgUrl1, imgUrl2, imgUrl3, imgUrl4, imgUrl5]
+    // console.log("🚀 ~ file: ThreeViewer.vue:167 ~ urls:", urls)
+    return new THREE.CubeTextureLoader().load(
+      urls,
+      () => {
+        // console.log("Environment map loaded.")
+      },
+      undefined,
+      err => {
+        console.error("An error happened:", err)
+      },
+    )
   }
 
   const addGui = (mesh, material) => {
@@ -991,14 +1020,8 @@ export const useThree = () => {
   }
 
   const totastMesh = controls => {
-    // if (!controls.autoRotate) {
-    //   controls.autoRotate = true
-    // } else {
-    //   controls.autoRotate = false
-    // }
-    // console.log("🚀 ~ file: useThree.js:837 ~ totastMesh ~ controls.autoRotate:", controls?.autoRotate)
-    controls.autoRotateSpeed = 6
-    controls.autoRotate = controls?.autoRotate ? false : true
+    // controls.autoRotateSpeed = 3
+    controls.autoRotate = !controls?.autoRotate
   }
   const toggleFullScreen = renderer => {
     // 切换 全屏 展示  控制canvas
@@ -1061,5 +1084,7 @@ export const useThree = () => {
     totastMesh,
     savedRotation,
     savedPosition,
+    createTexture,
+    containerRef,
   }
 }

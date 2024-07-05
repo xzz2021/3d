@@ -6,6 +6,7 @@
 -->
 <template>
   <div class="container">
+    <!-- <img src="http://xzz2022.top:2222/rural/px.png" alt="" srcset="" style="width: 100px; height: 100px" /> -->
     <el-dialog v-model="dialogVisible" width="920" draggable title="选择材料">
       <el-tabs type="card" class="demo-tabs" style="height: 500px" @tab-click="tabClick" v-model="activeTabName">
         <el-tab-pane size="small" v-for="(item, index) in listType" :key="index" :label="item" :name="item">
@@ -20,7 +21,8 @@
               @click="selectItem(item, index)"
               class="itemBox"
             >
-              <el-image class="imgBox" :src="item.img" fit="cover" />
+              <!-- <el-image class="imgBox" :src="item.image" fit="cover" crossorigin="anonymous" /> -->
+              <el-image class="imgBox" src="http://xzz2022.top:2222/shuzhi9400.png" fit="cover" crossorigin="anonymous" />
               <div class="priceBox">￥{{ item.list_price / 1000 }}起</div>
               <div class="nameBox">{{ item.default_code + item.name }}</div>
             </div>
@@ -55,6 +57,9 @@
 <script setup>
 import { useShopStore } from "@/pinia/shopTable.js"
 import { storeToRefs } from "pinia"
+
+// import { baseUrl } from "@/utils/env"
+
 const store = useShopStore()
 const { tableData } = storeToRefs(store)
 const { updatePrice } = store

@@ -85,9 +85,9 @@ let {
   getMeshAndSize,
   addLightOfCamera,
   totastMesh,
+  createTexture,
+  containerRef,
 } = useThree()
-
-const containerRef = ref(null)
 
 const { openLoading, closeLoading } = useLoading()
 
@@ -116,10 +116,14 @@ const loadModel = async modelFileInfo => {
     filePath,
     geometry => {
       const simpleArr = ["obj", "dae", "3ds"]
-      const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256)
-      cubeRenderTarget.texture.type = THREE.HalfFloatType
-      let material = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.4, roughness: 0.3 })
-      // let material = new THREE.MeshPhongMaterial({ color: 0xff5533, specular: 0x555555, shininess: 30 })
+      // const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256)
+      // cubeRenderTarget.texture.type = THREE.HalfFloatType
+
+      let material = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        metalness: 0.4,
+        roughness: 0.3,
+      })
       mesh = simpleArr.includes(fileType) ? geometry.scene || geometry : new THREE.Mesh(geometry, material)
 
       commonFn(material, modelFileInfo)
@@ -142,17 +146,16 @@ const commonFn = (material, modelFileInfo) => {
   const { box, center, size } = getMeshAndSize(mesh)
   // createGridHelper(size)   // 创建网格底座
 
+  // scene.background = createTexture()
+
   createLight(size) // 添加光源
 
   // 添加一个跟随相机的点光源 此处必须添加
   pointLight = addLightOfCamera()
 
   camera.value = createCarmera(size, center, mesh.up) // 创建相机
-
   // addEnvironment()
-  // addFaceGui(camera)
-
-  // scene.background = new THREE.Color( 0xAAAAAA );
+  // addF  aceGui  (camera)E:\xzz\development\3d\src\components\modelViewer\texture\rural_asphalt_road_2k.hdr
 
   scene.add(mesh)
 
@@ -160,7 +163,8 @@ const commonFn = (material, modelFileInfo) => {
   // detectWallThickness(mesh)
   // 有了渲染器之后   一定要先创建相机   再创建控制器
   controls = createControls(camera.value, renderer.domElement)
-  containerRef.value.appendChild(renderer.domElement) // 挂载
+  // totastMesh(controls)
+  containerRef.value && containerRef.value.appendChild(renderer.domElement) // 挂载
   // captureScreenshot()
   // addAxes(size) // 添加轴辅助器  原点坐标指示
 
