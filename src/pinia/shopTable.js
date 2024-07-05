@@ -72,8 +72,8 @@ export const useShopStore = defineStore("shopStore", () => {
     tableData.value.map(item => {
       const { c, u } = item.paint.colorList
       const colorLength = c.length + u.length
-      const { grinding, material, deliveryTime, count, surfaceArea, volume, nuts, braces } = item
-
+      const { grinding, material, deliveryTime, count, model3d, nuts, braces } = item
+      const { surfaceArea, volume } = model3d
       const rawPrice = Number((surfaceArea / 100).toFixed(2))
       grinding.rawPrice = rawPrice
       const final =

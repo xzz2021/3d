@@ -1,6 +1,5 @@
 export const RAWDATA = {
   imageUrl: "",
-  volume: 26.47,
   material: {
     id: 315,
     name: "光敏树脂",

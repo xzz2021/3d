@@ -44,7 +44,7 @@ export const useFn = () => {
     model3d.volume = volume
     model3d.surfaceArea = surfaceArea
 
-    return { model3d }
+    return model3d
   }
 
   const volumeOfTriangle = (p1, p2, p3) => {

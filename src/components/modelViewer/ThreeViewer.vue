@@ -22,13 +22,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref } from "vue"
 import * as THREE from "three"
 import { useThree } from "@/hooks/useThree.js"
 import { useFn } from "./hooks/fn.js"
 import { useLoading } from "@/hooks/useLoading.js"
 import AxisLine from "./AxisLine.vue"
-import { calVolume } from "@/utils/calVolume.js"
 import { useMitt } from "@/hooks/mitt.js"
 import { FullScreen } from "@element-plus/icons-vue"
 import { useShopStore } from "@/pinia/shopTable.js"
@@ -50,7 +49,7 @@ const props = defineProps({
 
 // threejs   scene、mesh 、renderer、controls 内部有只读属性的value  无法使用vue的响应式  ref 包裹
 
-const { onEvent, emitEvent } = useMitt()
+const { onEvent } = useMitt()
 onEvent("openPreview", modelFileInfo => {
   loadModel(modelFileInfo)
 })
@@ -72,7 +71,6 @@ let {
   createControls,
   chooseLoader,
   createCarmera,
-
   clearScene,
   LoadStep,
   LoadIges,
@@ -176,13 +174,11 @@ const commonFn = (material, modelFileInfo) => {
 
 const getInfoAndPushItem = (box, modelFileInfo) => {
   //  模型加载完之后 获取商品所有详细信息
-  const allInfo = getALLInformation(box, mesh.geometry)
-  console.log("🚀 ~ file: ThreeViewer.vue:180 ~ allInfo:", allInfo)
+  const model3d = getALLInformation(box, mesh.geometry)
   // 获取预览图片
   renderer.render(scene, camera.value)
   const imageUrl = renderer.domElement.toDataURL("image/jpeg")
-  const newItem = { ...RAWDATA, ...allInfo, imageUrl, modelFileInfo, ...modelFileInfo.resData }
-  console.log("🚀 ~ file: ThreeViewer.vue:185 ~ newItem:", newItem)
+  const newItem = { ...RAWDATA, model3d, imageUrl, modelFileInfo }
   addItem(newItem)
 
   setTimeout(() => {

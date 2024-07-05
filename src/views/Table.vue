@@ -114,7 +114,7 @@
             <!-- <el-badge :value="scope.row." class="item">
              <el-button type="primary" :icon="ShoppingCartFull" circle @click="addToCart(scope.row)"></el-button> -->
             <div class="btnBox">
-              <el-text class="mx-1" type="primary">加入购物车</el-text>
+              <el-text class="mx-1" type="primary">加购物车</el-text>
               <!-- <span>加入购物车</span> -->
               <el-button type="primary" :icon="Plus" circle @click="addToCart(scope.row)"></el-button>
             </div>
@@ -265,27 +265,8 @@ const addToCart = async item => {
   if (totalPrice.value == 0) {
     return ElMessage.error("请选择材料后再添加购物车!")
   }
-  // console.log("🚀 ~ file: Table.vue:244 ~ addToCart ~ item:", item)
-  // return
-  const {
-    count,
-    finalPrice,
-    product_tmpl_id,
-    product_id,
-    file_url,
-    volume,
-    surfaceArea,
-    imageUrl,
-    modelFileInfo,
-    ...restParams
-  } = item
-  // const variant_info = [{name: "表面积", val: surfaceArea}, {name: "体积", val: volume}]
-  // Object.values(restParams).forEach(value => {
-  //   if (value.status != false) {
-  //     variant_info.push(value)
-  //   }
-  // })
-  restParams.model3d = { ...restParams.model3d, volume, surfaceArea }
+  const { count, finalPrice, imageUrl, modelFileInfo, ...restParams } = item
+  const { product_tmpl_id, product_id, file_url } = modelFileInfo
 
   const params = {
     // product_tmpl_id,
