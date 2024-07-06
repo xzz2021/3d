@@ -5,7 +5,7 @@
     :z-index="2001"
     ref="dialogRef"
     draggable
-    width="674"
+    width="800"
     top="5vh"
     destroy-on-close
     @open="bootPanel"
@@ -47,7 +47,7 @@ const props = defineProps({
   },
 })
 
-// threejs   scene、mesh 、renderer.value、controls 内部有只读属性的value  无法使用vue的响应式  ref 包裹
+// threejs   scene、mesh 、renderer、controls 内部有只读属性的value  无法使用vue的响应式  ref 包裹
 const curModelFileInfo = ref({})
 const { onEvent } = useMitt()
 onEvent("openPreview", modelFileInfo => {
@@ -57,6 +57,7 @@ onEvent("openPreview", modelFileInfo => {
 const labelStatus = ref(false)
 let mesh, pointLight, labelArr
 const camera = ref(null)
+
 let {
   scene,
   controls,
@@ -80,6 +81,7 @@ let {
   createTexture,
   containerRef,
   initialStatus,
+  createRenderer,
 } = useThree()
 
 const { openLoading, closeLoading } = useLoading()
@@ -105,8 +107,9 @@ const loadModel = async modelFileInfo => {
   }
   if (loadView) {
     const { geometry, material } = loadView
+    // material.depthWrite = true // 默认情况下应启用深度写入
+    // material.depthTest = false // 解决 启用环境贴图后 模型闪烁的问题
     mesh = new THREE.Mesh(geometry, material)
-
     // bootPanel(modelFileInfo)
     // commonFn(modelFileInfo)
     return
@@ -122,6 +125,9 @@ const loadModel = async modelFileInfo => {
         metalness: 0.4,
         roughness: 0.3,
       })
+      // material.depthWrite = true // 默认情况下应启用深度写入
+
+      // material.depthTest = false // 解决 启用环境贴图后 模型闪烁的问题
       mesh = simpleArr.includes(fileType) ? geometry.scene || geometry : new THREE.Mesh(geometry, material)
 
       // commonFn(modelFileInfo)
@@ -143,27 +149,9 @@ const backCarmera = () => {
 
 const renderer = ref(null)
 
+renderer.value = createRenderer()
+
 const commonFn = async modelFileInfo => {
-  console.log("🚀 ~ file: ThreeViewer.vue:143 ~ commonFn:")
-
-  renderer.value = null
-  renderer.value = new THREE.WebGLRenderer({
-    antialias: true,
-    powerPreference: "high-performance",
-    logarithmicDepthBuffer: true,
-    // preserveDrawingBuffer: true,
-  })
-  renderer.value.setSize(600, 600)
-  // renderer.value.setSize(canvasWidth, canvasHeight)
-  renderer.value.shadowMap.enabled = true // 启用阴影
-  renderer.value.shadowMap.type = THREE.PCFSoftShadowMap
-  //  此处与renderer.value.autoClear  冲突
-  // renderer.value.setClearColor(0x8c8aff); // 设置为白色
-  // 设置渲染器屏幕像素比  高分辨率屏幕上 渲染更精细  但不建议直接设置  会导致性能问题
-  renderer.value.setPixelRatio(window.devicePixelRatio || 1)
-  renderer.value.setViewport(0, 0, 600, 600) //主场景视区
-
-  renderer.value.autoClear = false //【scene.autoClear一定要关闭】
   // 此函数最好放当前模块
   // 计算模型的中心点
   const { box, center, size } = getMeshAndSize(mesh)
@@ -181,6 +169,7 @@ const commonFn = async modelFileInfo => {
   // addF  aceGui  (camera)E:\xzz\development\3d\src\components\modelViewer\texture\rural_asphalt_road_2k.hdr
 
   scene.add(mesh)
+  autoResize(camera.value, renderer.value)
 
   // checkThickness(mesh)
   // detectWallThickness(mesh)
@@ -245,6 +234,21 @@ const toggleLabel = () => {
   }
   labelStatus.value = !labelStatus.value
 }
+
+watch(isFullscreen, () => {
+  autoResize(camera.value, renderer.value)
+})
+
+const autoResize = (camera, renderer) => {
+  nextTick(() => {
+    const width = document.getElementById("threecontainer").offsetWidth
+    const height = document.getElementById("threecontainer").offsetHeight
+    camera.aspect = width / height
+    camera.updateProjectionMatrix()
+    renderer.setSize(width, height)
+  })
+}
+
 defineExpose({ loadModel })
 </script>
 
@@ -258,8 +262,8 @@ defineExpose({ loadModel })
   border: 1px solid black;
   text-align: center;
   text-align: -webkit-center;
-  margin: 20px;
-  // margin: 20px;
+  margin: 20px 0;
+  height: 90%;
   // width: 600px;
   // height: 600px;
 }
@@ -297,5 +301,8 @@ defineExpose({ loadModel })
   position: absolute;
   top: 12px;
   right: 45px;
+}
+.el-dialog__body {
+  height: 90%;
 }
 </style>

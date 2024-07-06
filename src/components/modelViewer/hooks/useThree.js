@@ -20,12 +20,12 @@ import { TransformControls } from "three/addons/controls/TransformControls.js"
 
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js"
 
-import imgUrl0 from "./rural/px.png"
-import imgUrl1 from "./rural/nx.png"
-import imgUrl2 from "./rural/py.png"
-import imgUrl3 from "./rural/ny.png"
-import imgUrl4 from "./rural/pz.png"
-import imgUrl5 from "./rural/nz.png"
+import imgUrl0 from "./rooitou/px.png"
+import imgUrl1 from "./rooitou/nx.png"
+import imgUrl2 from "./rooitou/py.png"
+import imgUrl3 from "./rooitou/ny.png"
+import imgUrl4 from "./rooitou/pz.png"
+import imgUrl5 from "./rooitou/nz.png"
 
 // threejs 内置了lil-gui  不需要引入其他模块
 import { GUI } from "three/examples/jsm/libs/lil-gui.module.min.js"
@@ -56,9 +56,6 @@ export const useThree = () => {
   // let controls =  new OrbitControls(camera, renderer.domElement)
   let gridHelper, savedPosition, savedRotation, controls, savedZoom, gui
 
-  const canvasWidth = window.innerWidth
-  const canvasHeight = window.innerHeight
-
   // const init = () => {
   //   //  在此处初始化的模块 才能避免二次加载叠加
   //   createRenderer() //  创建渲染器
@@ -78,6 +75,25 @@ export const useThree = () => {
 
   //   // containerRef.value && containerRef.value.appendChild(renderer.domElement) // 挂载
   // }
+  const createRenderer = () => {
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      powerPreference: "high-performance",
+      logarithmicDepthBuffer: true,
+      // preserveDrawingBuffer: true,
+    })
+    renderer.setSize(600, 600)
+    // renderer.setSize(canvasWidth, canvasHeight)
+    renderer.shadowMap.enabled = true // 启用阴影
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap
+    //  此处与renderer.autoClear  冲突
+    // renderer.setClearColor(0x8c8aff); // 设置为白色
+    // 设置渲染器屏幕像素比  高分辨率屏幕上 渲染更精细  但不建议直接设置  会导致性能问题
+    renderer.setPixelRatio(window.devicePixelRatio || 1)
+    renderer.setViewport(0, 0, 600, 600) //主场景视区
+    renderer.autoClear = false //【scene.autoClear一定要关闭】
+    return renderer
+  }
 
   const createLight = size => {
     // 添加灯源前先移除所有的灯光
@@ -169,6 +185,8 @@ export const useThree = () => {
 
     // let camera = new THREE.OrthographicCamera(-y / ll, y / ll, z / ll, -z / ll, 1, 1000) //  直接展示物体每个面的真实 映射  眼 = 物体
     const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000) //  模拟人眼  以点看物体  眼 < 物体
+
+    // camera.updateProjectionMatrix()
     // 计算相机位置
     // 定位相机到左上角
     camera.position.set(x + y, -y, center.z)
@@ -886,5 +904,6 @@ export const useThree = () => {
     createTexture,
     containerRef,
     initialStatus,
+    createRenderer,
   }
 }
