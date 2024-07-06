@@ -22,7 +22,7 @@ export const useFn = () => {
     //  为何要传递参数？  因为数据不是响应式的， 模型加载后 变更后的参数只能实时传递？？
     camera.position.copy(savedPosition)
     camera.rotation.copy(savedRotation)
-    camera.zoom = savedZoom
+    // camera.zoom = savedZoom
     camera.updateProjectionMatrix()
     controls.target.copy(controlsarget)
     controls.update()
@@ -91,6 +91,16 @@ export const useFn = () => {
     }
   }
 
+  const autoResize = (camera, renderer) => {
+    nextTick(() => {
+      const width = document.getElementById("threecontainer").offsetWidth
+      const height = document.getElementById("threecontainer").offsetHeight
+      camera.aspect = width / height
+      camera.updateProjectionMatrix()
+      renderer.setSize(width, height)
+    })
+  }
+
   return {
     isFullscreen,
     toggleFullscreen,
@@ -99,5 +109,6 @@ export const useFn = () => {
     restoreCarmera,
     // getModelView,
     getALLInformation,
+    autoResize,
   }
 }

@@ -33,7 +33,7 @@ import { FullScreen } from "@element-plus/icons-vue"
 import { useShopStore } from "@/pinia/shopTable.js"
 import { RAWDATA } from "./utils/constant"
 
-let { isFullscreen, toggleFullscreen, dialogTableVisible, openDialog, restoreCarmera, getALLInformation } = useFn()
+let { isFullscreen, toggleFullscreen, dialogTableVisible, openDialog, restoreCarmera, getALLInformation, autoResize } = useFn()
 // 可以在组件中的任意位置访问 `store` 变量 ✨
 const store = useShopStore()
 const { addItem, IsExist, updatePrice } = store
@@ -157,7 +157,7 @@ const commonFn = async modelFileInfo => {
   const { box, center, size } = getMeshAndSize(mesh)
   // createGridHelper(size)   // 创建网格底座
 
-  scene.background = createTexture()
+  // scene.background = createTexture()
 
   createLight(size) // 添加光源
 
@@ -169,6 +169,8 @@ const commonFn = async modelFileInfo => {
   // addF  aceGui  (camera)E:\xzz\development\3d\src\components\modelViewer\texture\rural_asphalt_road_2k.hdr
 
   scene.add(mesh)
+  console.log("🚀: mesh", mesh)
+
   autoResize(camera.value, renderer.value)
 
   // checkThickness(mesh)
@@ -179,10 +181,10 @@ const commonFn = async modelFileInfo => {
   containerRef.value && containerRef.value.appendChild(renderer.value.domElement) // 挂载
   // totastMesh(controls)
 
-  // addAxes(size) // 添加轴辅助器  原点坐标指示
+  addAxes(size) // 添加轴辅助器  原点坐标指示
 
   // 添加可视化包围盒
-  // labelArr = addBox(mesh)
+  labelArr = addBox(mesh)
   // addArrow()
   closeLoading()
 
@@ -196,15 +198,61 @@ const commonFn = async modelFileInfo => {
 const getInfoAndPushItem = (box, modelFileInfo) => {
   //  模型加载完之后 获取商品所有详细信息
   const model3d = getALLInformation(box, mesh.geometry)
-  // 获取预览图片
-  renderer.value.render(scene, camera.value)
-  const imageUrl = renderer.value.domElement.toDataURL("image/jpeg")
+  const imageUrl = screenShot(box)
   const newItem = { ...RAWDATA, model3d, imageUrl, modelFileInfo }
   addItem(newItem)
-
   setTimeout(() => {
     updatePrice()
   }, 1000)
+}
+
+const findMinIndex = arr => {
+  if (arr.length === 0) {
+    return -1 // 如果数组为空，返回 -1 表示无效索引
+  }
+  let minIndex = 0
+  for (let i = 1; i < arr.length; i++) {
+    if (arr[i] < arr[minIndex]) {
+      minIndex = i
+    }
+  }
+  return minIndex
+}
+
+const screenShot = box => {
+  // 1. 先比较获取面积最大的面
+  const size = box.getSize(new THREE.Vector3())
+  const { x, y, z } = size
+  // // 2. 从而确定轴  改变相机显示视角
+  let index = findMinIndex([z, 999999, y, 9999999, x])
+  changeFace(camera.value, index)
+
+  const maxDimension = Math.max(x, y, z)
+  const fov = camera.value.fov * (Math.PI / 180) // convert vertical fov to radians
+  const fitHeightDistance = maxDimension / (2 * Math.atan(fov / 2))
+  const fitWidthDistance = fitHeightDistance / camera.value.aspect
+  const distance = Math.max(fitHeightDistance, fitWidthDistance)
+  const obj = { x: 4, y: 2, z: 0 }
+  Object.entries(obj).forEach(([key, value]) => {
+    if (index == value) {
+      camera.value.position[key] = distance
+      // camera.value.position[key] = size[key]
+    }
+  })
+
+  const { center } = getMeshAndSize(mesh)
+
+  camera.value.lookAt(center)
+
+  // 3. 调整模型 适配 canvas  大小
+
+  // 获取预览图片
+  renderer.value.render(scene, camera.value)
+  const imageUrl = renderer.value.domElement.toDataURL("image/jpeg")
+
+  // 4. 恢复初始视角
+  restoreCarmera(camera.value, controls, initialStatus.value)
+  return imageUrl
 }
 
 const animate = () => {
@@ -234,20 +282,9 @@ const toggleLabel = () => {
   }
   labelStatus.value = !labelStatus.value
 }
-
 watch(isFullscreen, () => {
   autoResize(camera.value, renderer.value)
 })
-
-const autoResize = (camera, renderer) => {
-  nextTick(() => {
-    const width = document.getElementById("threecontainer").offsetWidth
-    const height = document.getElementById("threecontainer").offsetHeight
-    camera.aspect = width / height
-    camera.updateProjectionMatrix()
-    renderer.setSize(width, height)
-  })
-}
 
 defineExpose({ loadModel })
 </script>

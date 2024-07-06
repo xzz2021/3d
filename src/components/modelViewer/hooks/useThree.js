@@ -42,7 +42,7 @@ export const useThree = () => {
   // const urls = [`${path}px.jpg`, `${path}nx.jpg`, `${path}py.jpg`, `${path}ny.jpg`, `${path}pz.jpg`, `${path}nz.jpg`]
   // const texture = new THREE.CubeTextureLoader().load(urls)
   // scene.background = texture
-  // scene.background = new THREE.Color(0x8c8aff) //  设置场景的背景色0x8c8aff
+  scene.background = new THREE.Color(0x8c8aff) //  设置场景的背景色0x8c8aff
   // scene.background = new THREE.Color(0xf2f2f2) //  设置场景的背景色0x8c8aff
 
   // let d = 75 // 控制视锥的尺寸  //  控制相机与模型中心的距离
@@ -54,27 +54,8 @@ export const useThree = () => {
   //   // preserveDrawingBuffer: true,
   // })
   // let controls =  new OrbitControls(camera, renderer.domElement)
-  let gridHelper, savedPosition, savedRotation, controls, savedZoom, gui
+  let gridHelper, savedPosition, savedRotation, controls, gui
 
-  // const init = () => {
-  //   //  在此处初始化的模块 才能避免二次加载叠加
-  //   createRenderer() //  创建渲染器
-  // }
-  // const createRenderer = () => {
-  //   renderer.setSize(600, 600)
-  //   // renderer.setSize(canvasWidth, canvasHeight)
-  //   renderer.shadowMap.enabled = true // 启用阴影
-  //   renderer.shadowMap.type = THREE.PCFSoftShadowMap
-  //   //  此处与renderer.autoClear  冲突
-  //   // renderer.setClearColor(0x8c8aff); // 设置为白色
-  //   // 设置渲染器屏幕像素比  高分辨率屏幕上 渲染更精细  但不建议直接设置  会导致性能问题
-  //   renderer.setPixelRatio(window.devicePixelRatio || 1)
-  //   renderer.setViewport(0, 0, 600, 600) //主场景视区
-
-  //   renderer.autoClear = false //【scene.autoClear一定要关闭】
-
-  //   // containerRef.value && containerRef.value.appendChild(renderer.domElement) // 挂载
-  // }
   const createRenderer = () => {
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -178,13 +159,12 @@ export const useThree = () => {
   // 设置相机位置和方向
   const createCarmera = (size, center) => {
     const { x, y, z } = size //  元素自带基底面  用于相机视角 默认为Z轴
-    const ll = 1.2
-    const d = Math.sqrt(size.x * size.x + size.y * size.y) / ll
+    // const ll = 1.2
+    // const d = Math.sqrt(size.x * size.x + size.y * size.y) / ll
     // const d = 300
     // let camera = new THREE.OrthographicCamera(-d, d, d, -d, 0.1, 1000) //  直接展示物体每个面的真实 映射  眼 = 物体
-
     // let camera = new THREE.OrthographicCamera(-y / ll, y / ll, z / ll, -z / ll, 1, 1000) //  直接展示物体每个面的真实 映射  眼 = 物体
-    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000) //  模拟人眼  以点看物体  眼 < 物体
+    const camera = new THREE.PerspectiveCamera(75, 1, 1, 1000) //  模拟人眼  以点看物体  眼 < 物体
 
     // camera.updateProjectionMatrix()
     // 计算相机位置
@@ -197,7 +177,6 @@ export const useThree = () => {
     // scene.add(helper)
     initialStatus.value.savedPosition = camera.position.clone()
     initialStatus.value.savedRotation = camera.rotation.clone()
-    savedZoom = camera.zoom
     return camera
   }
 
@@ -741,7 +720,11 @@ export const useThree = () => {
     // const folder = gui.addFolder('设置文件夹')
     // folder.add(params, 'fn').name('运动')
   }
+
+  //  变换视角
   const changeFace = (camera, i) => {
+    //   0     1     4     5     3     2
+    // +蓝z   -蓝z  +红x  -红x  -绿y   +绿y
     const distanceToOrigin = camera.position.distanceTo(new THREE.Vector3(0, 0, 0))
     const positionArr = [
       new THREE.Vector3(0, 0, distanceToOrigin), // 正上方
@@ -822,22 +805,6 @@ export const useThree = () => {
     sprite.scale.set(scale, scale * (canvas.height / canvas.width), 1)
 
     return sprite
-  }
-
-  //  变换视角
-  const changeCamera = face => {
-    // 获取相机与原点的距离
-    const distanceToOrigin = camera.position.distanceTo(new THREE.Vector3(0, 0, 0))
-    const positionArr = [
-      new THREE.Vector3(0, 0, distanceToOrigin), // 正上方
-      new THREE.Vector3(distanceToOrigin, 0, 0), // 正前方
-      new THREE.Vector3(0, distanceToOrigin, 0), // 正右方
-      new THREE.Vector3(0, 0, -distanceToOrigin), // 正下方
-      new THREE.Vector3(-distanceToOrigin, 0, 0), // 正后方
-      new THREE.Vector3(0, -distanceToOrigin, 0), // 正左方
-    ]
-    camera.zoom = savedZoom
-    camera.position.copy(positionArr[face])
   }
 
   const totastMesh = controls => {
