@@ -47,213 +47,37 @@ export const useThree = () => {
 
   // let d = 75 // 控制视锥的尺寸  //  控制相机与模型中心的距离
   // let camera = new THREE.OrthographicCamera(-d, d, d, -d, 1, 1000);
-  let renderer = new THREE.WebGLRenderer({
-    antialias: true,
-    powerPreference: "high-performance",
-    logarithmicDepthBuffer: true,
-    // preserveDrawingBuffer: true,
-  })
+  // let renderer = new THREE.WebGLRenderer({
+  //   antialias: true,
+  //   powerPreference: "high-performance",
+  //   logarithmicDepthBuffer: true,
+  //   // preserveDrawingBuffer: true,
+  // })
   // let controls =  new OrbitControls(camera, renderer.domElement)
   let gridHelper, savedPosition, savedRotation, controls, savedZoom, gui
 
   const canvasWidth = window.innerWidth
   const canvasHeight = window.innerHeight
 
-  const init = () => {
-    //  在此处初始化的模块 才能避免二次加载叠加
-    createRenderer() //  创建渲染器
-  }
-  const createRenderer = () => {
-    renderer.setSize(600, 600)
-    // renderer.setSize(canvasWidth, canvasHeight)
-    renderer.shadowMap.enabled = true // 启用阴影
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap
-    //  此处与renderer.autoClear  冲突
-    // renderer.setClearColor(0x8c8aff); // 设置为白色
-    // 设置渲染器屏幕像素比  高分辨率屏幕上 渲染更精细  但不建议直接设置  会导致性能问题
-    renderer.setPixelRatio(window.devicePixelRatio || 1)
-    renderer.setViewport(0, 0, 600, 600) //主场景视区
+  // const init = () => {
+  //   //  在此处初始化的模块 才能避免二次加载叠加
+  //   createRenderer() //  创建渲染器
+  // }
+  // const createRenderer = () => {
+  //   renderer.setSize(600, 600)
+  //   // renderer.setSize(canvasWidth, canvasHeight)
+  //   renderer.shadowMap.enabled = true // 启用阴影
+  //   renderer.shadowMap.type = THREE.PCFSoftShadowMap
+  //   //  此处与renderer.autoClear  冲突
+  //   // renderer.setClearColor(0x8c8aff); // 设置为白色
+  //   // 设置渲染器屏幕像素比  高分辨率屏幕上 渲染更精细  但不建议直接设置  会导致性能问题
+  //   renderer.setPixelRatio(window.devicePixelRatio || 1)
+  //   renderer.setViewport(0, 0, 600, 600) //主场景视区
 
-    renderer.autoClear = false //【scene.autoClear一定要关闭】
+  //   renderer.autoClear = false //【scene.autoClear一定要关闭】
 
-    // containerRef.value && containerRef.value.appendChild(renderer.domElement) // 挂载
-  }
-  // 添加光源  不然模型会是全黑色的
-  const createLight000 = size => {
-    // 添加灯源前先移除所有的灯光
-    removeAllLights(scene)
-    //  平行光的距离影响也很大  太远会显得很模糊
-    // const lightX = size.x + 50
-    // const lightY = size.y + (lightX / size.y) * 50
-    const ll = size.x + size.y
-    const lightX = ll
-    const lightY = ll
-    // const lightY = size.y + 50
-    const lightZ = size.z + 50
-    // const halfZ = lightZ / 2
-    const halfZ = lightZ / 4
-    // 添加光源  不然模型会是全黑色的
-
-    const color = 0xffffff
-    const softLight = 0x404040 // 柔和的白光
-    const skyColor = 0xb1e1ff // light blue
-    const groundColor = 0xb97a20 // brownish orange
-    const intensity = 0.8
-
-    //  环境光   没有方向，无法产生阴影   通常的作用是提亮场景，让暗部不要太暗
-    const ambientLight = new THREE.AmbientLight(softLight, intensity * 3)
-    scene.add(ambientLight)
-
-    //  点光源
-    // const pointLight = new THREE.PointLight(color, intensity)
-    // pointLight.position.set(lightX / 2, lightX / 2, halfZ)
-    // pointLight.distance = 200
-    // scene.add(pointLight)
-    // const helper = new THREE.PointLightHelper(pointLight)
-    // scene.add(helper)
-
-    //  半球光
-    // const hemiLight = new THREE.HemisphereLight(skyColor, groundColor, intensity)
-    // scene.add(hemiLight)
-    //  return
-
-    //  聚光灯
-    // const spotLight = new THREE.SpotLight(color, intensity)
-    // spotLight.position.set(0, 0, lightZ)
-    // spotLight.castShadow = true // 启用阴影
-    // scene.add(spotLight)
-    // scene.add(spotLight.target)
-    // const spotHelper = new THREE.SpotLightHelper(spotLight)
-    // scene.add(spotHelper)
-
-    //  方向光  用来表现太阳光照的效果
-    // 正前XY
-    // const directionLight2 = new THREE.DirectionalLight(0xffffff, intensity)
-    // directionLight2.position.set(lightX, -lightY, lightZ)
-    // // directionLight2.target.position.set(0, 0, 0)
-    // const directionLight2Helper = new THREE.DirectionalLightHelper(directionLight2)
-    // scene.add(directionLight2)
-    // scene.add(directionLight2Helper)
-
-    //  return
-    // 右前
-    const directionLight22 = new THREE.DirectionalLight(0xffffff, intensity)
-    directionLight22.position.set(lightX, lightY, lightZ)
-    // directionLight22.castShadow = true //  设定当前光可用投射阴影  注意 不要设置过多，否则会导致性能问题
-    const directionLight22Helper = new THREE.DirectionalLightHelper(directionLight22)
-    scene.add(directionLight22Helper)
-    scene.add(directionLight22)
-    // 左后
-    // const directionLight77 = new THREE.DirectionalLight(0xffffff, intensity)
-    // directionLight77.position.set(-lightX, -lightY, lightZ)
-    // // directionLight77.target.position.set(0, 0, 0)
-    // const directionLight77Helper = new THREE.DirectionalLightHelper(directionLight77)
-    // scene.add(directionLight77Helper)
-    // scene.add(directionLight77)
-    // // 右后
-    // const directionLight27 = new THREE.DirectionalLight(0xffffff, intensity)
-    // directionLight27.position.set(lightX, -lightY, lightZ)
-    // // directionLight27.target.position.set(0, 0, 0)
-    // const directionLight27Helper = new THREE.DirectionalLightHelper(directionLight27)
-    // scene.add(directionLight27Helper)
-    // scene.add(directionLight27)
-
-    // 顶部
-    // const directionLightBottom = new THREE.DirectionalLight(0xffffff, intensity)
-    // directionLightBottom.position.set(0, 0, lightZ + 50)
-    // const directionLightBottomHelper = new THREE.DirectionalLightHelper(directionLightBottom)
-    // scene.add(directionLightBottomHelper)
-    // scene.add(directionLightBottom)
-
-    // 底部
-    // const directionLightTop = new THREE.DirectionalLight(0xffffff, intensity)
-    // directionLightTop.position.set(0, 0, -lightZ - 50)
-    // const directionLightTopHelper = new THREE.DirectionalLightHelper(directionLightTop)
-    // scene.add(directionLightTopHelper)
-    // scene.add(directionLightTop)
-
-    // X 正前方
-    // const directionLight44 = new THREE.DirectionalLight(0xffffff, intensity)
-    // directionLight44.position.set(-lightX, lightY, 0)
-    // const directionLight44Helper = new THREE.DirectionalLightHelper(directionLight44)
-    // scene.add(directionLight44Helper)
-    // scene.add(directionLight44)
-
-    // const directionLight443 = new THREE.DirectionalLight(0xffffff, intensity)
-    // directionLight443.position.set(lightX, lightY, 0)
-    // const directionLight443Helper = new THREE.DirectionalLightHelper(directionLight443)
-    // scene.add(directionLight443Helper)
-    // scene.add(directionLight443)
-    //    // -X 正前方
-    //   const directionLightBack = new THREE.DirectionalLight(0xffffff,0.8)
-    //   directionLightBack.position.set(-lightX * 2, 0, halfZ);
-    //    scene.add(directionLightBack);
-
-    // // 左面
-    // const directionLightLeft = new THREE.DirectionalLight(0xffffff, intensity)
-    // directionLightLeft.position.set(0, -lightY, lightZ)
-    // const directionLightLeftHelper = new THREE.DirectionalLightHelper(directionLightLeft)
-    // scene.add(directionLightLeftHelper)
-    // scene.add(directionLightLeft)
-
-    // //  右侧
-    // const directionLightRight = new THREE.DirectionalLight(0xffffff, intensity)
-    // directionLightRight.position.set(0, lightY, lightZ)
-    // const directionLightRightHelper = new THREE.DirectionalLightHelper(directionLightRight)
-    // scene.add(directionLightRightHelper)
-    // scene.add(directionLightRight)
-
-    // // // 左面
-    // const directionLightFront = new THREE.DirectionalLight(0xffffff, intensity)
-    // directionLightFront.position.set(lightX, 0, lightZ)
-    // const directionLightFrontHelper = new THREE.DirectionalLightHelper(directionLightFront)
-    // scene.add(directionLightFrontHelper)
-    // scene.add(directionLightFront)
-
-    // //  右侧
-    // const directionLightBack = new THREE.DirectionalLight(0xffffff, intensity)
-    // directionLightRight.position.set(-lightX, 0, lightZ)
-    // const directionLightBackHelper = new THREE.DirectionalLightHelper(directionLightBack)
-    // scene.add(directionLightBackHelper)
-    // scene.add(directionLightBack)
-
-    //  正前方45度
-    // const directionLight33 = new THREE.DirectionalLight(0xffffff,0.1)
-    // directionLight33.position.set(0, lightY, halfZ);
-    // scene.add(directionLight33);
-
-    //  正后方45度
-    //   const directionLightBack45 = new THREE.DirectionalLight(0xffffff,0.5)
-    //   directionLightBack45.position.set(-170, 0, 170);
-    //   scene.add(directionLightBack45);
-
-    // const spotLight = new THREE.SpotLight(0xffffff,0.3);
-    // spotLight.position.set(0, 0, 200);
-    // spotLight.castShadow = true;
-    // spotLight.angle = Math.PI / 6;
-    // spotLight.penumbra = 0.1;
-    // spotLight.decay = 2;
-    // spotLight.distance = 200;
-    // scene.add(spotLight);
-
-    // const spotLightFront = new THREE.SpotLight(0xffffff,0.3);
-    // spotLightFront.position.set(200, 0, 0);
-    // spotLightFront.castShadow = true;
-    // spotLightFront.angle = Math.PI / 6;
-    // spotLightFront.penumbra = 0.1;
-    // spotLightFront.decay = 2;
-    // spotLightFront.distance = 200;
-    // scene.add(spotLightFront);
-
-    // const spotLightRight = new THREE.SpotLight(0xffffff,0.3);
-    // spotLightRight.position.set(0, 200, 0);
-    // spotLightRight.castShadow = true;
-    // spotLightRight.angle = Math.PI / 6;
-    // spotLightRight.penumbra = 0.1;
-    // spotLightRight.decay = 2;
-    // spotLightRight.distance = 200;
-    // scene.add(spotLightRight);
-  }
+  //   // containerRef.value && containerRef.value.appendChild(renderer.domElement) // 挂载
+  // }
 
   const createLight = size => {
     // 添加灯源前先移除所有的灯光
@@ -395,8 +219,8 @@ export const useThree = () => {
     controls.maxDistance = 1000
 
     //  默认旋转
-    controls.autoRotateSpeed = 3
-    controls.autoRotate = true
+    // controls.autoRotateSpeed = 3
+    // controls.autoRotate = true
 
     initialStatus.value.controlsarget = controls.target.clone()
 
@@ -765,7 +589,7 @@ export const useThree = () => {
     scene.add(arrowHelper)
   }
 
-  const addEnvironment = () => {
+  const addEnvironment = renderer => {
     // 添加 官方预设环境
     const pmremGenerator = new THREE.PMREMGenerator(renderer)
     pmremGenerator.compileEquirectangularShader()
@@ -1024,18 +848,16 @@ export const useThree = () => {
     }
     return needResize
   }
-  onMounted(() => {
-    init()
-  })
-  onUnmounted(() => {
-    renderer.dispose()
-  })
+  // onMounted(() => {
+  //   init()
+  // })
+  // onUnmounted(() => {
+  //   renderer.dispose()
+  // })
   return {
     scene,
-    renderer,
     controls,
     gui,
-    createRenderer,
     // pointLight,
     // camera,
     // controls,

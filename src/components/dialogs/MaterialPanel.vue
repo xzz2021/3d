@@ -7,7 +7,7 @@
 <template>
   <div class="container">
     <!-- <img src="http://xzz2022.top:2222/rural/px.png" alt="" srcset="" style="width: 100px; height: 100px" /> -->
-    <el-dialog v-model="dialogVisible" width="920" draggable title="选择材料">
+    <el-dialog v-model="dialogVisible" width="920" draggable top="5vh" title="选择材料">
       <el-tabs type="card" class="demo-tabs" style="height: 500px" @tab-click="tabClick" v-model="activeTabName">
         <el-tab-pane size="small" v-for="(item, index) in listType" :key="index" :label="item" :name="item">
           <template #label>

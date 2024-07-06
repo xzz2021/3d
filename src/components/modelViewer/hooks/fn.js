@@ -7,12 +7,10 @@ export const useFn = () => {
     isFullscreen.value = !isFullscreen.value
   }
 
-  const dialogTableVisible = ref(true)
-  const dialogOpen = ref(false)
+  const dialogTableVisible = ref(!true)
   const openDialog = () => {
     setTimeout(() => {
       dialogTableVisible.value = true
-      dialogOpen.value = true
     }, 300)
   }
 
@@ -96,7 +94,6 @@ export const useFn = () => {
     isFullscreen,
     toggleFullscreen,
     dialogTableVisible,
-    dialogOpen,
     openDialog,
     restoreCarmera,
     // getModelView,
