@@ -1,5 +1,4 @@
 import * as THREE from "three"
-import { watch } from "vue"
 
 //  独立于模型渲染之外的功能函数
 export const useFn = () => {

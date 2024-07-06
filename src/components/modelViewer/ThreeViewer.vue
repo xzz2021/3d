@@ -7,10 +7,11 @@
     draggable
     width="800"
     top="5vh"
-    destroy-on-close
     @open="bootPanel"
+    title="模型预览"
   >
     <template #header>
+      <div>模型预览</div>
       <el-button class="el-dialog__headerbtn el-dialog__fullbtn" @click="toggleFullscreen" link :icon="FullScreen" />
     </template>
 
@@ -290,17 +291,17 @@ defineExpose({ loadModel })
 </script>
 
 <style lang="scss" scope>
-#container {
-  width: 100%;
-  height: 100%;
-}
+// #container {
+//   width: 100%;
+//   height: 100%;
+// }
 #threecontainer {
   position: relative;
   border: 1px solid black;
   text-align: center;
   text-align: -webkit-center;
-  margin: 20px 0;
-  height: 90%;
+  // margin: 20px 0;
+  height: 100%;
   // width: 600px;
   // height: 600px;
 }
@@ -340,6 +341,8 @@ defineExpose({ loadModel })
   right: 45px;
 }
 .el-dialog__body {
-  height: 90%;
+  // height: 90%;
+  height: calc(95vh - 70px);
+  // height: v-bind(`${isFullscreen ? "calc(100vh - 70px)": "calc(90vh - 70px)"}`);
 }
 </style>
