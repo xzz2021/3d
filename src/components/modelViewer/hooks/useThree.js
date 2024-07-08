@@ -1,5 +1,4 @@
 import * as THREE from "three"
-import { onMounted, onUnmounted } from "vue"
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader"
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader"
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader"
@@ -26,7 +25,6 @@ import imgUrl2 from "./rooitou/py.png"
 import imgUrl3 from "./rooitou/ny.png"
 import imgUrl4 from "./rooitou/pz.png"
 import imgUrl5 from "./rooitou/nz.png"
-
 // threejs 内置了lil-gui  不需要引入其他模块
 import { GUI } from "three/examples/jsm/libs/lil-gui.module.min.js"
 export const useThree = () => {
@@ -42,7 +40,8 @@ export const useThree = () => {
   // const urls = [`${path}px.jpg`, `${path}nx.jpg`, `${path}py.jpg`, `${path}ny.jpg`, `${path}pz.jpg`, `${path}nz.jpg`]
   // const texture = new THREE.CubeTextureLoader().load(urls)
   // scene.background = texture
-  scene.background = new THREE.Color(0x8c8aff) //  设置场景的背景色0x8c8aff
+  // scene.background = new THREE.Color(0x8c8aff) //  设置场景的背景色0x8c8aff
+  scene.background = new THREE.Color(0x7f7f7f) //  设置场景的背景色 0x7f7f7f  0xf2f2f2
   // scene.background = new THREE.Color(0xf2f2f2) //  设置场景的背景色 0x7f7f7f  0xf2f2f2
 
   // let d = 75 // 控制视锥的尺寸  //  控制相机与模型中心的距离
@@ -81,16 +80,18 @@ export const useThree = () => {
     removeAllLights(scene)
     //  平行光的距离影响也很大  太远会显得很模糊
 
-    const { x, y, z } = size
+    // const { x, y, z } = size
     // 添加光源  不然模型会是全黑色的
 
-    const strength = 3
+    const strength = 1
     //  环境光 会影响 模型的颜色
+    // const ambientLight = new THREE.AmbientLight(0xffffff, strength)
     const ambientLight = new THREE.AmbientLight(0x7c7c7c, strength)
 
     const light = new THREE.DirectionalLight(0xffffff, strength)
     // light.position.set(x, y, z)
-    light.position.set(0.32, 0.39, 0.7)
+    // light.position.set(0.32, 0.39, 0.7)
+    light.position.set(100, 100, 100)
 
     scene.add(light)
     scene.add(ambientLight)
@@ -156,12 +157,18 @@ export const useThree = () => {
   // 设置相机位置和方向
   const createCarmera = (size, center) => {
     const { x, y, z } = size //  元素自带基底面  用于相机视角 默认为Z轴
+
+    const width = document.getElementById("threecontainer").offsetWidth
+    const height = document.getElementById("threecontainer").offsetHeight
     // const ll = 1.2
     // const d = Math.sqrt(size.x * size.x + size.y * size.y) / ll
     // // const d = 300
     // let camera2 = new THREE.OrthographicCamera(-d, d, d, -d, 0.1, 1000) //  直接展示物体每个面的真实 映射  眼 = 物体
+    // let camera = new THREE.OrthographicCamera(x / -2, x / 2, y / 2, y / -2, 1, 1000) //  直接展示物体每个面的真实 映射  眼 = 物体
     // let camera = new THREE.OrthographicCamera(-y / ll, y / ll, z / ll, -z / ll, 1, 1000) //  直接展示物体每个面的真实 映射  眼 = 物体
-    const camera = new THREE.PerspectiveCamera(75, 1, 1, 1000) //  模拟人眼  以点看物体  眼 < 物体
+
+    const aspect = width / height
+    const camera = new THREE.PerspectiveCamera(75, aspect, 1, 1000) //  模拟人眼  以点看物体  眼 < 物体
 
     // camera.updateProjectionMatrix()
     // 计算相机位置
@@ -237,7 +244,7 @@ export const useThree = () => {
 
   // 添加一个跟随相机的平行光源
   const addLightOfCamera = () => {
-    const pointLight = new THREE.DirectionalLight(0xffffff, 0.3, 100)
+    const pointLight = new THREE.DirectionalLight(0xffffff, 2)
     // pointLight.castShadow = true
     scene.add(pointLight)
     return pointLight
@@ -593,6 +600,10 @@ export const useThree = () => {
   }
 
   const createTexture = () => {
+    // const rgbeLoader = new RGBELoader()
+    // rgbeLoader.loadAsync("http://xzz2022.top:2222/rural.hdr").then(texture => {
+    //   return texture
+    // })
     const urls = [imgUrl0, imgUrl1, imgUrl2, imgUrl3, imgUrl4, imgUrl5]
     // console.log("🚀 ~ file: ThreeViewer.vue:167 ~ urls:", urls)
     return new THREE.CubeTextureLoader().load(

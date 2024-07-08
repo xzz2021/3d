@@ -33,7 +33,7 @@ import { useMitt } from "@/hooks/mitt.js"
 import { FullScreen } from "@element-plus/icons-vue"
 import { useShopStore } from "@/pinia/shopTable.js"
 import { RAWDATA } from "./utils/constant"
-
+import matcapPorcelainWhite from "./hooks/66.jpg"
 let { isFullscreen, toggleFullscreen, dialogTableVisible, openDialog, restoreCarmera, getALLInformation, autoResize } = useFn()
 // 可以在组件中的任意位置访问 `store` 变量 ✨
 const store = useShopStore()
@@ -116,6 +116,7 @@ const loadModel = async modelFileInfo => {
     return
   }
   // 其他常规3d文件走这里   // 获取对应的模型加载器
+
   const loader = chooseLoader(fileType)
   loader.load(
     filePath,
@@ -126,6 +127,13 @@ const loadModel = async modelFileInfo => {
         metalness: 0.4,
         roughness: 0.2,
       })
+
+      // const textureLoader = new THREE.TextureLoader()
+      // let material = new THREE.MeshMatcapMaterial({
+      //   color: 0xffffff,
+
+      //   matcap: textureLoader.load(matcapPorcelainWhite),
+      // })
       // material.depthWrite = true // 默认情况下应启用深度写入
 
       // material.depthTest = false // 解决 启用环境贴图后 模型闪烁的问题
@@ -158,9 +166,12 @@ const commonFn = async modelFileInfo => {
   const { box, center, size } = getMeshAndSize(mesh)
   // createGridHelper(size)   // 创建网格底座
 
-  // scene.background = createTexture()
+  scene.background = createTexture()
 
-  createLight(size) // 添加光源
+  // 给场景所有物体添加默认的环境贴图
+  // scene.environment =
+
+  // createLight(size) // 添加光源
 
   // 添加一个跟随相机的点光源 此处必须添加
   pointLight = addLightOfCamera()
@@ -190,7 +201,7 @@ const commonFn = async modelFileInfo => {
 
   animate()
 
-  //  新增商品推送之前线检查 是否当前项存在
+  //  新增商品推送之前先检查 是否当前项存在
   const check = IsExist(modelFileInfo.filePath)
   !check && getInfoAndPushItem(box, modelFileInfo)
 }
@@ -284,9 +295,7 @@ const toggleLabel = () => {
 }
 watch(isFullscreen, val => {
   const dom = document.querySelector("#threecontainer")
-
   dom.style.height = val ? `calc(100vh - 70px)` : `600px`
-
   autoResize(camera.value, renderer.value)
 })
 
@@ -294,24 +303,14 @@ defineExpose({ loadModel })
 </script>
 
 <style lang="scss" scope>
-// #container {
-//   width: 100%;
-//   height: 100%;
-// }
 #threecontainer {
   position: relative;
   border: 1px solid black;
   text-align: center;
   text-align: -webkit-center;
-  // margin: 20px 0;
   height: 100%;
-  // width: 600px;
-  // height: 600px;
 }
 #button {
-  /* position: absolute;
-  top: 20px;
-  left: 20px; */
   padding: 10px 20px;
   background-color: #ff9800;
   color: white;
@@ -342,10 +341,5 @@ defineExpose({ loadModel })
   position: absolute;
   top: 12px;
   right: 45px;
-}
-.el-dialog__body {
-  // height: 90%;
-  // height: calc(100vh - 70px);
-  // height: v-bind(`${isFullscreen ? "calc(100vh - 70px)": "calc(90vh - 70px)"}`);
 }
 </style>
