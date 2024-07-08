@@ -94,6 +94,8 @@ export const useFn = () => {
     nextTick(() => {
       const width = document.getElementById("threecontainer").offsetWidth
       const height = document.getElementById("threecontainer").offsetHeight
+      // console.log("🚀: autoResize -> width", width)
+      // console.log("🚀: autoResize -> height", height)
       camera.aspect = width / height
       camera.updateProjectionMatrix()
       renderer.setSize(width, height)

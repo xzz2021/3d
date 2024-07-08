@@ -59,9 +59,9 @@ const labelStatus = ref(false)
 let mesh, pointLight, labelArr
 const camera = ref(null)
 
+const controls = ref(null)
 let {
   scene,
-  controls,
   addBox,
   addArrow,
   addAxes,
@@ -124,7 +124,7 @@ const loadModel = async modelFileInfo => {
       let material = new THREE.MeshStandardMaterial({
         color: 0xffffff,
         metalness: 0.4,
-        roughness: 0.3,
+        roughness: 0.2,
       })
       // material.depthWrite = true // 默认情况下应启用深度写入
 
@@ -145,7 +145,7 @@ const loadModel = async modelFileInfo => {
 
 const backCarmera = () => {
   //  为何要传递参数？  因为数据不是响应式的， 模型加载后 变更后的参数只能实时传递？？
-  restoreCarmera(camera.value, controls, initialStatus.value)
+  restoreCarmera(camera.value, controls.value, initialStatus.value)
 }
 
 const renderer = ref(null)
@@ -170,22 +170,21 @@ const commonFn = async modelFileInfo => {
   // addF  aceGui  (camera)E:\xzz\development\3d\src\components\modelViewer\texture\rural_asphalt_road_2k.hdr
 
   scene.add(mesh)
-  console.log("🚀: mesh", mesh)
 
   autoResize(camera.value, renderer.value)
 
   // checkThickness(mesh)
   // detectWallThickness(mesh)
   // 有了渲染器之后   一定要先创建相机   再创建控制器
-  controls = createControls(camera.value, renderer.value.domElement)
+  controls.value = createControls(camera.value, renderer.value.domElement)
 
   containerRef.value && containerRef.value.appendChild(renderer.value.domElement) // 挂载
-  // totastMesh(controls)
+  // totastMesh(controls.value)
 
-  addAxes(size) // 添加轴辅助器  原点坐标指示
+  // addAxes(size) // 添加轴辅助器  原点坐标指示
 
   // 添加可视化包围盒
-  labelArr = addBox(mesh)
+  // labelArr = addBox(mesh)
   // addArrow()
   closeLoading()
 
@@ -252,21 +251,21 @@ const screenShot = box => {
   const imageUrl = renderer.value.domElement.toDataURL("image/jpeg")
 
   // 4. 恢复初始视角
-  restoreCarmera(camera.value, controls, initialStatus.value)
+  restoreCarmera(camera.value, controls.value, initialStatus.value)
   return imageUrl
 }
 
 const animate = () => {
   requestAnimationFrame(animate)
-  if (mesh && camera.value) {
-    controls.update()
-    // 使点光源跟随相机
-    const vector = camera.value.position.clone()
-    pointLight.position.set(vector.x, vector.y, vector.z) //点光源位置
-    // 显示器每刷新一次就重新render一次  相当于实时刷新渲染的场景
-    // 也就是这里定义的方法 会随显示屏每一帧刷新率而刷新
-    renderer.value.render(scene, camera.value)
-  }
+  // if (mesh && camera.value) {
+  controls.value.update()
+  // 使点光源跟随相机
+  const vector = camera.value.position.clone()
+  pointLight.position.set(vector.x, vector.y, vector.z) //点光源位置
+  // 显示器每刷新一次就重新render一次  相当于实时刷新渲染的场景
+  // 也就是这里定义的方法 会随显示屏每一帧刷新率而刷新
+  renderer.value.render(scene, camera.value)
+  // }
 }
 
 //  一键切换显示三维信息
@@ -283,7 +282,11 @@ const toggleLabel = () => {
   }
   labelStatus.value = !labelStatus.value
 }
-watch(isFullscreen, () => {
+watch(isFullscreen, val => {
+  const dom = document.querySelector("#threecontainer")
+
+  dom.style.height = val ? `calc(100vh - 70px)` : `600px`
+
   autoResize(camera.value, renderer.value)
 })
 
@@ -342,7 +345,7 @@ defineExpose({ loadModel })
 }
 .el-dialog__body {
   // height: 90%;
-  height: calc(95vh - 70px);
+  // height: calc(100vh - 70px);
   // height: v-bind(`${isFullscreen ? "calc(100vh - 70px)": "calc(90vh - 70px)"}`);
 }
 </style>

@@ -43,7 +43,7 @@ export const useThree = () => {
   // const texture = new THREE.CubeTextureLoader().load(urls)
   // scene.background = texture
   scene.background = new THREE.Color(0x8c8aff) //  设置场景的背景色0x8c8aff
-  // scene.background = new THREE.Color(0xf2f2f2) //  设置场景的背景色0x8c8aff
+  // scene.background = new THREE.Color(0xf2f2f2) //  设置场景的背景色 0x7f7f7f  0xf2f2f2
 
   // let d = 75 // 控制视锥的尺寸  //  控制相机与模型中心的距离
   // let camera = new THREE.OrthographicCamera(-d, d, d, -d, 1, 1000);
@@ -54,7 +54,7 @@ export const useThree = () => {
   //   // preserveDrawingBuffer: true,
   // })
   // let controls =  new OrbitControls(camera, renderer.domElement)
-  let gridHelper, savedPosition, savedRotation, controls, gui
+  let gridHelper, savedPosition, savedRotation, gui
 
   const createRenderer = () => {
     const renderer = new THREE.WebGLRenderer({
@@ -80,21 +80,18 @@ export const useThree = () => {
     // 添加灯源前先移除所有的灯光
     removeAllLights(scene)
     //  平行光的距离影响也很大  太远会显得很模糊
-    // const lightX = size.x + 50
-    // const lightY = size.y + (lightX / size.y) * 50
-    const ll = size.x + size.y
-    const lightX = ll
-    const lightY = ll
-    // const lightY = size.y + 50
-    const lightZ = size.z + 50
-    // const halfZ = lightZ / 2
-    const halfZ = lightZ / 4
+
+    const { x, y, z } = size
     // 添加光源  不然模型会是全黑色的
 
-    const ambientLight = new THREE.AmbientLight(0x7c7c7c, 3.0)
+    const strength = 3
+    //  环境光 会影响 模型的颜色
+    const ambientLight = new THREE.AmbientLight(0x7c7c7c, strength)
 
-    const light = new THREE.DirectionalLight(0xffffff, 3.0)
+    const light = new THREE.DirectionalLight(0xffffff, strength)
+    // light.position.set(x, y, z)
     light.position.set(0.32, 0.39, 0.7)
+
     scene.add(light)
     scene.add(ambientLight)
   }
@@ -161,8 +158,8 @@ export const useThree = () => {
     const { x, y, z } = size //  元素自带基底面  用于相机视角 默认为Z轴
     // const ll = 1.2
     // const d = Math.sqrt(size.x * size.x + size.y * size.y) / ll
-    // const d = 300
-    // let camera = new THREE.OrthographicCamera(-d, d, d, -d, 0.1, 1000) //  直接展示物体每个面的真实 映射  眼 = 物体
+    // // const d = 300
+    // let camera2 = new THREE.OrthographicCamera(-d, d, d, -d, 0.1, 1000) //  直接展示物体每个面的真实 映射  眼 = 物体
     // let camera = new THREE.OrthographicCamera(-y / ll, y / ll, z / ll, -z / ll, 1, 1000) //  直接展示物体每个面的真实 映射  眼 = 物体
     const camera = new THREE.PerspectiveCamera(75, 1, 1, 1000) //  模拟人眼  以点看物体  眼 < 物体
 
@@ -171,7 +168,7 @@ export const useThree = () => {
     // 定位相机到左上角
     camera.position.set(x + y, -y, center.z)
     camera.lookAt(center)
-    // camera.up.set(0, 0, 1)
+    camera.up.set(0, 0, 1)
 
     // const helper = new THREE.CameraHelper(camera)
     // scene.add(helper)
@@ -209,15 +206,15 @@ export const useThree = () => {
     controls.dampingFactor = 0.25 // 阻尼系数
     controls.enableZoom = true // 启用缩放
     // controls.enablePan = !true;
-    controls.enableRotate = true // 启用旋转
     // controls.screenSpacePanning = false; // 允许基于世界坐标的平移
     controls.target.set(0, 0, 0)
     controls.minDistance = 1
     controls.maxDistance = 1000
 
     //  默认旋转
-    // controls.autoRotateSpeed = 3
+    // controls.enableRotate = true // 启用旋转
     // controls.autoRotate = true
+    // controls.autoRotateSpeed = 3
 
     initialStatus.value.controlsarget = controls.target.clone()
 
@@ -841,11 +838,7 @@ export const useThree = () => {
   // })
   return {
     scene,
-    controls,
     gui,
-    // pointLight,
-    // camera,
-    // controls,
     addBox,
     addArrow,
     addLightOfCamera,
