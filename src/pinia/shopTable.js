@@ -9,12 +9,18 @@ export const useShopStore = defineStore("shopStore", () => {
   const tableData = ref([])
   const backendData = ref({})
 
-  const totalPrice = computed(() => {
+  const totalPrice00 = computed(() => {
     let price = 0
     tableData.value.forEach(item => {
       price += item.finalPrice
     })
     return roundUp(price, 2)
+  })
+
+  const totalPrice = computed(() => {
+    const init = 0
+    const totalPriceSum = tableData.value.reduce((preSum, curItem) => preSum + curItem.finalPrice, init)
+    return roundUp(totalPriceSum, 2)
   })
 
   const sum = computed(() => {

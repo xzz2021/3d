@@ -175,7 +175,7 @@ export const useThree = () => {
     // 定位相机到左上角
     camera.position.set(x + y, -y, center.z)
     camera.lookAt(center)
-    camera.up.set(0, 0, 1)
+    // camera.up.set(0, 0, 1)
 
     // const helper = new THREE.CameraHelper(camera)
     // scene.add(helper)
@@ -360,6 +360,16 @@ export const useThree = () => {
   const LoadIges = async fileUrl => {
     // init occt-import-js   已全局引入
     // eslint-disable-next-line no-undef
+
+    //   occtimportjs ().then (async function (occt) {
+    //     let fileUrl = '../test/testfiles/simple-basic-cube/cube.stp';
+    //     let response = await fetch (fileUrl);
+    //     let buffer = await response.arrayBuffer ();
+    //     let fileBuffer = new Uint8Array (buffer);
+    //     let result = occt.ReadStepFile (fileBuffer, null);
+    //     console.log (result);
+    // });
+
     const occt = await occtimportjs()
     // download a step file
     let response = await fetch(fileUrl)

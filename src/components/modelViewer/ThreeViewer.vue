@@ -111,8 +111,9 @@ const loadModel = async modelFileInfo => {
     // material.depthWrite = true // 默认情况下应启用深度写入
     // material.depthTest = false // 解决 启用环境贴图后 模型闪烁的问题
     mesh = new THREE.Mesh(geometry, material)
-    // bootPanel(modelFileInfo)
-    // commonFn(modelFileInfo)
+
+    openDialog()
+
     return
   }
   // 其他常规3d文件走这里   // 获取对应的模型加载器
@@ -131,7 +132,6 @@ const loadModel = async modelFileInfo => {
       // const textureLoader = new THREE.TextureLoader()
       // let material = new THREE.MeshMatcapMaterial({
       //   color: 0xffffff,
-
       //   matcap: textureLoader.load(matcapPorcelainWhite),
       // })
       // material.depthWrite = true // 默认情况下应启用深度写入
@@ -139,10 +139,7 @@ const loadModel = async modelFileInfo => {
       // material.depthTest = false // 解决 启用环境贴图后 模型闪烁的问题
       mesh = simpleArr.includes(fileType) ? geometry.scene || geometry : new THREE.Mesh(geometry, material)
 
-      // commonFn(modelFileInfo)
       openDialog()
-
-      // bootPanel(modelFileInfo)
     },
     undefined,
     error => {
