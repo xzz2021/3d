@@ -33,7 +33,7 @@ import { useMitt } from "@/hooks/mitt.js"
 import { FullScreen } from "@element-plus/icons-vue"
 import { useShopStore } from "@/pinia/shopTable.js"
 import { RAWDATA } from "./utils/constant"
-import matcapPorcelainWhite from "./hooks/66.jpg"
+// import matcapPorcelainWhite from "./hooks/66.jpg"
 let { isFullscreen, toggleFullscreen, dialogTableVisible, openDialog, restoreCarmera, getALLInformation, autoResize } = useFn()
 // 可以在组件中的任意位置访问 `store` 变量 ✨
 const store = useShopStore()
@@ -87,6 +87,7 @@ let {
 } = useThree()
 
 const { openLoading, closeLoading } = useLoading()
+onEvent("openLoading", openLoading)
 
 //  打开面板需要等待dom渲染之后 执行模型渲染
 const bootPanel = () => {
@@ -97,7 +98,7 @@ const bootPanel = () => {
 // 加载模型 前 类型 判断
 const loadModel = async modelFileInfo => {
   clearScene() //  加载新模型前先清除旧场景所有对象
-  openLoading() // 开启加载效果
+  // openLoading() // 开启加载效果
   let loadView
   //  特殊3d文件类型判断, 使用自定义的加载方法, 不走官方loader判断
   const { filePath, fileType } = modelFileInfo

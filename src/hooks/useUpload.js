@@ -36,6 +36,7 @@ export const useUpload = () => {
     // return
     // 触发模型加载
     emitEvent("openPreview", modelFileInfo)
+    emitEvent("openLoading")
   }
 
   const multiPartUpload = async file => {
