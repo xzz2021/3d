@@ -83,6 +83,7 @@ let {
   containerRef,
   initialStatus,
   createRenderer,
+  checkThickness,
 } = useThree()
 
 const { openLoading, closeLoading } = useLoading()
@@ -178,6 +179,7 @@ const commonFn = async modelFileInfo => {
   // addF  aceGui  (camera)E:\xzz\development\3d\src\components\modelViewer\texture\rural_asphalt_road_2k.hdr
 
   scene.add(mesh)
+  // await checkThickness(mesh)
 
   autoResize(camera.value, renderer.value)
 

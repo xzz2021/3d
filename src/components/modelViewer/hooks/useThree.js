@@ -851,6 +851,50 @@ export const useThree = () => {
     }
     return needResize
   }
+
+  const checkThickness = mesh => {
+    const detectWallThickness = (mesh, threshold) => {
+      const raycaster = new THREE.Raycaster()
+      const position = mesh.geometry.attributes.position
+      const faces = position.count / 3
+
+      for (let i = 0; i < faces; i++) {
+        const a = new THREE.Vector3().fromBufferAttribute(position, i * 3)
+        const b = new THREE.Vector3().fromBufferAttribute(position, i * 3 + 1)
+        const c = new THREE.Vector3().fromBufferAttribute(position, i * 3 + 2)
+
+        const midpoint = new THREE.Vector3().addVectors(a, b).add(c).divideScalar(3)
+        const normal = new THREE.Triangle(a, b, c).getNormal(new THREE.Vector3())
+
+        raycaster.set(midpoint, normal.negate())
+        const intersects = raycaster.intersectObject(mesh)
+
+        if (intersects.length > 0 && intersects[0].distance > 0 && intersects[0].distance < threshold * 1e-15) {
+          console.log("🚀 ~ file: useThree.js:873 ~ intersects[0].distance:", intersects[0].distance)
+          // highlightFace(mesh, i, 0xff0000) // 高亮颜色为红色
+        }
+      }
+    }
+
+    const highlightFace = (mesh, faceIndex, color) => {
+      const position = mesh.geometry.attributes.position
+      const colors = new Float32Array(position.count * 3)
+      const colorVec = new THREE.Color(color)
+
+      for (let i = 0; i < 3; i++) {
+        colors[(faceIndex * 3 + i) * 3] = colorVec.r
+        colors[(faceIndex * 3 + i) * 3 + 1] = colorVec.g
+        colors[(faceIndex * 3 + i) * 3 + 2] = colorVec.b
+      }
+
+      mesh.geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3))
+      mesh.material = new THREE.MeshPhongMaterial({ vertexColors: true, side: THREE.DoubleSide })
+    }
+
+    detectWallThickness(mesh, 0.1)
+  }
+
+  const checkThickness22 = mesh => {}
   // onMounted(() => {
   //   init()
   // })
@@ -886,5 +930,6 @@ export const useThree = () => {
     containerRef,
     initialStatus,
     createRenderer,
+    checkThickness,
   }
 }
