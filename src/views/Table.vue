@@ -108,7 +108,7 @@
           <div style="color: red">{{ scope.row.finalPrice }} 元</div>
         </template>
       </el-table-column>
-      <el-table-column prop="operation" label="操作">
+      <el-table-column prop="operation" label="操作" width="150">
         <template #default="scope">
           <div class="operateBox">
             <!-- <el-badge :value="scope.row." class="item">

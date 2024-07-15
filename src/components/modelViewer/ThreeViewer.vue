@@ -182,7 +182,7 @@ const commonFn = async modelFileInfo => {
   const { box, center, size } = getMeshAndSize(mesh)
   // createGridHelper(size)   // 创建网格底座
 
-  scene.background = createTexture()
+  // scene.background = createTexture()
 
   // 给场景所有物体添加默认的环境贴图
   // scene.environment =
@@ -202,7 +202,7 @@ const commonFn = async modelFileInfo => {
   scene.add(mesh)
 
   // checkThickness(mesh)
-  pianyichang(mesh)
+  // pianyichang(mesh)
 
   autoResize(camera.value, renderer.value)
 

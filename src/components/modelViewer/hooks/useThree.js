@@ -20,12 +20,12 @@ import { TransformControls } from "three/addons/controls/TransformControls.js"
 
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js"
 
-import imgUrl0 from "./rooitou/px.png"
-import imgUrl1 from "./rooitou/nx.png"
-import imgUrl2 from "./rooitou/py.png"
-import imgUrl3 from "./rooitou/ny.png"
-import imgUrl4 from "./rooitou/pz.png"
-import imgUrl5 from "./rooitou/nz.png"
+// import imgUrl0 from "./rooitou/px.png"
+// import imgUrl1 from "./rooitou/nx.png"
+// import imgUrl2 from "./rooitou/py.png"
+// import imgUrl3 from "./rooitou/ny.png"
+// import imgUrl4 from "./rooitou/pz.png"
+// import imgUrl5 from "./rooitou/nz.png"
 // threejs 内置了lil-gui  不需要引入其他模块
 import { GUI } from "three/examples/jsm/libs/lil-gui.module.min.js"
 export const useThree = () => {
@@ -41,8 +41,8 @@ export const useThree = () => {
   // const urls = [`${path}px.jpg`, `${path}nx.jpg`, `${path}py.jpg`, `${path}ny.jpg`, `${path}pz.jpg`, `${path}nz.jpg`]
   // const texture = new THREE.CubeTextureLoader().load(urls)
   // scene.background = texture
-  // scene.background = new THREE.Color(0x8c8aff) //  设置场景的背景色0x8c8aff
-  scene.background = new THREE.Color(0x7f7f7f) //  设置场景的背景色 0x7f7f7f  0xf2f2f2
+  scene.background = new THREE.Color(0x8c8aff) //  设置场景的背景色0x8c8aff
+  // scene.background = new THREE.Color(0x7f7f7f) //  设置场景的背景色 0x7f7f7f  0xf2f2f2
   // scene.background = new THREE.Color(0xf2f2f2) //  设置场景的背景色 0x7f7f7f  0xf2f2f2
 
   // let d = 75 // 控制视锥的尺寸  //  控制相机与模型中心的距离
@@ -913,9 +913,7 @@ export const useThree = () => {
 
         // 准备进行射线投射
         const positions = geometry.attributes.position.array // 获取几何体的顶点位置数组
-        console.log("🚀 ~ file: useThree.js:916 ~ positions:", positions)
         const normals = geometry.attributes.normal.array // 获取几何体的顶点法线数组
-        console.log("🚀 ~ file: useThree.js:918 ~ normals:", normals)
         const raycaster = new THREE.Raycaster() // 创建射线投射器
         const thicknesses = [] // 存储计算的壁厚值
 
@@ -925,7 +923,6 @@ export const useThree = () => {
 
         // 计算厚度
         for (let i = 0; i < positions.length; i += 3) {
-          console.log("🚀 ~ file: useThree.js:928 ~ i:", i)
           // 遍历顶点位置数组，每次处理一个顶点
           const origin = new THREE.Vector3(positions[i], positions[i + 1], positions[i + 2]) // 创建顶点位置向量
           const direction = new THREE.Vector3(normals[i], normals[i + 1], normals[i + 2]).normalize() // 创建法线方向向量并归一化
@@ -1085,13 +1082,13 @@ export const useThree = () => {
             const z = positions[j + 2]
             if (Math.abs(z - zPos) < sliceThickness / 2) {
               // 假设此处进行壁厚计算，获得thickness值
-              const thickness = calculateThicknessAtPoint(positions, j, geometry)
+              const thickness = calculateThicknessAtPoint(positions, j, mesh)
 
               const color = new THREE.Color()
               if (thickness < 2) {
                 color.set(0xff0000) // 壁厚小于2的部分设为红色
               } else {
-                color.set(0xffffff) // 其他部分设为白色
+                // color.set(0xffffff) // 其他部分设为白色
               }
               colors[j] = color.r
               colors[j + 1] = color.g
