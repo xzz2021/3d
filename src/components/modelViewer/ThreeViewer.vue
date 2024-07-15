@@ -17,7 +17,12 @@
 
     <div ref="containerRef" id="threecontainer">
       <AxisLine v-show="mesh" :camera2="camera" @backCarmera="backCarmera" @totastMesh="totastMesh(controls)" />
+      <!-- <div v-if="is3dm"> -->
+      <div class="boomSlider">
+        <el-slider v-model="ratioValue" :show-tooltip="false" :min="0" :max="30" size="small" />
+      </div>
     </div>
+
     <!-- <button v-show="mesh" id="button" @click="toggleLabel">{{ labelStatus ? "开启" : "关闭" }}三维信息</button> -->
   </el-dialog>
 </template>
@@ -30,6 +35,7 @@ import { useFn } from "./hooks/fn.js"
 import { useLoading } from "@/hooks/useLoading.js"
 import AxisLine from "./AxisLine.vue"
 import { useMitt } from "@/hooks/mitt.js"
+import { useBoom } from "./hooks/useBoom.js"
 import { FullScreen } from "@element-plus/icons-vue"
 import { useShopStore } from "@/pinia/shopTable.js"
 import { RAWDATA } from "./utils/constant"
@@ -47,6 +53,8 @@ const props = defineProps({
     default: () => {},
   },
 })
+
+const { is3dm, ratioValue, initExplodeModel, explodeModel } = useBoom()
 
 // threejs   scene、mesh 、renderer、controls 内部有只读属性的value  无法使用vue的响应式  ref 包裹
 const curModelFileInfo = ref({})
@@ -84,6 +92,7 @@ let {
   initialStatus,
   createRenderer,
   checkThickness,
+  pianyichang,
 } = useThree()
 
 const { openLoading, closeLoading } = useLoading()
@@ -127,6 +136,7 @@ const loadModel = async modelFileInfo => {
     filePath,
     geometry => {
       if (fileType == "3dm") {
+        is3dm.value = true
         mesh = geometry
         openDialog()
         return
@@ -186,8 +196,13 @@ const commonFn = async modelFileInfo => {
   // addEnvironment()
   // addF  aceGui  (camera)E:\xzz\development\3d\src\components\modelViewer\texture\rural_asphalt_road_2k.hdr
 
+  // console.log("🚀 ~ file: ThreeViewer.vue:227 ~ mesh:", mesh)
+  // addGui2(mesh, mesh.material, renderer.value)
+
   scene.add(mesh)
-  // await checkThickness(mesh)
+
+  // checkThickness(mesh)
+  pianyichang(mesh)
 
   autoResize(camera.value, renderer.value)
 
@@ -348,5 +363,11 @@ defineExpose({ loadModel })
   position: absolute;
   top: 12px;
   right: 45px;
+}
+.boomSlider {
+  position: absolute;
+  bottom: 25px;
+  right: 10px;
+  width: 200px;
 }
 </style>

@@ -635,7 +635,7 @@ export const useThree = () => {
     )
   }
 
-  const addGui = (mesh, material) => {
+  const addGui2 = (mesh, material, renderer) => {
     // 创建一个剪裁平面  此处 可以控制轴向剖面
     const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 30)
     // const helper = new THREE.PlaneHelper(plane, 300, 0xffff00)
@@ -678,8 +678,8 @@ export const useThree = () => {
     renderer.localClippingEnabled = true
     renderer.clippingPlanes = [plane]
     // 清除上一次gui添加的元素
-    gui && gui.destroy()
-    gui = new GUI()
+    // gui && gui.destroy()
+    const gui = new GUI()
 
     const options = {
       // clipIntersection: true,
@@ -724,7 +724,7 @@ export const useThree = () => {
     // folder.add(params, 'fn').name('运动')
   }
 
-  const addGui2 = (mesh, material) => {
+  const addGui222 = (mesh, material) => {
     // 清除上一次gui添加的元素
     gui && gui.destroy()
     gui = new GUI()
@@ -859,7 +859,7 @@ export const useThree = () => {
     return needResize
   }
 
-  const checkThickness = mesh => {
+  const checkThickness00 = mesh => {
     const detectWallThickness = (mesh, threshold) => {
       const raycaster = new THREE.Raycaster()
       const position = mesh.geometry.attributes.position
@@ -901,7 +901,210 @@ export const useThree = () => {
     detectWallThickness(mesh, 0.1)
   }
 
-  const checkThickness22 = mesh => {}
+  const checkThickness = mesh => {
+    // 遍历模型几何体
+    mesh.traverse(child => {
+      // 遍历模型的每个子元素
+      if (child.isMesh) {
+        // 如果子元素是一个网格
+        const geometry = child.geometry // 获取网格的几何体
+        geometry.computeBoundingBox() // 计算几何体的边界框
+        geometry.computeVertexNormals() // 计算几何体的顶点法线
+
+        // 准备进行射线投射
+        const positions = geometry.attributes.position.array // 获取几何体的顶点位置数组
+        console.log("🚀 ~ file: useThree.js:916 ~ positions:", positions)
+        const normals = geometry.attributes.normal.array // 获取几何体的顶点法线数组
+        console.log("🚀 ~ file: useThree.js:918 ~ normals:", normals)
+        const raycaster = new THREE.Raycaster() // 创建射线投射器
+        const thicknesses = [] // 存储计算的壁厚值
+
+        // 获取原始顶点颜色（如果有的话）
+        const originalColors = geometry.attributes.color ? geometry.attributes.color.array : null
+        const hasVertexColors = !!originalColors
+
+        // 计算厚度
+        for (let i = 0; i < positions.length; i += 3) {
+          console.log("🚀 ~ file: useThree.js:928 ~ i:", i)
+          // 遍历顶点位置数组，每次处理一个顶点
+          const origin = new THREE.Vector3(positions[i], positions[i + 1], positions[i + 2]) // 创建顶点位置向量
+          const direction = new THREE.Vector3(normals[i], normals[i + 1], normals[i + 2]).normalize() // 创建法线方向向量并归一化
+
+          raycaster.set(origin, direction) // 设置射线投射器的起点和方向
+
+          // 检测交点
+          const intersects = raycaster.intersectObject(mesh, true) // 进行射线投射，检测与模型的交点
+          if (intersects.length > 1) {
+            // 如果检测到多个交点
+            const distance = intersects[1].distance - intersects[0].distance // 计算两个交点之间的距离
+            thicknesses.push(distance) // 将计算的距离（壁厚）添加到数组中
+          } else {
+            thicknesses.push(Infinity) // 未找到交点，设置为无穷大
+          }
+        }
+        // console.log("🚀 ~ file: useThree.js:942 ~ thicknesses:", thicknesses)
+
+        // 创建基于厚度的颜色数组
+        const colors = new Float32Array(positions.length)
+        for (let i = 0; i < thicknesses.length; i++) {
+          const color = new THREE.Color()
+          if (thicknesses[i] < 2) {
+            color.set(0xff0000) // 壁厚小于 2 的部分设置为红色
+          } else if (hasVertexColors) {
+            // 保持原有颜色
+            // color.setRGB(originalColors[i * 3], originalColors[i * 3 + 1], originalColors[i * 3 + 2])
+          } else {
+            // 使用默认颜色（假设为白色）
+            // color.setRGB(1, 1, 1)
+          }
+          colors[i * 3] = color.r
+          colors[i * 3 + 1] = color.g
+          colors[i * 3 + 2] = color.b
+        }
+
+        // 将颜色数组应用到几何体
+        geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3))
+
+        // 设置材质以启用顶点颜色
+        // child.material = new THREE.MeshBasicMaterial({ vertexColors: true })
+        child.material = new THREE.MeshStandardMaterial({
+          color: 0xffffff,
+          metalness: 0.4,
+          roughness: 0.2,
+          vertexColors: true,
+        })
+      }
+    })
+  }
+
+  const pianyichang00 = mesh => {
+    // 计算距离场的函数
+    function computeDistanceField(geometry, distances) {
+      const raycaster = new THREE.Raycaster()
+      const positions = geometry.attributes.position.array
+      for (let i = 0; i < positions.length; i += 3) {
+        const origin = new THREE.Vector3(positions[i], positions[i + 1], positions[i + 2])
+        raycaster.set(origin, new THREE.Vector3(0, 0, 0)) // 射线方向可以任意设置
+        const intersects = raycaster.intersectObject(geometry, true)
+        distances[i / 3] = intersects.length > 0 ? intersects[0].distance : Infinity
+      }
+    }
+
+    // 计算偏移场的函数
+    function computeOffsetField(geometry, distances, thicknesses) {
+      const positions = geometry.attributes.position.array
+      for (let i = 0; i < positions.length; i += 3) {
+        const origin = new THREE.Vector3(positions[i], positions[i + 1], positions[i + 2])
+        const offsetDistance = getOffsetDistance(origin, distances)
+        thicknesses[i / 3] = offsetDistance
+      }
+    }
+
+    // 获取偏移距离的辅助函数
+    function getOffsetDistance(origin, distances) {
+      // 此处应实现获取偏移距离的逻辑
+      // 假设我们有一个函数来计算偏移距离
+      return computeOffsetDistance(origin, distances)
+    }
+    // 准备计算距离场
+    const geometry = new THREE.BufferGeometry().fromGeometry(new THREE.Geometry().fromBufferGeometry(mesh.children[0].geometry))
+    const positions = geometry.attributes.position.array
+    const distances = new Float32Array(positions.length / 3)
+
+    // 初始化距离场计算
+    computeDistanceField(geometry, distances)
+
+    // 计算偏移场并比较距离
+    const thicknesses = new Float32Array(positions.length / 3)
+    computeOffsetField(geometry, distances, thicknesses)
+
+    // 创建颜色数组并应用
+    const colors = new Float32Array(positions.length)
+    for (let i = 0; i < thicknesses.length; i++) {
+      const color = new THREE.Color()
+      if (thicknesses[i] < 2) {
+        color.set(0xff0000) // 红色表示壁厚小于2的区域
+      } else {
+        color.set(0xffffff) // 其他区域保持原始颜色
+      }
+      colors[i * 3] = color.r
+      colors[i * 3 + 1] = color.g
+      colors[i * 3 + 2] = color.b
+    }
+
+    geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3))
+    mesh.children[0].material = new THREE.MeshBasicMaterial({ vertexColors: true })
+  }
+
+  const pianyichang = mesh => {
+    function calculateThicknessAtPoint(positions, index, geometry) {
+      const origin = new THREE.Vector3(positions[index], positions[index + 1], positions[index + 2])
+      const direction = new THREE.Vector3(0, 0, 1) // 假设沿z轴方向投射射线
+
+      // 创建射线投射器
+      const raycaster = new THREE.Raycaster(origin, direction.normalize())
+
+      // 获取与当前模型的交点
+      const intersects = raycaster.intersectObject(geometry, true)
+
+      if (intersects.length < 2) {
+        return Infinity // 如果交点少于2个，表示该点不在闭合体内
+      }
+
+      // 计算交点之间的距离
+      let minDistance = Infinity
+      for (let i = 0; i < intersects.length - 1; i++) {
+        for (let j = i + 1; j < intersects.length; j++) {
+          const distance = intersects[j].distance - intersects[i].distance
+          if (distance > 0 && distance < minDistance) {
+            minDistance = distance
+          }
+        }
+      }
+
+      return minDistance
+    }
+
+    // 切片参数
+    const sliceCount = 100 // 切片数量
+    const bbox = new THREE.Box3().setFromObject(mesh) // 获取模型的包围盒
+    const sliceThickness = (bbox.max.z - bbox.min.z) / sliceCount // 计算每个切片的厚度
+
+    const colors = new Float32Array(mesh.geometry.attributes.position.count * 3)
+
+    // 遍历每个切片
+    for (let i = 0; i < sliceCount; i++) {
+      const zPos = bbox.min.z + i * sliceThickness
+
+      // 在该切片位置进行壁厚计算
+      mesh.traverse(child => {
+        if (child.isMesh) {
+          const geometry = child.geometry
+          const positions = geometry.attributes.position.array
+          for (let j = 0; j < positions.length; j += 3) {
+            const z = positions[j + 2]
+            if (Math.abs(z - zPos) < sliceThickness / 2) {
+              // 假设此处进行壁厚计算，获得thickness值
+              const thickness = calculateThicknessAtPoint(positions, j, geometry)
+
+              const color = new THREE.Color()
+              if (thickness < 2) {
+                color.set(0xff0000) // 壁厚小于2的部分设为红色
+              } else {
+                color.set(0xffffff) // 其他部分设为白色
+              }
+              colors[j] = color.r
+              colors[j + 1] = color.g
+              colors[j + 2] = color.b
+            }
+          }
+        }
+      })
+    }
+
+    mesh.geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3))
+    mesh.material = new THREE.MeshBasicMaterial({ vertexColors: true })
+  }
   // onMounted(() => {
   //   init()
   // })
@@ -938,5 +1141,6 @@ export const useThree = () => {
     initialStatus,
     createRenderer,
     checkThickness,
+    pianyichang,
   }
 }
