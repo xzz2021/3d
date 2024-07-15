@@ -118,12 +118,19 @@ const loadModel = async modelFileInfo => {
 
     return
   }
+
   // 其他常规3d文件走这里   // 获取对应的模型加载器
 
   const loader = chooseLoader(fileType)
+
   loader.load(
     filePath,
     geometry => {
+      if (fileType == "3dm") {
+        mesh = geometry
+        openDialog()
+        return
+      }
       const simpleArr = ["obj", "dae", "3ds"]
       let material = new THREE.MeshStandardMaterial({
         color: 0xffffff,

@@ -12,6 +12,7 @@ import { PCDLoader } from "three/examples/jsm/loaders/PCDLoader"
 import { XYZLoader } from "three/examples/jsm/loaders/XYZLoader"
 import { PDBLoader } from "three/examples/jsm/loaders/PDBLoader"
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader"
+import { Rhino3dmLoader } from "three/addons/loaders/3DMLoader.js"
 // import { MaterialLoader } from "three/examples/"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 
@@ -124,6 +125,12 @@ export const useThree = () => {
         break
       case "3ds":
         loader = new TDSLoader()
+        break
+      case "3dm":
+        {
+          loader = new Rhino3dmLoader()
+          loader.setLibraryPath("https://cdn.jsdelivr.net/npm/rhino3dm@8.0.1/")
+        }
         break
       case "svg":
         loader = new SVGLoader()

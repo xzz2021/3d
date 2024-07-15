@@ -6,7 +6,7 @@
     :limit="1"
     :auto-upload="false"
     :on-change="onUpload"
-    accept=".glb,.obj,.gltf,.fbx,.stl,.igs,.stp,.iges,.dae,.3ds"
+    accept=".glb,.obj,.gltf,.fbx,.stl,.igs,.stp,.iges,.dae,.3ds,.3dm"
   >
     <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
     <div class="el-upload__text">
