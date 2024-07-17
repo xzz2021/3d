@@ -88,14 +88,49 @@ export const useThree = () => {
     //  环境光 会影响 模型的颜色
     // const ambientLight = new THREE.AmbientLight(0xffffff, strength)
     const ambientLight = new THREE.AmbientLight(0x7c7c7c, strength)
+    scene.add(ambientLight)
 
-    const light = new THREE.DirectionalLight(0xffffff, strength)
+    // const directionArr = [
+    //   { x: 1000, y: 0, z: 0 }, // 正前方 x轴
+    //   { x: -1000, y: 0, z: 0 }, //  反前方 x轴
+    //   { x: 0, y: 1000, z: 0 }, //  正上方 y轴
+    //   { x: 0, y: -1000, z: 0 }, //  反上方 y轴
+    //   { x: 0, y: 0, z: 1000 }, //  正右方 z轴
+    //   { x: 0, y: 0, z: -1000 }, //  反右方 z轴
+    // ]
+    const directionArr = [
+      { x: 1000, y: 1000, z: 1000 },
+      { x: 1000, y: -1000, z: 1000 },
+      { x: -1000, y: 1000, z: 1000 },
+      { x: -1000, y: -1000, z: 1000 },
+    ]
+    false &&
+      directionArr.map(item => {
+        const { x, y, z } = item
+        const directionaLight = new THREE.DirectionalLight(0xffffff, 0.2)
+        directionaLight.castShadow = true
+        directionaLight.position.set(x, y, z)
+        scene.add(directionaLight)
+      })
+
+    // const directionaLight = new THREE.DirectionalLight(0xffffff, strength)
+    // // directionaLight.castShadow = true
+    // directionaLight.position.set(1000, 0, 0)
+
+    // scene.add(directionaLight)
+
+    // 创建一个 HemisphereLight
+    // const skyColor = 0xb1e1ff // 浅蓝色 0xb1e1ff
+    // const groundColor = 0x4d4d4d // 深灰色  0x4d4d4d
+    // const intensity = 1 // 强度
+    // const hemiLight = new THREE.HemisphereLight(skyColor, groundColor, intensity)
+
+    // // 将光源添加到场景中
+    // scene.add(hemiLight)
+
     // light.position.set(x, y, z)
     // light.position.set(0.32, 0.39, 0.7)
-    light.position.set(100, 100, 100)
-
-    scene.add(light)
-    scene.add(ambientLight)
+    // light.position.set(100, 100, 100)
   }
 
   // 自动选择相应 加载器
@@ -251,8 +286,8 @@ export const useThree = () => {
 
   // 添加一个跟随相机的平行光源
   const addLightOfCamera = () => {
-    const pointLight = new THREE.DirectionalLight(0xffffff, 2)
-    // pointLight.castShadow = true
+    const pointLight = new THREE.DirectionalLight(0xffffff, 0.8)
+    pointLight.castShadow = true
     scene.add(pointLight)
     return pointLight
   }

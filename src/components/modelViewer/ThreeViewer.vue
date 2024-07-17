@@ -135,6 +135,7 @@ const loadModel = async modelFileInfo => {
   loader.load(
     filePath,
     geometry => {
+      // console.log("🚀 ~ file: ThreeViewer.vue:138 ~ geometry:", geometry)
       if (fileType == "3dm") {
         is3dm.value = true
         mesh = geometry
@@ -144,8 +145,9 @@ const loadModel = async modelFileInfo => {
       const simpleArr = ["obj", "dae", "3ds"]
       let material = new THREE.MeshStandardMaterial({
         color: 0xffffff,
-        metalness: 0.4,
-        roughness: 0.2,
+        metalness: 0.3,
+        roughness: 0.3,
+        // emissive: 0x7c7c7c,
       })
 
       // const textureLoader = new THREE.TextureLoader()
@@ -187,7 +189,7 @@ const commonFn = async modelFileInfo => {
   // 给场景所有物体添加默认的环境贴图
   // scene.environment =
 
-  // createLight(size) // 添加光源
+  createLight(size) // 添加光源
 
   // 添加一个跟随相机的点光源 此处必须添加
   pointLight = addLightOfCamera()
@@ -200,6 +202,9 @@ const commonFn = async modelFileInfo => {
   // addGui2(mesh, mesh.material, renderer.value)
 
   scene.add(mesh)
+
+  // mesh.castShadow = true
+  // mesh.receiveShadow = true
 
   // checkThickness(mesh)
   // pianyichang(mesh)

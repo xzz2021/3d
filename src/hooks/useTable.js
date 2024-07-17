@@ -10,7 +10,6 @@ export const useTable = () => {
     })
     if (response.ok) {
       const data = await response.json()
-      console.log("🚀 ~ file: useTable.js:13 ~ data:", data)
       const nuts = []
       const braces = []
       const materials = []
@@ -21,7 +20,7 @@ export const useTable = () => {
         } else if (item.categ_material_name === "牙套") {
           item.num = 0
           braces.push(item)
-        } else if (item.categ_big_name === "原材料") {
+        } else if (item.categ_big_name === "打印原材") {
           materials.push(item)
         }
       })

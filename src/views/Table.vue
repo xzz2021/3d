@@ -218,6 +218,8 @@ const deleteItem = index => {
 }
 
 const openPreview = modelFileInfo => {
+  emitEvent("openLoading")
+
   emitEvent("openPreview", modelFileInfo)
 }
 

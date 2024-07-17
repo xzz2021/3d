@@ -20,6 +20,7 @@ export default defineConfig({
   ],
   server: {
     open: true,
+    port: 666,
   },
   resolve: {
     alias: {
