@@ -39,6 +39,7 @@ import { useBoom } from "./hooks/useBoom.js"
 import { FullScreen } from "@element-plus/icons-vue"
 import { useShopStore } from "@/pinia/shopTable.js"
 import { RAWDATA } from "./utils/constant"
+import { ElMessage } from "element-plus"
 // import matcapPorcelainWhite from "./hooks/66.jpg"
 let { isFullscreen, toggleFullscreen, dialogTableVisible, openDialog, restoreCarmera, getALLInformation, autoResize } = useFn()
 // 可以在组件中的任意位置访问 `store` 变量 ✨
@@ -111,7 +112,7 @@ const loadModel = async modelFileInfo => {
   let loadView
   //  特殊3d文件类型判断, 使用自定义的加载方法, 不走官方loader判断
   const { filePath, fileType } = modelFileInfo
-  if (fileType == "stp") {
+  if (fileType == "stp" || fileType == "step") {
     loadView = await LoadStep(filePath)
   } else if (fileType == "iges" || fileType == "igs") {
     loadView = await LoadIges(filePath)
@@ -164,7 +165,7 @@ const loadModel = async modelFileInfo => {
     },
     undefined,
     error => {
-      console.error("模型加载出错, 出错原因:", error)
+      ElMessage.error("模型加载出错, 出错原因:", error)
     },
   )
 }

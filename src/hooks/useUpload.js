@@ -1,6 +1,8 @@
 import { ref } from "vue"
 import { useMitt } from "@/hooks/mitt"
 import { baseUrl } from "@/utils/env"
+import { ElMessage } from "element-plus"
+
 const getFileType = fileName => {
   const fileExtension = fileName.split(".").pop().toLowerCase()
   return fileExtension
@@ -19,9 +21,12 @@ export const useUpload = () => {
 
   const resData = ref({})
   const onUpload = async file => {
+    const fileType = getFileType(file.name)
+    const arr = accept.replaceAll(".", "").split(",")
+    if (!arr.includes(fileType)) return ElMessage.error("文件格式不合法,请重新选择!")
     clearFiles()
     if (file.size > M50 * 10) {
-      return alert("文件过大,请上传小于500MB的文件")
+      return ElMessage.error("文件过大,请上传小于500MB的文件")
     } else {
       await multiPartUpload(file)
     }
@@ -30,7 +35,7 @@ export const useUpload = () => {
     const filePath = URL.createObjectURL(file.raw)
     const modelFileInfo = {
       filePath,
-      fileType: getFileType(file.name),
+      fileType,
       resData: resData.value,
     }
     // return
@@ -77,7 +82,7 @@ export const useUpload = () => {
         return res
       }
     } else {
-      alert("上传模型失败,请重新尝试!")
+      ElMessage.error("上传模型失败,请重新尝试!")
       throw new Error("上传分片数据失败")
     }
   }
