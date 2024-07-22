@@ -5,7 +5,7 @@
  * MaterialPanel.vue
 -->
 <template>
-  <div class="container">
+  <div class="containerMaterial">
     <!-- <img src="http://xzz2022.top:2222/rural/px.png" alt="" srcset="" style="width: 100px; height: 100px" /> -->
     <el-dialog v-model="dialogVisible" width="920" draggable top="5vh" title="选择材料">
       <el-tabs type="card" class="demo-tabs" style="height: 500px" @tab-click="tabClick" v-model="activeTabName">
@@ -22,7 +22,12 @@
               class="itemBox"
             >
               <!-- <el-image class="imgBox" :src="item.image" fit="cover" crossorigin="anonymous" /> -->
-              <el-image class="imgBox" src="http://xzz2022.top:2222/shuzhi9400.png" fit="cover" crossorigin="anonymous" />
+              <el-image
+                class="imgBox"
+                src="https://yun3d.com/filestore/assets/shuzhi9400.png"
+                fit="cover"
+                crossorigin="anonymous"
+              />
               <div class="priceBox">￥{{ item.list_price / 1000 }}起</div>
               <div class="nameBox">{{ item.default_code + item.name }}</div>
             </div>

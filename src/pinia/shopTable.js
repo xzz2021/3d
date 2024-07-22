@@ -84,7 +84,7 @@ export const useShopStore = defineStore("shopStore", () => {
       grinding.rawPrice = rawPrice
       const final =
         ((((volume * material.list_price) / 1000) * (material.material_density || 1.4)) / 1000 +
-          (surfaceArea * colorLength) / 100 +
+          (Number(surfaceArea) * Number(colorLength)) / 100 +
           braces.price +
           nuts.price +
           deliveryTime.price +

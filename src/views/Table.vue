@@ -253,8 +253,8 @@ const updateNuts = msg => {
 const checkColor = msg => {
   const { index, v } = msg
   //  有选择  计算打磨价格  勾选打磨  且禁用按钮
-  const { surfaceArea } = tableData.value[index]
-  tableData.value[index].grinding.price = v ? Number((surfaceArea / 100).toFixed(2)) : 0
+  const { surfaceArea } = tableData.value[index].model3d
+  tableData.value[index].grinding.price = v ? Number((Number(surfaceArea) / 100).toFixed(2)) : 0
   tableData.value[index].grinding.status = v
   tableData.value[index].grinding.checkDisabled = v
 }
@@ -268,8 +268,6 @@ const addToCart = async item => {
     return ElMessage.error("请选择材料后再添加购物车!")
   }
   const { count, finalPrice, imageUrl, modelFileInfo, ...restParams } = item
-  console.log("🚀 ~ file: Table.vue:271 ~ modelFileInfo:", modelFileInfo)
-  // console.log("🚀 ~ file: Table.vue:271 ~ restParams:", restParams)
   const { product_tmpl_id, product_id, file_url } = modelFileInfo.resData
 
   const params = {

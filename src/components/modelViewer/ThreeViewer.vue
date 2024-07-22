@@ -92,7 +92,7 @@ let {
   containerRef,
   initialStatus,
   createRenderer,
-  checkThickness,
+  // checkThickness,
   pianyichang,
 } = useThree()
 
@@ -234,10 +234,10 @@ const commonFn = async modelFileInfo => {
   !check && getInfoAndPushItem(box, modelFileInfo)
 }
 
-const getInfoAndPushItem = (box, modelFileInfo) => {
+const getInfoAndPushItem = async (box, modelFileInfo) => {
   //  模型加载完之后 获取商品所有详细信息
   const model3d = getALLInformation(box, mesh.geometry)
-  const imageUrl = screenShot(box)
+  const imageUrl = await screenShot(box)
   const newItem = { ...RAWDATA, model3d, imageUrl, modelFileInfo }
   addItem(newItem)
   setTimeout(() => {
@@ -258,7 +258,7 @@ const findMinIndex = arr => {
   return minIndex
 }
 
-const screenShot = box => {
+const screenShot = async box => {
   // 1. 先比较获取面积最大的面
   const size = box.getSize(new THREE.Vector3())
   const { x, y, z } = size
@@ -285,6 +285,7 @@ const screenShot = box => {
 
   // 3. 调整模型 适配 canvas  大小
 
+  await new Promise(resolve => setTimeout(resolve, 10))
   // 获取预览图片
   renderer.value.render(scene, camera.value)
   const imageUrl = renderer.value.domElement.toDataURL("image/jpeg")

@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="containerCheckBox">
     <p>已选择的颜色: {{ colorSum }}</p>
     <div class="list_box">
       <p>亮光:</p>
@@ -111,7 +111,7 @@ defineExpose({ addItem, colorSum, initPanel, closePopover })
 </script>
 
 <style lang="scss" scoped>
-.container {
+.containerCheckBox {
   width: 250px;
   .list_box {
     // width: 200px;

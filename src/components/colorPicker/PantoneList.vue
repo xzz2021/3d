@@ -5,7 +5,7 @@
  * PantoneList.vue
 -->
 <template>
-  <div class="container">
+  <div class="containerListBox">
     <div class="color_list_box">
       <div class="cBox">
         <div class="list_box">

@@ -41,9 +41,9 @@ export const useThree = () => {
   // const urls = [`${path}px.jpg`, `${path}nx.jpg`, `${path}py.jpg`, `${path}ny.jpg`, `${path}pz.jpg`, `${path}nz.jpg`]
   // const texture = new THREE.CubeTextureLoader().load(urls)
   // scene.background = texture
-  // scene.background = new THREE.Color(0x8c8aff) //  设置场景的背景色0x8c8aff
+  scene.background = new THREE.Color(0x8c8aff) //  设置场景的背景色0x8c8aff
   // scene.background = new THREE.Color(0x7f7f7f) //  设置场景的背景色 0x7f7f7f  0xf2f2f2
-  scene.background = new THREE.Color(0xf2f2f2) //  设置场景的背景色 0x7f7f7f  0xf2f2f2
+  // scene.background = new THREE.Color(0xf2f2f2) //  设置场景的背景色 0x7f7f7f  0xf2f2f2
 
   // let d = 75 // 控制视锥的尺寸  //  控制相机与模型中心的距离
   // let camera = new THREE.OrthographicCamera(-d, d, d, -d, 1, 1000);
@@ -1172,7 +1172,7 @@ export const useThree = () => {
     containerRef,
     initialStatus,
     createRenderer,
-    checkThickness,
+    // checkThickness,
     pianyichang,
   }
 }
