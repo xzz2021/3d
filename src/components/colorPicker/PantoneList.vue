@@ -254,9 +254,6 @@ const changeLineHeight = text => {
       display: flex;
       justify-content: center; /* 水平居中 */
       align-items: center;
-
-      .text {
-      }
     }
   }
 }
