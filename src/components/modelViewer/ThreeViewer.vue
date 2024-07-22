@@ -18,9 +18,9 @@
     <div ref="containerRef" id="threecontainer">
       <AxisLine v-show="mesh" :camera2="camera" @backCarmera="backCarmera" @totastMesh="totastMesh(controls)" />
       <!-- <div v-if="is3dm"> -->
-      <div class="boomSlider">
+      <!-- <div class="boomSlider">
         <el-slider v-model="ratioValue" :show-tooltip="false" :min="0" :max="30" size="small" />
-      </div>
+      </div> -->
     </div>
 
     <!-- <button v-show="mesh" id="button" @click="toggleLabel">{{ labelStatus ? "开启" : "关闭" }}三维信息</button> -->
@@ -145,7 +145,7 @@ const loadModel = async modelFileInfo => {
       }
       const simpleArr = ["obj", "dae", "3ds"]
       let material = new THREE.MeshStandardMaterial({
-        color: 0xffffff,
+        // color: "#8d8d8d",
         metalness: 0.3,
         roughness: 0.3,
         // emissive: 0x7c7c7c,
@@ -333,7 +333,7 @@ defineExpose({ loadModel })
 <style lang="scss" scope>
 #threecontainer {
   position: relative;
-  border: 1px solid black;
+  // border: 1px solid black;
   text-align: center;
   text-align: -webkit-center;
   height: 100%;

@@ -6,7 +6,7 @@
 -->
 <template>
   <div class="table_container">
-    <el-table :data="tableData" height="300" style="width: 100%" stripe border>
+    <el-table :data="tableData" height="300" style="width: 100%" border>
       <!-- <el-table-column type="selection" width="55" /> -->
       <el-table-column label="文件预览" width="180">
         <template #default="scope">
@@ -268,7 +268,9 @@ const addToCart = async item => {
     return ElMessage.error("请选择材料后再添加购物车!")
   }
   const { count, finalPrice, imageUrl, modelFileInfo, ...restParams } = item
-  const { product_tmpl_id, product_id, file_url } = modelFileInfo
+  console.log("🚀 ~ file: Table.vue:271 ~ modelFileInfo:", modelFileInfo)
+  // console.log("🚀 ~ file: Table.vue:271 ~ restParams:", restParams)
+  const { product_tmpl_id, product_id, file_url } = modelFileInfo.resData
 
   const params = {
     // product_tmpl_id,
@@ -287,7 +289,7 @@ const addToCart = async item => {
   }
   // console.log("🚀 ~ file: Table.vue:273 ~ addToCart ~ params:", params)
   // return
-  const response = await fetch(`${baseUrl}/shop/cart/update_json`, {
+  const response = await fetch(`${baseUrl}/shop/cart/add_cart`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

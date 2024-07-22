@@ -22,6 +22,7 @@ export const useUpload = () => {
   const resData = ref({})
   const onUpload = async file => {
     const fileType = getFileType(file.name)
+    const accept = ".glb,.obj,.gltf,.fbx,.stl,.igs,.stp,.step,.iges,.dae,.3ds,.3dm"
     const arr = accept.replaceAll(".", "").split(",")
     if (!arr.includes(fileType)) return ElMessage.error("文件格式不合法,请重新选择!")
     clearFiles()
@@ -42,6 +43,7 @@ export const useUpload = () => {
     // 触发模型加载
     emitEvent("openPreview", modelFileInfo)
     emitEvent("openLoading")
+    emitEvent("showLogo")
   }
 
   const multiPartUpload = async file => {

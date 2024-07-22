@@ -41,9 +41,9 @@ export const useThree = () => {
   // const urls = [`${path}px.jpg`, `${path}nx.jpg`, `${path}py.jpg`, `${path}ny.jpg`, `${path}pz.jpg`, `${path}nz.jpg`]
   // const texture = new THREE.CubeTextureLoader().load(urls)
   // scene.background = texture
-  scene.background = new THREE.Color(0x8c8aff) //  设置场景的背景色0x8c8aff
+  // scene.background = new THREE.Color(0x8c8aff) //  设置场景的背景色0x8c8aff
   // scene.background = new THREE.Color(0x7f7f7f) //  设置场景的背景色 0x7f7f7f  0xf2f2f2
-  // scene.background = new THREE.Color(0xf2f2f2) //  设置场景的背景色 0x7f7f7f  0xf2f2f2
+  scene.background = new THREE.Color(0xf2f2f2) //  设置场景的背景色 0x7f7f7f  0xf2f2f2
 
   // let d = 75 // 控制视锥的尺寸  //  控制相机与模型中心的距离
   // let camera = new THREE.OrthographicCamera(-d, d, d, -d, 1, 1000);
@@ -70,7 +70,7 @@ export const useThree = () => {
     //  此处与renderer.autoClear  冲突
     // renderer.setClearColor(0x8c8aff); // 设置为白色
     // 设置渲染器屏幕像素比  高分辨率屏幕上 渲染更精细  但不建议直接设置  会导致性能问题
-    renderer.setPixelRatio(window.devicePixelRatio || 1)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.setViewport(0, 0, 600, 600) //主场景视区
     renderer.autoClear = false //【scene.autoClear一定要关闭】
     return renderer
@@ -217,7 +217,7 @@ export const useThree = () => {
     // 定位相机到左上角
     camera.position.set(x + y, -y, center.z)
     camera.lookAt(center)
-    // camera.up.set(0, 0, 1)
+    camera.up.set(0, 0, 1)
 
     // const helper = new THREE.CameraHelper(camera)
     // scene.add(helper)
@@ -263,7 +263,7 @@ export const useThree = () => {
     //  默认旋转
     // controls.enableRotate = true // 启用旋转
     // controls.autoRotate = true
-    // controls.autoRotateSpeed = 3
+    controls.autoRotateSpeed = 3
 
     initialStatus.value.controlsarget = controls.target.clone()
 

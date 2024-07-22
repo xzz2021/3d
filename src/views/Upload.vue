@@ -27,4 +27,8 @@ import { useUpload } from "@/hooks/useUpload"
 import { UploadFilled } from "@element-plus/icons-vue"
 const { onUpload, modelInformation, threeRef, uploadFormRef } = useUpload()
 </script>
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+:deep(.el-upload-dragger) {
+  background: #8080801c;
+}
+</style>

@@ -13,7 +13,9 @@
       <div class="arrow arrow-right"></div>
       <div class="arrow arrow-up"></div> -->
     </div>
-    <div @click="totastMesh2">旋转</div>
+    <!-- <div @click="totastMesh2">旋转</div> -->
+    <!-- <el-button type="warning" @click="totastMesh2">{{ flag ? "停止" : "旋转" }}</el-button> -->
+    <el-button type="warning" @click="totastMesh2">旋转</el-button>
   </div>
 </template>
 <script setup>
@@ -30,7 +32,10 @@ const emit = defineEmits(["backCarmera", "totastMesh"])
 const backCarmera2 = () => {
   emit("backCarmera")
 }
+
+// const flag = ref(false)
 const totastMesh2 = () => {
+  // flag.value = !flag.value
   emit("totastMesh")
 }
 let { changeFace } = useThree()
