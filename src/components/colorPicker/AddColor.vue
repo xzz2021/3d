@@ -14,7 +14,10 @@
           <div v-for="item in addList.c" :key="item">
             <el-tooltip class="box-item" :content="item.pantone" placement="top">
               <div class="item_box" :style="{ 'background-color': item.hex }">
-                <div class="close_btn" @click="deleteItem('c', item)">&#10006;</div>
+                <!-- <div class="close_btn" @click="deleteItem('c', item)">&#10006;</div> -->
+                <div class="close_btn" @click="deleteItem('c', item)">
+                  <el-icon><Delete /></el-icon>
+                </div>
               </div>
             </el-tooltip>
           </div>
@@ -35,7 +38,9 @@
           <div v-for="item in addList.u" :key="item">
             <el-tooltip class="box-item" :content="item.pantone" placement="top">
               <div class="item_box" :style="{ 'background-color': item.hex }">
-                <div class="close_btn" @click="deleteItem('u', item)">&#10006;</div>
+                <div class="close_btn" @click="deleteItem('u', item)">
+                  <el-icon><Delete /></el-icon>
+                </div>
               </div>
             </el-tooltip>
           </div>
@@ -57,6 +62,7 @@
 </template>
 
 <script setup>
+import { Delete } from "@element-plus/icons-vue"
 import { computed } from "vue"
 import { useShopStore } from "@/pinia/shopTable.js"
 import { useMitt2 } from "@/hooks/mitt2.js"
@@ -162,15 +168,21 @@ defineExpose({ addItem, colorSum, initPanel, closePopover })
         .text {
         }
         .close_btn {
+          // position: absolute;
+          // right: 2px;
+          // top: -1px;
+          // text-align: center;
+          // font-size: 8px;
+          // color: white;
           display: none;
-          // cursor: pointer;
           position: absolute;
-          right: 2px;
-          top: -1px;
+          top: 0px;
           text-align: center;
-          font-size: 8px;
+          font-size: 16px;
           color: white;
-          // background-color: red;
+          background: #4e64758a;
+          padding: 5px 7px;
+          border-radius: 4px;
           &:hover {
             // color: red;
           }

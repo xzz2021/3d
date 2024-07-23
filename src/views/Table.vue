@@ -214,7 +214,8 @@ const handleChangeNuts = (bool, index) => {
   nutsPanelRef.value && nutsPanelRef.value.handleOpen(index)
 }
 const deleteItem = index => {
-  tableData.value.length > 1 && tableData.value.splice(index, 1)
+  // tableData.value.length > 1 && tableData.value.splice(index, 1)
+  tableData.value.splice(index, 1)
 }
 
 const openPreview = modelFileInfo => {

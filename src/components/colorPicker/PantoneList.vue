@@ -6,6 +6,28 @@
 -->
 <template>
   <div class="containerListBox">
+    <div class="color_select_box">
+      <div style="margin: 0 30px 0 5px">潘通色号:</div>
+      <el-select
+        v-model="selectValue"
+        value-key="pantone"
+        filterable
+        placeholder="选择颜色"
+        style="width: 200px"
+        no-data-text="当前色号不存在"
+        @change="selectColor"
+        remote
+        remote-show-suffix
+        :remote-method="remoteMethod"
+        :loading="loading"
+        loading-text="正在搜索"
+      >
+        <template #prefix>
+          <el-icon><Search /></el-icon>
+        </template>
+        <el-option v-for="item in options" :key="item.pantone" :label="item.pantone" :value="item" />
+      </el-select>
+    </div>
     <div class="color_list_box">
       <div class="cBox">
         <div class="list_box">
@@ -28,7 +50,8 @@
             </div>
           </div>
         </div>
-        <el-button type="primary">亮 光 C</el-button>
+        <el-button type="primary" color="#017eff" style="filter: brightness(1.2)">亮 光 C</el-button>
+        <!-- <div class="oooo">亮 光 C</div> -->
       </div>
       <div class="uBox">
         <div class="list_box">
@@ -51,35 +74,15 @@
             </div>
           </div>
         </div>
-        <el-button class="titleBtn" type="primary" color="#1e22aa">哑 光 U</el-button>
+        <el-button class="titleBtn" type="primary">哑 光 U</el-button>
       </div>
-    </div>
-
-    <div class="color_select_box">
-      <div style="margin: 0 30px 0 5px">潘通色号:</div>
-      <el-select
-        v-model="selectValue"
-        value-key="pantone"
-        filterable
-        placeholder="选择颜色"
-        style="width: 200px"
-        no-data-text="暂无数据"
-        @change="selectColor"
-        remote
-        remote-show-suffix
-        :remote-method="remoteMethod"
-        :loading="loading"
-        loading-text="正在搜索"
-      >
-        <el-option v-for="item in options" :key="item.pantone" :label="item.pantone" :value="item" />
-      </el-select>
     </div>
   </div>
 </template>
 
 <script setup>
 import { pantoneColors } from "../../utils/calculateColor"
-
+import { Search } from "@element-plus/icons-vue"
 const props = defineProps({
   colorList: {
     type: Object,
@@ -213,10 +216,21 @@ const changeLineHeight = text => {
 </script>
 
 <style lang="scss" scoped>
+.oooo {
+  background: #017eff;
+  width: 139px;
+  height: 33px;
+  /* color: #017eff; */
+  position: absolute;
+  bottom: 66px;
+  right: 402px;
+  color: white;
+  line-height: 33px;
+}
 .color_select_box {
   display: flex;
   align-items: center;
-  margin-top: 8px;
+  margin-bottom: 8px;
   // justify-content: space-between;
 }
 .color_list_box {
