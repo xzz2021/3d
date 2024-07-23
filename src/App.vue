@@ -3,6 +3,7 @@ import Steps from "@/views/Steps.vue"
 import Table from "@/views/Table.vue"
 import Upload from "@/views/Upload.vue"
 import ShopCard from "@/views/ShopCard.vue"
+import BaiduMap from "@/views/BaiduMap.vue"
 </script>
 
 <template>
@@ -17,6 +18,7 @@ import ShopCard from "@/views/ShopCard.vue"
       </div>
     </el-card>
   </div>
+  <BaiduMap />
 </template>
 
 <style scoped lang="scss">
