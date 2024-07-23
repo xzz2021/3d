@@ -55,6 +55,7 @@
 
 <script setup>
 import { useShopStore } from "@/pinia/shopTable.js"
+import { computed } from "vue"
 const store = useShopStore()
 const { tableData } = storeToRefs(store)
 
@@ -66,17 +67,25 @@ const props = defineProps({
 })
 
 const dialogVisible = ref(false)
-const bracesType = ref([
-  { type: "M2(1D-3D)", depth: "2*1d-3d加1.5", diameter: "2.1", outerDiameter: "5.1", num: 0 },
-  { type: "M2.5(1D-3D)", depth: "2.5*1d-3d加1.5", diameter: "2.6", outerDiameter: "5.6", num: 0 },
-  { type: "M3(1D-3D)", depth: "3*1d-3d加1.5", diameter: "3.1", outerDiameter: "6.1", num: 0 },
-  { type: "M4(1D-3D)", depth: "4*1d-3d加1.5", diameter: "4.2", outerDiameter: "7.2", num: 0 },
-  { type: "M5(1D-3D)", depth: "5*1d-3d加1.5", diameter: "5.2", outerDiameter: "8.2", num: 0 },
-  { type: "M6(1D-3D)", depth: "6*1d-3d加1.5", diameter: "6.2", outerDiameter: "9.2", num: 0 },
-  { type: "M8(1D-3D)", depth: "8*1d-3d加1.5", diameter: "8.3", outerDiameter: "11.3", num: 0 },
-  { type: "M10(1D-3D)", depth: "10*1d-3d加1.5", diameter: "10.4", outerDiameter: "13.4", num: 0 },
-])
-
+// const bracesType = ref([
+//   { type: "M2(1D-3D)", depth: "2*1d-3d加1.5", diameter: "2.1", outerDiameter: "5.1", num: 0 },
+//   { type: "M2.5(1D-3D)", depth: "2.5*1d-3d加1.5", diameter: "2.6", outerDiameter: "5.6", num: 0 },
+//   { type: "M3(1D-3D)", depth: "3*1d-3d加1.5", diameter: "3.1", outerDiameter: "6.1", num: 0 },
+//   { type: "M4(1D-3D)", depth: "4*1d-3d加1.5", diameter: "4.2", outerDiameter: "7.2", num: 0 },
+//   { type: "M5(1D-3D)", depth: "5*1d-3d加1.5", diameter: "5.2", outerDiameter: "8.2", num: 0 },
+//   { type: "M6(1D-3D)", depth: "6*1d-3d加1.5", diameter: "6.2", outerDiameter: "9.2", num: 0 },
+//   { type: "M8(1D-3D)", depth: "8*1d-3d加1.5", diameter: "8.3", outerDiameter: "11.3", num: 0 },
+//   { type: "M10(1D-3D)", depth: "10*1d-3d加1.5", diameter: "10.4", outerDiameter: "13.4", num: 0 },
+// ])
+const bracesType = computed(() => {
+  const temp = []
+  props.list.map(item => {
+    const type = item.default_code
+    const { 孔底深度, 底孔直径, 工件外径 } = item.variants[0].attribute_values
+    temp.push({ type, depth: 孔底深度, diameter: 底孔直径, outerDiameter: 工件外径 })
+  })
+  return temp
+})
 const emit = defineEmits(["changeBraces"])
 
 const curIndex = ref(0)
@@ -86,6 +95,7 @@ const confirm = () => {
   props.list.map(item => {
     if (item.num != 0) total.push(JSON.parse(JSON.stringify(item)))
   })
+  console.log("🚀 ~ file: BracesPanel.vue:89 ~ props.list:", props.list)
   dialogVisible.value = false //  不需要关闭面板 本身就包含关闭事件
   // 发送事件 更新牙套数据
   if (total.length == 0) status = false
