@@ -8,13 +8,15 @@
   <div class="containerListBox">
     <div class="color_select_box">
       <div style="margin: 0 30px 0 5px">潘通色号:</div>
+
       <el-select
         v-model="selectValue"
         value-key="pantone"
         filterable
-        placeholder="选择颜色"
-        style="width: 200px"
-        no-data-text="当前色号不存在"
+        placeholder="输入需要的潘通色号"
+        style="width: 260px"
+        no-data-text="正在搜索"
+        no-match-text="当前色号不存在"
         @change="selectColor"
         remote
         remote-show-suffix
@@ -28,155 +30,83 @@
         <el-option v-for="item in options" :key="item.pantone" :label="item.pantone" :value="item" />
       </el-select>
     </div>
-    <div class="color_list_box">
-      <div class="cBox">
-        <div class="list_box">
-          <div
-            class="item_box"
-            v-for="item in colorList.pantoneC"
-            :key="item"
-            @click="pushColor(item)"
-            :style="{ 'background-color': item.hex }"
-          >
-            <div
-              class="text"
-              :style="{
-                color: getHighContrastColor(item.rgb),
-                fontSize: changeFontSize(item.pantone),
-                lineHeight: changeLineHeight(item.pantone),
-              }"
-            >
-              {{ item.pantone }}
-            </div>
-          </div>
-        </div>
-        <el-button type="primary" color="#017eff" style="filter: brightness(1.2)">亮 光 C</el-button>
-        <!-- <div class="oooo">亮 光 C</div> -->
-      </div>
-      <div class="uBox">
-        <div class="list_box">
-          <div
-            class="item_box"
-            v-for="item in colorList.pantoneU"
-            :key="item"
-            @click="pushColor(item)"
-            :style="{ 'background-color': item.hex }"
-          >
-            <div
-              class="text"
-              :style="{
-                color: getHighContrastColor(item.rgb),
-                fontSize: changeFontSize(item.pantone),
-                lineHeight: changeLineHeight(item.pantone),
-              }"
-            >
-              {{ item.pantone }}
-            </div>
-          </div>
-        </div>
-        <el-button class="titleBtn" type="primary">哑 光 U</el-button>
-      </div>
-    </div>
+
+    <SelectedPanel colorType="c" :addList="addList.c" @deleteItem="deleteItemC" />
+    <ColorList :defaultColor="colorList.pantoneC" @chooseColor="chooseColor" />
+    <SelectedPanel colorType="u" :addList="addList.u" @deleteItem="deleteItemU" />
+    <ColorList :defaultColor="colorList.pantoneU" @chooseColor="chooseColor" />
   </div>
 </template>
 
 <script setup>
 import { pantoneColors } from "../../utils/calculateColor"
 import { Search } from "@element-plus/icons-vue"
+import { useShopStore } from "@/pinia/shopTable.js"
+import { useMitt } from "@/hooks/mitt.js"
+const { emitEvent } = useMitt()
 const props = defineProps({
   colorList: {
     type: Object,
-    default: {
-      pantoneC: [
-        {
-          hex: "#FF3EB5",
-          rgb: [255, 62, 181],
-          pantone: "806 C",
-        },
-        {
-          hex: "#FF7276",
-          rgb: [255, 114, 118],
-          pantone: "805 C",
-        },
-        {
-          hex: "#FFAA4D",
-          rgb: [255, 170, 77],
-          pantone: "804 C",
-        },
-        {
-          hex: "#FFE900",
-          rgb: [255, 233, 0],
-          pantone: "803 C",
-        },
-        {
-          hex: "#44D62C",
-          rgb: [68, 214, 44],
-          pantone: "802 C",
-        },
-      ],
-      pantoneU: [
-        {
-          hex: "#FF48B0",
-          rgb: [255, 72, 176],
-          pantone: "806 U",
-        },
-        {
-          hex: "#FF7477",
-          rgb: [255, 116, 119],
-          pantone: "805 U",
-        },
-        {
-          hex: "#FFAA52",
-          rgb: [255, 170, 82],
-          pantone: "804 U",
-        },
-        {
-          hex: "#FFE916",
-          rgb: [255, 233, 22],
-          pantone: "803 U",
-        },
-        {
-          hex: "#3BD23D",
-          rgb: [59, 210, 61],
-          pantone: "802 U",
-        },
-        {
-          hex: "#009CCD",
-          rgb: [0, 156, 205],
-          pantone: "801 U",
-        },
-        {
-          hex: "#9D9994",
-          rgb: [157, 153, 148],
-          pantone: "Black 0961 U",
-        },
-        {
-          hex: "#78E6D0",
-          rgb: [120, 230, 208],
-          pantone: "Green 0921 U",
-        },
-      ],
-    },
+    default: [],
   },
 })
 
-const emit = defineEmits(["chooseColor", "updateColorBlock"])
+const addList = ref({
+  c: [],
+  u: [],
+})
 
-const pushColor = color => {
-  emit("chooseColor", color)
+const colorSum = computed(() => {
+  return addList.value.c.length + addList.value.u.length
+})
+
+const addItem = (type, item) => {
+  const isExist = addList.value[type].find(i => i.hex === item.hex)
+  if (isExist) return
+  addList.value[type].push(item)
 }
 
+// 删除已选择的颜色
+const deleteItemC = item => {
+  addList.value.c = addList.value.c.filter(i => i !== item)
+}
+
+const deleteItemU = item => {
+  addList.value.u = addList.value.u.filter(i => i !== item)
+}
+
+
+// 更新颜色
+const emit = defineEmits(["updateColorBlock"])
+const selectValue = ref([])
 const selectColor = item => {
+  console.log("🚀 ~ selectColor ~ item:", item)
   selectValue.value = item
   // 选择颜色后 触发 列表更新
   // 此处颜色值需要转换
-  const getRgb = item.rgb
-  const [r, g, b] = getRgb
+  const [r, g, b] = item.rgb
   emit("updateColorBlock", { rgb: { r, g, b } })
 }
 
+
+const store = useShopStore()
+const { tableData } = storeToRefs(store)
+//  关闭面板   给颜色赋值  更新  面板勾选状态
+const updateDate = (index) => {
+  tableData.value[index].paint.colorList = addList.value
+  const bool = colorSum.value != 0
+  tableData.value[index].paint.status = bool
+ //  有喷漆 必有打磨 // 触发事件
+ emitEvent("checkGrinding",{ v: bool, index })
+ store.updatePrice()
+}
+
+//  开启面板 初始化已选择的颜色
+const initPanel = index => {
+  addList.value = tableData.value[index].paint.colorList
+}
+
 const options = ref([])
-const selectValue = ref([])
 const loading = ref(false)
 // 将remoteMethod改造为支持防抖
 let timer = null
@@ -196,23 +126,20 @@ const remoteMethod = query => {
   }
 }
 
-//    颜色块  内部的 文字颜色 动态变换  高对比度
-const getHighContrastColor = color => {
-  const [R, G, B] = color.map(channel => {
-    const proportion = channel / 255
-    return proportion <= 0.03928 ? proportion / 12.92 : Math.pow((proportion + 0.055) / 1.055, 2.4)
-  })
-  const luminance = 0.2126 * R + 0.7152 * G + 0.0722 * B
-  return luminance > 0.5 ? "#000000" : "#FFFFFF"
+
+//  选择颜色  推送到右侧
+const chooseColor = color => {
+  if (color.pantone.lastIndexOf("C") == -1) {
+    addItem("u", color)
+  } else {
+    addItem("c", color)
+  }
 }
 
-const changeFontSize = text => {
-  return text.length > 9 ? "11px" : ""
-}
-
-const changeLineHeight = text => {
-  return text.length > 10 ? "1" : ""
-}
+defineExpose({
+  initPanel,
+  updateDate
+})
 </script>
 
 <style lang="scss" scoped>

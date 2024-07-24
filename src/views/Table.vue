@@ -147,7 +147,6 @@
 import { Delete, CopyDocument, Picture as IconPicture, MagicStick, Plus } from "@element-plus/icons-vue"
 import XzzColorPicker from "../components/colorPicker/XzzColorPicker.vue"
 import { useMitt } from "../hooks/mitt"
-import { useMitt2 } from "../hooks/mitt2"
 import { useTable } from "../hooks/useTable"
 import { useShopStore } from "@/pinia/shopTable.js"
 import { baseUrl } from "@/utils/env"
@@ -160,8 +159,8 @@ const store = useShopStore()
 const { tableData, totalPrice } = storeToRefs(store)
 
 const { updatePrice } = store
-const { emitEvent } = useMitt()
-const { onEvent } = useMitt2("checkColor")
+const { emitEvent, onEvent } = useMitt()
+// const { onEvent } = useMitt2("checkColor")
 
 const deliveryTimeArr = ref([
   { name: "交期", key: "deliveryTime", price: 56, val: "加急" },
@@ -261,7 +260,7 @@ const checkColor = msg => {
 }
 
 onMounted(() => {
-  onEvent(checkColor)
+  onEvent("checkGrinding", checkColor)
 })
 
 const addToCart = async item => {

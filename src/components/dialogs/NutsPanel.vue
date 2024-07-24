@@ -101,7 +101,6 @@ const confirm = () => {
   props.list.map(item => {
     if (item.num != 0) total.push(JSON.parse(JSON.stringify(item)))
   })
-  console.log("🚀 ~ file: NutsPanel.vue:94 ~ props.list:", props.list)
   dialogVisible.value = false //  不需要关闭面板 本身就包含关闭事件
   // 发送事件 更新牙套数据
   if (total.length == 0) status = false
