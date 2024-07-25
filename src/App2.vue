@@ -1,7 +1,7 @@
 <script setup>
 import Upload from "@/views/Upload2.vue"
 import Table from "@/views/Table.vue"
-
+import LogoViewer from "@/views/LogoViewer.vue"
 import { useMitt } from "@/hooks/mitt.js"
 
 const showLogo = ref(true)
@@ -14,13 +14,14 @@ onEvent("showLogo", () => {
 
 <template>
   <div id="xzzapp">
-    <div v-if="showLogo" class="item">
+    <!-- <div v-if="showLogo" class="item">
       <div class="logo">
         <div>
           <img src="https://yun3d.com/filestore/assets/logo.png" style="width: 288px; height:100px "></img>
         </div>
       </div>
-    </div>
+    </div> -->
+    <LogoViewer  v-if="showLogo"/>
     <Table v-else />
     <Upload />
   </div>

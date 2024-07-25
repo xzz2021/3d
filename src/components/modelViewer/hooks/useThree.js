@@ -658,6 +658,7 @@ export const useThree = () => {
     // })
     const urls = [imgUrl0, imgUrl1, imgUrl2, imgUrl3, imgUrl4, imgUrl5]
     // console.log("🚀 ~ file: ThreeViewer.vue:167 ~ urls:", urls)
+    //  anyTexture.magFilter = THREE。NearestFilter  //  minFilter  // 当贴图像素较低时， 使材质贴图的边界更清晰分明， 没有模糊感
     return new THREE.CubeTextureLoader().load(
       urls,
       () => {
