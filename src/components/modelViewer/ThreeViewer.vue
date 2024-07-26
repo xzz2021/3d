@@ -40,6 +40,7 @@ import { FullScreen } from "@element-plus/icons-vue"
 import { useShopStore } from "@/pinia/shopTable.js"
 import { RAWDATA } from "./utils/constant"
 import { ElMessage } from "element-plus"
+// import { checkThickness } from "@/utils/checkThickness"
 // import matcapPorcelainWhite from "./hooks/66.jpg"
 let { isFullscreen, toggleFullscreen, dialogTableVisible, openDialog, restoreCarmera, getALLInformation, autoResize } = useFn()
 // 可以在组件中的任意位置访问 `store` 变量 ✨
@@ -94,6 +95,7 @@ let {
   createRenderer,
   // checkThickness,
   pianyichang,
+  addGui
 } = useThree()
 
 const { openLoading, closeLoading } = useLoading()
@@ -150,7 +152,7 @@ const loadModel = async modelFileInfo => {
         roughness: 0.3,
         // emissive: 0x7c7c7c,
       })
-
+      // addGui(material)
       // const textureLoader = new THREE.TextureLoader()
       // let material = new THREE.MeshMatcapMaterial({
       //   color: 0xffffff,
@@ -194,13 +196,15 @@ const commonFn = async modelFileInfo => {
 
   // 添加一个跟随相机的点光源 此处必须添加
   pointLight = addLightOfCamera()
-
+  
   camera.value = createCarmera(size, center, mesh.up) // 创建相机
+
   // addEnvironment()
   // addF  aceGui  (camera)E:\xzz\development\3d\src\components\modelViewer\texture\rural_asphalt_road_2k.hdr
 
   // console.log("🚀 ~ file: ThreeViewer.vue:227 ~ mesh:", mesh)
   // addGui2(mesh, mesh.material, renderer.value)
+
 
   scene.add(mesh)
 
@@ -220,10 +224,10 @@ const commonFn = async modelFileInfo => {
   containerRef.value && containerRef.value.appendChild(renderer.value.domElement) // 挂载
   // totastMesh(controls.value)
 
-  // addAxes(size) // 添加轴辅助器  原点坐标指示
+  addAxes(size) // 添加轴辅助器  原点坐标指示
 
   // 添加可视化包围盒
-  // labelArr = addBox(mesh)
+  labelArr = addBox(mesh)
   // addArrow()
   closeLoading()
 

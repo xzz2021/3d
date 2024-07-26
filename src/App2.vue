@@ -21,7 +21,18 @@ onEvent("showLogo", () => {
         </div>
       </div>
     </div> -->
+    <div  data-v-18ac34e8="" data-v-e16649ff="" class="logo_container" style="  display: flex; 
+    width: 300px; flex-direction: row; font-size: 64px;font-weight: 600;">
+      <span style=" color: #4285f4;">D</span>
+      <span style="color: #ea4335;">a</span>
+      <span style="color: #fbbc05;">y</span>
+      <span style="color: #4285f4;">u</span>
+      <span style="color: #34a853;">3</span>
+      <span style="color: #ea4335;">D</span>
+    </div>
+
     <LogoViewer  v-if="showLogo"/>
+
     <Table v-else />
     <Upload />
   </div>

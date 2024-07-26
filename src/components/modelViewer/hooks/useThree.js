@@ -63,7 +63,7 @@ export const useThree = () => {
       logarithmicDepthBuffer: true,
       // preserveDrawingBuffer: true,
     })
-    renderer.setSize(600, 600)
+    renderer.setSize(800, 600)
     // renderer.setSize(canvasWidth, canvasHeight)
     renderer.shadowMap.enabled = true // 启用阴影
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
@@ -71,12 +71,13 @@ export const useThree = () => {
     // renderer.setClearColor(0x8c8aff); // 设置为白色
     // 设置渲染器屏幕像素比  高分辨率屏幕上 渲染更精细  但不建议直接设置  会导致性能问题
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    renderer.setViewport(0, 0, 600, 600) //主场景视区
+    renderer.setViewport(0, 0, 800, 600) //主场景视区
     renderer.autoClear = false //【scene.autoClear一定要关闭】
     return renderer
   }
 
   const createLight = size => {
+    //  灯光可以开启阴影投射 .castShadow 114版本之后没有
     // 添加灯源前先移除所有的灯光
     removeAllLights(scene)
     //  平行光的距离影响也很大  太远会显得很模糊
@@ -98,26 +99,25 @@ export const useThree = () => {
     //   { x: 0, y: 0, z: 1000 }, //  正右方 z轴
     //   { x: 0, y: 0, z: -1000 }, //  反右方 z轴
     // ]
-    const directionArr = [
-      { x: 1000, y: 1000, z: 1000 },
-      { x: 1000, y: -1000, z: 1000 },
-      { x: -1000, y: 1000, z: 1000 },
-      { x: -1000, y: -1000, z: 1000 },
-    ]
-    false &&
-      directionArr.map(item => {
-        const { x, y, z } = item
-        const directionaLight = new THREE.DirectionalLight(0xffffff, 0.2)
-        directionaLight.castShadow = true
-        directionaLight.position.set(x, y, z)
-        scene.add(directionaLight)
-      })
+    // const directionArr = [
+    //   { x: 1000, y: 1000, z: 1000 },
+    //   { x: 1000, y: -1000, z: 1000 },
+    //   { x: -1000, y: 1000, z: 1000 },
+    //   { x: -1000, y: -1000, z: 1000 },
+    // ]
+    // false &&
+    //   directionArr.map(item => {
+    //     const { x, y, z } = item
+    //     const directionaLight = new THREE.DirectionalLight(0xffffff, 0.2)
+    //     directionaLight.castShadow = true
+    //     directionaLight.position.set(x, y, z)
+    //     scene.add(directionaLight)
+    //   })
 
-    // const directionaLight = new THREE.DirectionalLight(0xffffff, strength)
+    const directionaLight = new THREE.DirectionalLight(0xffffff, strength)
     // // directionaLight.castShadow = true
     // directionaLight.position.set(1000, 0, 0)
-
-    // scene.add(directionaLight)
+    scene.add(directionaLight)
 
     // 创建一个 HemisphereLight
     // const skyColor = 0xb1e1ff // 浅蓝色 0xb1e1ff
@@ -199,25 +199,38 @@ export const useThree = () => {
   // 设置相机位置和方向
   const createCarmera = (size, center) => {
     const { x, y, z } = size //  元素自带基底面  用于相机视角 默认为Z轴
+    console.log("🚀 ~ createCarmera ~ size:", size)
 
-    const width = document.getElementById("threecontainer").offsetWidth
-    const height = document.getElementById("threecontainer").offsetHeight
+    // const width = document.getElementById("threecontainer").offsetWidth
+    // console.log("🚀 ~ createCarmera ~ width:", width)
+    // const height = document.getElementById("threecontainer").offsetHeight
+    // console.log("🚀 ~ createCarmera ~ height:", height)
     // const ll = 1.2
     // const d = Math.sqrt(size.x * size.x + size.y * size.y) / ll
-    // // const d = 300
-    // let camera2 = new THREE.OrthographicCamera(-d, d, d, -d, 0.1, 1000) //  直接展示物体每个面的真实 映射  眼 = 物体
+    // const d = 300
+    // const w = width / 2
+    // const h = height / 2
+    const w = 800 / 8
+    const h = 600 / 8
+    const camera = new THREE.OrthographicCamera(-w, w, h, -h, 1, 10000) //  直接展示物体每个面的真实 映射  眼 = 物体
     // let camera = new THREE.OrthographicCamera(x / -2, x / 2, y / 2, y / -2, 1, 1000) //  直接展示物体每个面的真实 映射  眼 = 物体
     // let camera = new THREE.OrthographicCamera(-y / ll, y / ll, z / ll, -z / ll, 1, 1000) //  直接展示物体每个面的真实 映射  眼 = 物体
 
-    const aspect = width / height
-    const camera = new THREE.PerspectiveCamera(75, aspect, 1, 1000) //  模拟人眼  以点看物体  眼 < 物体
-
-    // camera.updateProjectionMatrix()
+    // const aspect = width / height
+    // const camera = new THREE.PerspectiveCamera(75, aspect, 1, 10000) //  模拟人眼  以点看物体  眼 < 物体
+    
+    // let zz = x + y
+    // scaleRate < 1 && (zz = z / scaleRate)
     // 计算相机位置
     // 定位相机到左上角
-    camera.position.set(x + y, -y, center.z)
+    // const cameraDistance = Math.max(x, y, z)
+    // camera.position.set(x + y, - y, cameraDistance * 2)
+    camera.position.set(x , -y, center.z )
     camera.lookAt(center)
+    // const scaleRate = 400 / x
+   
     camera.up.set(0, 0, 1)
+    // camera.updateProjectionMatrix(); 
 
     // const helper = new THREE.CameraHelper(camera)
     // scene.add(helper)
@@ -669,6 +682,16 @@ export const useThree = () => {
         console.error("An error happened:", err)
       },
     )
+  }
+
+  const addGui = ( material) => {
+   
+    // 清除上一次gui添加的元素
+    // gui && gui.destroy()
+    const gui = new GUI()
+    gui.add(material, 'metalness').min(0).max(1).step(0.01)
+    gui.add(material, 'roughness').min(0).max(1).step(0.01)
+
   }
 
   const addGui2 = (mesh, material, renderer) => {
@@ -1147,6 +1170,7 @@ export const useThree = () => {
   return {
     scene,
     gui,
+    addGui,
     addBox,
     addArrow,
     addLightOfCamera,

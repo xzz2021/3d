@@ -10,13 +10,12 @@ import * as THREE from "three"
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js"
-import jsonText from './optimer_bold.typeface.json?raw'
-import { onMounted } from "vue";
+// import jsonText from './optimer_bold.typeface.json?raw'
+import { randomGenerateGroupMesh, randomMove } from '../utils/randomGenerateGroupMesh.js'
 
 const jsonurl = new URL('./optimer_bold.typeface.json', import.meta.url).href
 const  scene = new THREE.Scene()
 // scene.background = new THREE.Color(0x8c8aff)
-
 const renderer = new THREE.WebGLRenderer({
       antialias: true,
       powerPreference: "high-performance",
@@ -43,11 +42,11 @@ const renderer = new THREE.WebGLRenderer({
         font: font,
 		size: 80,
 		depth: 5,
-		curveSegments: 12,
+		curveSegments: 6,
 		bevelEnabled: true,
 		bevelThickness: 10,
-		bevelSize: 8,
-		bevelOffset: 0,
+		bevelSize: 2,
+		bevelOffset: 0, 
 		bevelSegments: 5
 	})
 
@@ -55,22 +54,37 @@ const renderer = new THREE.WebGLRenderer({
     // const textMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 
     const mesh = new THREE.Mesh(geometry, material)
-    const box = new THREE.Box3().setFromObject(mesh)
-    const center = box.getCenter(new THREE.Vector3())
-    mesh.position.sub(center) // 将模型居中
+    mesh.castShadow = true
+    mesh.receiveShadow = true
+    // geometry.computeBoundingBox()   // 将模型居中二
+    // //    此时得到的不是正中心  因为斜面bevelSize会影响集合 真实数据需要xyz轴都减去斜面-(geometry.boundingBox.max.x - bevelSize的值2）* 0.5
+    // geometry.translate(-geometry.boundingBox.max.x * 0.5, -geometry.boundingBox.max.y * 0.5, -geometry.boundingBox.max.z * 0.5)
+
+    geometry.center() // 将模型居中三
+    // const box = new THREE.Box3().setFromObject(mesh) 
+    // const center = box.getCenter(new THREE.Vector3())
+    // mesh.position.sub(center) // 将模型居中一
     scene.add(mesh)
 
+console.time("test need time")
 
+const geometry1 = new THREE.CapsuleGeometry( 5, 5, 4, 8 );
+const geometry2 = new THREE.ConeGeometry( 2, 6,32 );
+const geometry3 = new THREE.OctahedronGeometry(6,0 );
+const geometry4 = new THREE.TorusGeometry(4,2,16,100 );
+const geometryArr = [geometry1,geometry2,geometry3,geometry4]
+geometryArr.map(item => {
+  const currentGroup = randomGenerateGroupMesh(item)
+  scene.add( currentGroup );
+})
+    console.timeEnd("test need time")  //  13ms   3.8ms 
     logo3dRef.value && logo3dRef.value.appendChild(renderer.domElement)
-
-      animate();
+    animate();
     })
-
-
 
     const controls = new OrbitControls(camera, renderer.domElement)
     controls.enableDamping = true // 启用阻尼效果  必须调用update()
-    controls.dampingFactor = 0.25 // 阻尼系数
+    controls.dampingFactor = 0.02 // 阻尼系数  数值越小缓慢滑动效果越好
     controls.enableZoom = true // 启用缩放
     controls.target.set(0, 0, 0)
     controls.minDistance = 1
@@ -78,9 +92,9 @@ const renderer = new THREE.WebGLRenderer({
     // controls.autoRotateSpeed = 4
     // controls.autoRotate = true
 
-
     const animate = function () {
       controls.update()
+      randomMove(scene)
         requestAnimationFrame(animate);
         renderer.render(scene, camera);
       };
