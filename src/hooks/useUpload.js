@@ -17,7 +17,6 @@ export const useUpload = () => {
   const uploadFormRef = ref(null)
   const forgeRef = ref(null)
   const modelName = ref("")
-  const threeRef = ref(null)
 
   const resData = ref({})
   const onUpload = async file => {
@@ -98,12 +97,10 @@ export const useUpload = () => {
 
   const clearFiles = () => {
     uploadFormRef.value && uploadFormRef.value.clearFiles()
-    // threeRef.value && threeRef.value.clearMesh()
   }
   return {
     onUpload,
     uploadFormRef,
-    threeRef,
     forgeRef,
   }
 }

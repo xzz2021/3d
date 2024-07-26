@@ -178,7 +178,7 @@ const backCarmera = () => {
 }
 
 const renderer = ref(null)
-
+// renderer只能创建一次
 renderer.value = createRenderer()
 
 const commonFn = async modelFileInfo => {
@@ -197,7 +197,7 @@ const commonFn = async modelFileInfo => {
   // 添加一个跟随相机的点光源 此处必须添加
   pointLight = addLightOfCamera()
   
-  camera.value = createCarmera(size, center, mesh.up) // 创建相机
+  camera.value = createCarmera(size, center) // 创建相机
 
   // addEnvironment()
   // addF  aceGui  (camera)E:\xzz\development\3d\src\components\modelViewer\texture\rural_asphalt_road_2k.hdr
@@ -213,15 +213,18 @@ const commonFn = async modelFileInfo => {
 
   // checkThickness(mesh)
   // pianyichang(mesh)
-
+      const width = document.getElementById("threecontainer").offsetWidth
+        // console.log("🚀 ~ createRenderer ~ width:", width)
+    const height = document.getElementById("threecontainer").offsetHeight
+    renderer.value.setSize(width, height)
   autoResize(camera.value, renderer.value)
 
   // checkThickness(mesh)
   // detectWallThickness(mesh)
   // 有了渲染器之后   一定要先创建相机   再创建控制器
   controls.value = createControls(camera.value, renderer.value.domElement)
+   containerRef.value && containerRef.value.appendChild(renderer.value.domElement) // 挂载
 
-  containerRef.value && containerRef.value.appendChild(renderer.value.domElement) // 挂载
   // totastMesh(controls.value)
 
   addAxes(size) // 添加轴辅助器  原点坐标指示
@@ -233,10 +236,12 @@ const commonFn = async modelFileInfo => {
 
   animate()
 
+
   //  新增商品推送之前先检查 是否当前项存在
   const check = IsExist(modelFileInfo.filePath)
   !check && getInfoAndPushItem(box, modelFileInfo)
 }
+
 
 const getInfoAndPushItem = async (box, modelFileInfo) => {
   //  模型加载完之后 获取商品所有详细信息
@@ -312,6 +317,8 @@ const animate = () => {
   // }
 }
 
+
+
 //  一键切换显示三维信息
 const toggleLabel = () => {
   if (!mesh) return
@@ -338,10 +345,12 @@ defineExpose({ loadModel })
 <style lang="scss" scope>
 #threecontainer {
   position: relative;
+  width: 100%;
+  height: 600px;
   // border: 1px solid black;
   text-align: center;
   text-align: -webkit-center;
-  height: 100%;
+  // height: 100%;
 }
 #button {
   padding: 10px 20px;

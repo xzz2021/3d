@@ -63,6 +63,9 @@ export const useThree = () => {
       logarithmicDepthBuffer: true,
       // preserveDrawingBuffer: true,
     })
+        // const width = document.getElementById("threecontainer").offsetWidth
+        // console.log("🚀 ~ createRenderer ~ width:", width)
+    // const height = document.getElementById("threecontainer").offsetHeight
     renderer.setSize(800, 600)
     // renderer.setSize(canvasWidth, canvasHeight)
     renderer.shadowMap.enabled = true // 启用阴影
@@ -199,10 +202,8 @@ export const useThree = () => {
   // 设置相机位置和方向
   const createCarmera = (size, center) => {
     const { x, y, z } = size //  元素自带基底面  用于相机视角 默认为Z轴
-    console.log("🚀 ~ createCarmera ~ size:", size)
 
-    // const width = document.getElementById("threecontainer").offsetWidth
-    // console.log("🚀 ~ createCarmera ~ width:", width)
+    const width = document.getElementById("threecontainer").offsetWidth
     // const height = document.getElementById("threecontainer").offsetHeight
     // console.log("🚀 ~ createCarmera ~ height:", height)
     // const ll = 1.2
@@ -210,12 +211,15 @@ export const useThree = () => {
     // const d = 300
     // const w = width / 2
     // const h = height / 2
-    const w = 800 / 8
-    const h = 600 / 8
+    const w = width / 2
+    const h = 600 / 2
     const camera = new THREE.OrthographicCamera(-w, w, h, -h, 1, 10000) //  直接展示物体每个面的真实 映射  眼 = 物体
     // let camera = new THREE.OrthographicCamera(x / -2, x / 2, y / 2, y / -2, 1, 1000) //  直接展示物体每个面的真实 映射  眼 = 物体
     // let camera = new THREE.OrthographicCamera(-y / ll, y / ll, z / ll, -z / ll, 1, 1000) //  直接展示物体每个面的真实 映射  眼 = 物体
 
+    //  根据模型大小和canvas大小动态缩放
+    camera.zoom = width/x/4
+    
     // const aspect = width / height
     // const camera = new THREE.PerspectiveCamera(75, aspect, 1, 10000) //  模拟人眼  以点看物体  眼 < 物体
     
@@ -225,11 +229,11 @@ export const useThree = () => {
     // 定位相机到左上角
     // const cameraDistance = Math.max(x, y, z)
     // camera.position.set(x + y, - y, cameraDistance * 2)
-    camera.position.set(x , -y, center.z )
+    camera.position.set(x + y , -y, center.z )
     camera.lookAt(center)
     // const scaleRate = 400 / x
    
-    camera.up.set(0, 0, 1)
+    // camera.up.set(0, 0, 1)
     // camera.updateProjectionMatrix(); 
 
     // const helper = new THREE.CameraHelper(camera)

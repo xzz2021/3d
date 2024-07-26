@@ -96,7 +96,7 @@ export const useFn = () => {
       const height = document.getElementById("threecontainer").offsetHeight
       // console.log("🚀: autoResize -> width", width)
       // console.log("🚀: autoResize -> height", height)
-      camera.aspect = width / height
+      // camera.zoom = width / 4
       camera.updateProjectionMatrix()
       renderer.setSize(width, height)
     })
