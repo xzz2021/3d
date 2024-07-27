@@ -31,6 +31,7 @@
 import { ref } from "vue"
 import * as THREE from "three"
 import { useThree } from "./hooks/useThree.js"
+import { useConfig } from "./hooks/useConfig.js"
 import { useFn } from "./hooks/fn.js"
 import { useLoading } from "@/hooks/useLoading.js"
 import AxisLine from "./AxisLine.vue"
@@ -42,78 +43,52 @@ import { RAWDATA } from "./utils/constant"
 import { ElMessage } from "element-plus"
 // import { checkThickness } from "@/utils/checkThickness"
 // import matcapPorcelainWhite from "./hooks/66.jpg"
-let { isFullscreen, toggleFullscreen, dialogTableVisible, openDialog, restoreCarmera, getALLInformation, autoResize } = useFn()
+let { isFullscreen, toggleFullscreen, dialogTableVisible, openDialog, restoreCarmera, getALLInformation } = useFn()
 // 可以在组件中的任意位置访问 `store` 变量 ✨
 const store = useShopStore()
 const { addItem, IsExist, updatePrice } = store
-
+const { modelFileInfo } = storeToRefs(store)
 const dialogRef = ref(null)
-// 接收props
-const props = defineProps({
-  modelInformation: {
-    type: Object,
-    default: () => {},
-  },
-})
 
+const containerRef = ref(null)
 const { is3dm, ratioValue, initExplodeModel, explodeModel } = useBoom()
 
 // threejs   scene、mesh 、renderer、controls 内部有只读属性的value  无法使用vue的响应式  ref 包裹
-const curModelFileInfo = ref({})
+
 const { onEvent } = useMitt()
-onEvent("openPreview", modelFileInfo => {
-  curModelFileInfo.value = modelFileInfo
-  loadModel(modelFileInfo)
+onEvent("openPreview", () => {
+  loadModel(modelFileInfo.value)
 })
 const labelStatus = ref(false)
-let mesh, pointLight, labelArr
-const camera = ref(null)
 
-const controls = ref(null)
-let {
-  scene,
-  addBox,
-  addArrow,
-  addAxes,
-  addGui2,
-  // addFaceGui,
-  addEnvironment,
-  changeFace,
-  createLight,
-  createControls,
-  chooseLoader,
-  createCarmera,
-  clearScene,
-  LoadStep,
-  LoadIges,
-  getMeshAndSize,
-  addLightOfCamera,
-  totastMesh,
-  createTexture,
-  containerRef,
+const {
   initialStatus,
-  createRenderer,
-  // checkThickness,
-  pianyichang,
-  addGui
+  scene,
+  renderer,
+  camera,
+  controls,
+  chooseLoader,
+  LoadStep,
+  LoadIges,addCameraLight
 } = useThree()
-
+let mesh
+const {  clearScene,changeFace, meshSize, getMeshSize, autoResize, addLight, addAxes } = useConfig()
 const { openLoading, closeLoading } = useLoading()
 onEvent("openLoading", openLoading)
 
 //  打开面板需要等待dom渲染之后 执行模型渲染
 const bootPanel = () => {
   nextTick(() => {
-    commonFn(curModelFileInfo.value)
+    commonFn(modelFileInfo.value)
   })
 }
 // 加载模型 前 类型 判断
-const loadModel = async modelFileInfo => {
-  clearScene() //  加载新模型前先清除旧场景所有对象
+const loadModel = async () => {
+  clearScene(scene) //  加载新模型前先清除旧场景所有对象
   // openLoading() // 开启加载效果
   let loadView
   //  特殊3d文件类型判断, 使用自定义的加载方法, 不走官方loader判断
-  const { filePath, fileType } = modelFileInfo
+  const { filePath, fileType } = modelFileInfo.value
   if (fileType == "stp" || fileType == "step") {
     loadView = await LoadStep(filePath)
   } else if (fileType == "iges" || fileType == "igs") {
@@ -125,20 +100,14 @@ const loadModel = async modelFileInfo => {
     // material.depthWrite = true // 默认情况下应启用深度写入
     // material.depthTest = false // 解决 启用环境贴图后 模型闪烁的问题
     mesh = new THREE.Mesh(geometry, material)
-
     openDialog()
-
     return
   }
-
   // 其他常规3d文件走这里   // 获取对应的模型加载器
-
   const loader = chooseLoader(fileType)
-
   loader.load(
     filePath,
     geometry => {
-      // console.log("🚀 ~ file: ThreeViewer.vue:138 ~ geometry:", geometry)
       if (fileType == "3dm") {
         is3dm.value = true
         mesh = geometry
@@ -147,22 +116,10 @@ const loadModel = async modelFileInfo => {
       }
       const simpleArr = ["obj", "dae", "3ds"]
       let material = new THREE.MeshStandardMaterial({
-        // color: "#8d8d8d",
         metalness: 0.3,
         roughness: 0.3,
-        // emissive: 0x7c7c7c,
       })
-      // addGui(material)
-      // const textureLoader = new THREE.TextureLoader()
-      // let material = new THREE.MeshMatcapMaterial({
-      //   color: 0xffffff,
-      //   matcap: textureLoader.load(matcapPorcelainWhite),
-      // })
-      // material.depthWrite = true // 默认情况下应启用深度写入
-
-      // material.depthTest = false // 解决 启用环境贴图后 模型闪烁的问题
       mesh = simpleArr.includes(fileType) ? geometry.scene || geometry : new THREE.Mesh(geometry, material)
-
       openDialog()
     },
     undefined,
@@ -174,76 +131,33 @@ const loadModel = async modelFileInfo => {
 
 const backCarmera = () => {
   //  为何要传递参数？  因为数据不是响应式的， 模型加载后 变更后的参数只能实时传递？？
-  restoreCarmera(camera.value, controls.value, initialStatus.value)
+  restoreCarmera(camera, controls.value, initialStatus.value)
 }
-
-const renderer = ref(null)
-// renderer只能创建一次
-renderer.value = createRenderer()
 
 const commonFn = async modelFileInfo => {
   // 此函数最好放当前模块
   // 计算模型的中心点
-  const { box, center, size } = getMeshAndSize(mesh)
-  // createGridHelper(size)   // 创建网格底座
+  const { box, center, size } = getMeshSize(mesh)
+  addAxes(size, scene)
+  autoResize(camera, renderer, size)
 
-  // scene.background = createTexture()
-
-  // 给场景所有物体添加默认的环境贴图
-  // scene.environment =
-
-  createLight(size) // 添加光源
-
-  // 添加一个跟随相机的点光源 此处必须添加
-  pointLight = addLightOfCamera()
-  
-  camera.value = createCarmera(size, center) // 创建相机
-
-  // addEnvironment()
-  // addF  aceGui  (camera)E:\xzz\development\3d\src\components\modelViewer\texture\rural_asphalt_road_2k.hdr
-
-  // console.log("🚀 ~ file: ThreeViewer.vue:227 ~ mesh:", mesh)
-  // addGui2(mesh, mesh.material, renderer.value)
-
+  addLight(scene)
+  addCameraLight(scene)
+  initialStatus.value.savedPosition = camera.position.clone()
+  initialStatus.value.savedRotation = camera.rotation.clone()
 
   scene.add(mesh)
 
-  // mesh.castShadow = true
-  // mesh.receiveShadow = true
+  containerRef.value && containerRef.value.appendChild(renderer.domElement) // 挂载
 
-  // checkThickness(mesh)
-  // pianyichang(mesh)
-      const width = document.getElementById("threecontainer").offsetWidth
-        // console.log("🚀 ~ createRenderer ~ width:", width)
-    const height = document.getElementById("threecontainer").offsetHeight
-    renderer.value.setSize(width, height)
-  autoResize(camera.value, renderer.value)
-
-  // checkThickness(mesh)
-  // detectWallThickness(mesh)
-  // 有了渲染器之后   一定要先创建相机   再创建控制器
-  controls.value = createControls(camera.value, renderer.value.domElement)
-   containerRef.value && containerRef.value.appendChild(renderer.value.domElement) // 挂载
-
-  // totastMesh(controls.value)
-
-  addAxes(size) // 添加轴辅助器  原点坐标指示
-
-  // 添加可视化包围盒
-  labelArr = addBox(mesh)
-  // addArrow()
   closeLoading()
-
-  animate()
-
 
   //  新增商品推送之前先检查 是否当前项存在
   const check = IsExist(modelFileInfo.filePath)
-  !check && getInfoAndPushItem(box, modelFileInfo)
+  !check && getInfoAndPushItem(box, modelFileInfo, mesh)
 }
 
-
-const getInfoAndPushItem = async (box, modelFileInfo) => {
+const getInfoAndPushItem = async (box, modelFileInfo, mesh) => {
   //  模型加载完之后 获取商品所有详细信息
   const model3d = getALLInformation(box, mesh.geometry)
   const imageUrl = await screenShot(box)
@@ -269,55 +183,49 @@ const findMinIndex = arr => {
 
 const screenShot = async box => {
   // 1. 先比较获取面积最大的面
-  const size = box.getSize(new THREE.Vector3())
-  const { x, y, z } = size
-  // // 2. 从而确定轴  改变相机显示视角
-  let index = findMinIndex([z, 999999, y, 9999999, x])
-  changeFace(camera.value, index)
+  // const size = box.getSize(new THREE.Vector3())
+  // const { x, y, z } = size
+  // // // 2. 从而确定轴  改变相机显示视角
+  // let index = findMinIndex([z, 999999, y, 9999999, x])
+  // changeFace(camera, index)
+  // const maxDimension = Math.max(x, y, z)
+  // const fov = camera.fov * (Math.PI / 180) // convert vertical fov to radians
+  // const fitHeightDistance = maxDimension / (2 * Math.atan(fov / 2))
+  // const fitWidthDistance = fitHeightDistance / camera.aspect
+  // const distance = Math.max(fitHeightDistance, fitWidthDistance)
+  // const obj = { x: 4, y: 2, z: 0 }
+  // Object.entries(obj).forEach(([key, value]) => {
+  //   if (index == value) {
+  //     camera.position[key] = distance
+  //     // camera.position[key] = size[key]
+  //   }
+  // })
 
-  const maxDimension = Math.max(x, y, z)
-  const fov = camera.value.fov * (Math.PI / 180) // convert vertical fov to radians
-  const fitHeightDistance = maxDimension / (2 * Math.atan(fov / 2))
-  const fitWidthDistance = fitHeightDistance / camera.value.aspect
-  const distance = Math.max(fitHeightDistance, fitWidthDistance)
-  const obj = { x: 4, y: 2, z: 0 }
-  Object.entries(obj).forEach(([key, value]) => {
-    if (index == value) {
-      camera.value.position[key] = distance
-      // camera.value.position[key] = size[key]
-    }
-  })
-
-  const { center } = getMeshAndSize(mesh)
-
-  camera.value.lookAt(center)
-
+  // camera.lookAt(meshSize.value.center)
   // 3. 调整模型 适配 canvas  大小
-
   await new Promise(resolve => setTimeout(resolve, 10))
   // 获取预览图片
-  renderer.value.render(scene, camera.value)
-  const imageUrl = renderer.value.domElement.toDataURL("image/jpeg")
+  renderer.render(scene, camera)
+  const imageUrl = renderer.domElement.toDataURL("image/jpeg")
 
   // 4. 恢复初始视角
-  restoreCarmera(camera.value, controls.value, initialStatus.value)
+  // restoreCarmera(camera, controls, initialStatus.value)
   return imageUrl
 }
 
-const animate = () => {
-  requestAnimationFrame(animate)
-  // if (mesh && camera.value) {
-  controls.value.update()
-  // 使点光源跟随相机
-  const vector = camera.value.position.clone()
-  pointLight.position.set(vector.x, vector.y, vector.z) //点光源位置
-  // 显示器每刷新一次就重新render一次  相当于实时刷新渲染的场景
-  // 也就是这里定义的方法 会随显示屏每一帧刷新率而刷新
-  renderer.value.render(scene, camera.value)
-  // }
-}
 
-
+// const animate = () => {
+//   requestAnimationFrame(animate)
+//   // if (mesh && camera) {
+//   controls.value.update()
+//   // 使点光源跟随相机
+//   const vector = camera.position.clone()
+//   pointLight.position.set(vector.x, vector.y, vector.z) //点光源位置
+//   // 显示器每刷新一次就重新render一次  相当于实时刷新渲染的场景
+//   // 也就是这里定义的方法 会随显示屏每一帧刷新率而刷新
+//   renderer.value.render(scene, camera)
+//   // }
+// }
 
 //  一键切换显示三维信息
 const toggleLabel = () => {
@@ -336,7 +244,7 @@ const toggleLabel = () => {
 watch(isFullscreen, val => {
   const dom = document.querySelector("#threecontainer")
   dom.style.height = val ? `calc(100vh - 70px)` : `600px`
-  autoResize(camera.value, renderer.value)
+  autoResize(camera, renderer)
 })
 
 defineExpose({ loadModel })

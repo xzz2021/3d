@@ -2,8 +2,9 @@ import { ref } from "vue"
 import { useMitt } from "@/hooks/mitt"
 import { baseUrl } from "@/utils/env"
 import { ElMessage } from "element-plus"
-
+import { useShopStore } from "@/pinia/shopTable.js"
 const getFileType = fileName => {
+
   const fileExtension = fileName.split(".").pop().toLowerCase()
   return fileExtension
 }
@@ -14,13 +15,17 @@ const uploadId = Math.random().toString(36).substring(2, 15)
 
 const { emitEvent } = useMitt()
 export const useUpload = () => {
+  const store = useShopStore()
+  const { modelFileInfo } = storeToRefs(store)
   const uploadFormRef = ref(null)
   const forgeRef = ref(null)
   const modelName = ref("")
 
   const resData = ref({})
   const onUpload = async file => {
+		// console.log("TCL: useUpload -> file", file)
     const fileType = getFileType(file.name)
+    // const fileName = 
     const accept = ".glb,.obj,.gltf,.fbx,.stl,.igs,.stp,.step,.iges,.dae,.3ds,.3dm"
     const arr = accept.replaceAll(".", "").split(",")
     if (!arr.includes(fileType)) return ElMessage.error("文件格式不合法,请重新选择!")
@@ -33,14 +38,16 @@ export const useUpload = () => {
     if (!resData.value) return
     modelName.value = file.name
     const filePath = URL.createObjectURL(file.raw)
-    const modelFileInfo = {
+    modelFileInfo.value = {
       filePath,
       fileType,
+      fileName:file.name,
       resData: resData.value,
     }
+    
     // return
     // 触发模型加载
-    emitEvent("openPreview", modelFileInfo)
+    emitEvent("openPreview")
     emitEvent("openLoading")
     emitEvent("showLogo")
   }

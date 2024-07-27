@@ -8,7 +8,10 @@ export const useShopStore = defineStore("shopStore", () => {
 
   const tableData = ref([])
   const backendData = ref({})
-
+  const modelFileInfo = ref({})
+const updateModelFileInfo = (obj) => {
+  modelFileInfo.value = obj
+}
   const totalPrice00 = computed(() => {
     let price = 0
     tableData.value.forEach(item => {
@@ -105,5 +108,7 @@ export const useShopStore = defineStore("shopStore", () => {
     updatePrice,
     getGrindingPrice,
     backendData,
+    modelFileInfo,
+    updateModelFileInfo
   }
 })
