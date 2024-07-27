@@ -17,67 +17,62 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 import { onMounted } from "vue"
 
 export const useThree = () => {
-
   const initialStatus = ref({})
-  
+
   // 初始化创建场景
   const scene = new THREE.Scene()
   scene.background = new THREE.Color(0x8c8aff) //  设置场景的背景色0x8c8aff
   //  初始化renderer
   const renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      powerPreference: "high-performance",
-      logarithmicDepthBuffer: true,
-    })
-    renderer.setSize(800, 600)
-    renderer.shadowMap.enabled = true // 启用阴影
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    renderer.setViewport(0, 0, 800, 600) //主场景视区
-    renderer.autoClear = false //【scene.autoClear一定要关闭】
+    antialias: true,
+    powerPreference: "high-performance",
+    logarithmicDepthBuffer: true,
+  })
+  renderer.setSize(800, 600)
+  renderer.shadowMap.enabled = true // 启用阴影
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+  renderer.setViewport(0, 0, 800, 600) //主场景视区
+  renderer.autoClear = false //【scene.autoClear一定要关闭】
 
   // 初始化相机位置和方向
-    const w = 800 / 2
-    const h = 600 / 2
-    const camera = new THREE.OrthographicCamera(-w, w, h, -h, 1, 10000) //  直接展示物体每个面的真实 映射  眼 = 物体
-    //  根据模型大小和canvas大小动态缩放
+  const w = 800 / 2
+  const h = 600 / 2
+  const camera = new THREE.OrthographicCamera(-w, w, h, -h, 1, 10000) //  直接展示物体每个面的真实 映射  眼 = 物体
+  //  根据模型大小和canvas大小动态缩放
 
-    camera.lookAt(0,0,0)
-    initialStatus.value.savedPosition = camera.position.clone()
-    initialStatus.value.savedRotation = camera.rotation.clone()
+  camera.lookAt(0, 0, 0)
+  let cameraLight = null
+  const addCameraLight = scene => {
+    cameraLight = new THREE.DirectionalLight(0xffffff, 0.8)
+    cameraLight.castShadow = true
+    scene.add(cameraLight)
+  }
 
-    let cameraLight = null;
-    const addCameraLight = (scene) => {
-       cameraLight = new THREE.DirectionalLight(0xffffff, 0.8)
-      cameraLight.castShadow = true
-      scene.add(cameraLight)
-    }
+  const controls = new OrbitControls(camera, renderer.domElement)
+  controls.enableDamping = true // 启用阻尼效果  必须调用update()
+  controls.dampingFactor = 0.25 // 阻尼系数
+  controls.enableZoom = true // 启用缩放
+  controls.target.set(0, 0, 0)
+  controls.minDistance = 1
+  controls.maxDistance = 1000
+  controls.autoRotateSpeed = 3
+  initialStatus.value.controlsTarget = controls.target.clone()
 
-
-    const controls = new OrbitControls(camera, renderer.domElement)
-    controls.enableDamping = true // 启用阻尼效果  必须调用update()
-    controls.dampingFactor = 0.25 // 阻尼系数
-    controls.enableZoom = true // 启用缩放
-    controls.target.set(0, 0, 0)
-    controls.minDistance = 1
-    controls.maxDistance = 1000
-    controls.autoRotateSpeed = 3
-    initialStatus.value.controlsarget = controls.target.clone()
-
-    const animate = () => {
-      window.requestAnimationFrame(animate)
-      if (camera) {
+  const animate = () => {
+    window.requestAnimationFrame(animate)
+    if (camera) {
       controls.update()
       // 使点光源跟随相机
-      if(cameraLight){
+      if (cameraLight) {
         const vector = camera.position.clone()
         cameraLight.position.set(vector.x, vector.y, vector.z) //点光源位置
       }
       // 显示器每刷新一次就重新render一次  相当于实时刷新渲染的场景
       // 也就是这里定义的方法 会随显示屏每一帧刷新率而刷新
       renderer.render(scene, camera)
-      }
     }
+  }
 
   // 自动选择相应 加载器
   const chooseLoader = type => {
@@ -234,9 +229,9 @@ export const useThree = () => {
     }
   }
 
-onMounted(() => {
-  animate()
-})
+  onMounted(() => {
+    animate()
+  })
 
   return {
     initialStatus,
@@ -247,6 +242,6 @@ onMounted(() => {
     chooseLoader,
     LoadStep,
     LoadIges,
-    addCameraLight
+    addCameraLight,
   }
 }

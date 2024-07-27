@@ -33,9 +33,9 @@ const { onUpload, uploadFormRef } = useUpload()
 :deep(.el-upload-dragger) {
   background: #f9f9f9a3;
 }
-:deep(.el-upload) {
-  // margin-right: 40px;
-}
+// :deep(.el-upload) {
+//   // margin-right: 40px;
+// }
 .tips_box {
   margin: 18px 0;
 }

@@ -1,41 +1,41 @@
 import * as THREE from "three"
+import { toRefs } from "vue"
 
 export const useConfig = () => {
   //  初始化时添加灯光无效
-  const addLight = (scene) => {
+  const addLight = scene => {
     // 添加灯光
     const strength = 1
     //  环境光 会影响 模型的颜色
     const ambientLight = new THREE.AmbientLight(0x7c7c7c, strength)
     scene.add(ambientLight)
     //   方向光 类似太阳和月亮   覆盖全场景
-    
-    // const directionArr = [
-      //     { x: 1000, y: 0, z: 1000 },
-      //     { x: 1000, y: 0, z: -1000 },
-      //     { x: -1000, y: 0, z: 1000 },
-      //     { x: -1000, y: 0, z: -1000 },
-      //     { x: 0, y: 1000, z: 0 },
-            //     { x: 0, y: -1000, z: 0 },
-            //     ]
-            // directionArr.map(item => {
-            //         const { x, y, z } = item
-            //         const directionaLight = new THREE.DirectionalLight(0xffffff, 0.4)
-            //         directionaLight.castShadow = true
-            //         directionaLight.position.set(x, y, z)
-            //         scene.add(directionaLight)
-            //         const helper = new THREE.DirectionalLightHelper(directionaLight, 5 );
-            //         scene.add( helper );
-            //     })
-            //  跟随相机的光
-            // const cameraLight = new THREE.DirectionalLight(0xffffff, 0.8)
-            // cameraLight.castShadow = true
-            // scene.add(cameraLight)
-      }
 
+    // const directionArr = [
+    //     { x: 1000, y: 0, z: 1000 },
+    //     { x: 1000, y: 0, z: -1000 },
+    //     { x: -1000, y: 0, z: 1000 },
+    //     { x: -1000, y: 0, z: -1000 },
+    //     { x: 0, y: 1000, z: 0 },
+    //     { x: 0, y: -1000, z: 0 },
+    //     ]
+    // directionArr.map(item => {
+    //         const { x, y, z } = item
+    //         const directionaLight = new THREE.DirectionalLight(0xffffff, 0.4)
+    //         directionaLight.castShadow = true
+    //         directionaLight.position.set(x, y, z)
+    //         scene.add(directionaLight)
+    //         const helper = new THREE.DirectionalLightHelper(directionaLight, 5 );
+    //         scene.add( helper );
+    //     })
+    //  跟随相机的光
+    // const cameraLight = new THREE.DirectionalLight(0xffffff, 0.8)
+    // cameraLight.castShadow = true
+    // scene.add(cameraLight)
+  }
 
   //  业务处理函数
-  const clearScene = (scene) => {
+  const clearScene = scene => {
     // 遍历场景中的所有对象
     while (scene.children.length > 0) {
       // 获取第一个子对象
@@ -67,49 +67,70 @@ export const useConfig = () => {
     // 可选：如果有需要，也可以清理其他资源，如纹理
   }
 
-    //  变换视角
-    const changeFace = (camera, i) => {
-        //   0     1     4     5     3     2
-        // +蓝z   -蓝z  +红x  -红x  -绿y   +绿y
-        const distanceToOrigin = camera.position.distanceTo(new THREE.Vector3(0, 0, 0))
-        const positionArr = [
-          new THREE.Vector3(0, 0, distanceToOrigin), // 正上方
-          new THREE.Vector3(0, 0, -distanceToOrigin), // 正下方
-          new THREE.Vector3(0, -distanceToOrigin, 0), // 正左方
-          new THREE.Vector3(0, distanceToOrigin, 0), // 正右方
-          new THREE.Vector3(distanceToOrigin, 0, 0), // 正前方
-          new THREE.Vector3(-distanceToOrigin, 0, 0), // 正后方
-        ]
-        camera.position.copy(positionArr[i])
-      }
+  //  变换视角
+  const changeFace = (camera, i) => {
+    //   0     1     4     5     3     2
+    // +蓝z   -蓝z  +红x  -红x  -绿y   +绿y
+    const distanceToOrigin = camera.position.distanceTo(new THREE.Vector3(0, 0, 0))
+    const positionArr = [
+      new THREE.Vector3(0, 0, distanceToOrigin), // 正上方
+      new THREE.Vector3(0, 0, -distanceToOrigin), // 正下方
+      new THREE.Vector3(0, -distanceToOrigin, 0), // 正左方
+      new THREE.Vector3(0, distanceToOrigin, 0), // 正右方
+      new THREE.Vector3(distanceToOrigin, 0, 0), // 正前方
+      new THREE.Vector3(-distanceToOrigin, 0, 0), // 正后方
+    ]
+    camera.position.copy(positionArr[i])
+  }
 
-    
-      const meshSize = ref(null)
-      const  getMeshSize = mesh => {
-        const box = new THREE.Box3().setFromObject(mesh)
-        const center = box.getCenter(new THREE.Vector3())
-        mesh.position.sub(center) // 将模型居中
-        const size = box.getSize(new THREE.Vector3())
-        meshSize.value =  { box, center, size }
-        return { box, center, size }
-      }
+  //  恢复模型（相机） 初始状态
+  const restoreCarmera = (camera, controls, initialStatus) => {
+    //  固定的初始 状态
+    const { savedPosition, savedRotation, controlsTarget } = initialStatus.value
+    //  为何要传递参数？  因为数据不是响应式的， 模型加载后 变更后的参数只能实时传递？？
+    camera.position.copy(savedPosition)
+    camera.rotation.copy(savedRotation)
+    // camera.zoom = savedZoom
+    camera.updateProjectionMatrix()
+    controls.target.copy(controlsTarget)
+    controls.update()
+  }
 
-    const autoResize = (camera, renderer, size) => {
-        nextTick(() => {
-          const width = document.getElementById("threecontainer").offsetWidth
-          const height = document.getElementById("threecontainer").offsetHeight
-          const { x, y, z} = size
-          camera.zoom = width/2/x/2
-          camera.position.set(x + y , -y, z )
-          camera.updateProjectionMatrix()
-          renderer.setSize(width, height)
-        })
-      }
+  const meshSize = ref(null)
+  const getMeshSize = mesh => {
+    const box = new THREE.Box3().setFromObject(mesh)
+    const center = box.getCenter(new THREE.Vector3())
+    mesh.position.sub(center) // 将模型居中
+    const size = box.getSize(new THREE.Vector3())
+    meshSize.value = { box, center, size }
+    return { box, center, size }
+  }
+
+  const autoResize = async (camera, renderer, size, initialStatus) => {
+    nextTick(() => {
+      const width = document.getElementById("threecontainer").offsetWidth
+      const height = document.getElementById("threecontainer").offsetHeight
+      const { x, y, z } = size
+      camera.zoom = width / 2 / x / 2
+      camera.position.set(x + y, -y, z)
+      camera.updateProjectionMatrix()
+      renderer.setSize(width, height)
+      initialStatus.value.savedPosition = camera.position.clone()
+      initialStatus.value.zoom = camera.zoom
+      initialStatus.value.savedRotation = camera.rotation.clone()
+    })
+  }
   // 添加轴辅助器  原点坐标指示
   const addAxes = (size, scene) => {
     const max = Math.max(size.x, size.y, size.z)
     const axesHelper = new THREE.AxesHelper(max / 2 + 30)
     scene.add(axesHelper)
+  }
+
+  const screenShot = renderer => {
+    // 获取预览图片
+    const imageUrl = renderer.domElement.toDataURL("image/jpeg")
+    return imageUrl
   }
 
   return {
@@ -120,6 +141,7 @@ export const useConfig = () => {
     autoResize,
     addLight,
     addAxes,
-    
+    screenShot,
+    restoreCarmera,
   }
 }

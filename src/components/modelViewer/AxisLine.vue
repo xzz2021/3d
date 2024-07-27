@@ -19,7 +19,7 @@
   </div>
 </template>
 <script setup>
-import { useThree } from "./hooks/useThree.js"
+import { useConfig } from "./hooks/useConfig.js"
 
 const props = defineProps({
   camera2: {
@@ -38,7 +38,7 @@ const totastMesh2 = () => {
   // flag.value = !flag.value
   emit("totastMesh")
 }
-let { changeFace } = useThree()
+let { changeFace } = useConfig()
 </script>
 
 <style>

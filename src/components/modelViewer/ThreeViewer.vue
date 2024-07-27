@@ -16,7 +16,12 @@
     </template>
 
     <div ref="containerRef" id="threecontainer">
-      <AxisLine v-show="mesh" :camera2="camera" @backCarmera="backCarmera" @totastMesh="totastMesh(controls)" />
+      <AxisLine
+        v-show="mesh"
+        :camera2="camera"
+        @backCarmera="backCarmera"
+        @totastMesh="controls.autoRotate = !controls?.autoRotate"
+      />
       <!-- <div v-if="is3dm"> -->
       <!-- <div class="boomSlider">
         <el-slider v-model="ratioValue" :show-tooltip="false" :min="0" :max="30" size="small" />
@@ -28,7 +33,6 @@
 </template>
 
 <script setup>
-import { ref } from "vue"
 import * as THREE from "three"
 import { useThree } from "./hooks/useThree.js"
 import { useConfig } from "./hooks/useConfig.js"
@@ -43,13 +47,12 @@ import { RAWDATA } from "./utils/constant"
 import { ElMessage } from "element-plus"
 // import { checkThickness } from "@/utils/checkThickness"
 // import matcapPorcelainWhite from "./hooks/66.jpg"
-let { isFullscreen, toggleFullscreen, dialogTableVisible, openDialog, restoreCarmera, getALLInformation } = useFn()
+let { isFullscreen, toggleFullscreen, dialogTableVisible, openDialog, getALLInformation } = useFn()
 // 可以在组件中的任意位置访问 `store` 变量 ✨
 const store = useShopStore()
 const { addItem, IsExist, updatePrice } = store
 const { modelFileInfo } = storeToRefs(store)
 const dialogRef = ref(null)
-const containerRef = ref(null)
 const { is3dm, initExplodeModel, explodeModel } = useBoom()
 
 // threejs   scene、mesh 、renderer、controls 内部有只读属性的value  无法使用vue的响应式  ref 包裹
@@ -62,7 +65,7 @@ const labelStatus = ref(false)
 
 const { initialStatus, scene, renderer, camera, controls, chooseLoader, LoadStep, LoadIges, addCameraLight } = useThree()
 let mesh
-const { clearScene, changeFace, meshSize, getMeshSize, autoResize, addLight, addAxes } = useConfig()
+const { clearScene, changeFace, meshSize, getMeshSize, autoResize, addLight, addAxes, screenShot, restoreCarmera } = useConfig()
 const { openLoading, closeLoading } = useLoading()
 onEvent("openLoading", openLoading)
 
@@ -72,6 +75,7 @@ const bootPanel = () => {
     commonFn()
   })
 }
+
 // 加载模型 前 类型 判断
 const loadModel = async () => {
   clearScene(scene) //  加载新模型前先清除旧场景所有对象
@@ -121,8 +125,10 @@ const loadModel = async () => {
 
 const backCarmera = () => {
   //  为何要传递参数？  因为数据不是响应式的， 模型加载后 变更后的参数只能实时传递？？
-  restoreCarmera(camera, controls.value, initialStatus.value)
+  restoreCarmera(camera, controls, initialStatus)
 }
+
+const containerRef = ref(null)
 
 const commonFn = async () => {
   // 此函数最好放当前模块
@@ -130,13 +136,12 @@ const commonFn = async () => {
   const { box, center, size } = getMeshSize(mesh)
   const { x, y, z } = size
   modelFileInfo.value.size = `${x.toFixed(2)}x${y.toFixed(2)}x${z.toFixed(2)}`
+  modelFileInfo.value.rawSize = size
   addAxes(size, scene)
-  autoResize(camera, renderer, size)
+  await autoResize(camera, renderer, size, initialStatus)
 
   addLight(scene)
   addCameraLight(scene)
-  initialStatus.value.savedPosition = camera.position.clone()
-  initialStatus.value.savedRotation = camera.rotation.clone()
 
   scene.add(mesh)
 
@@ -145,18 +150,20 @@ const commonFn = async () => {
   closeLoading()
 
   //  新增商品推送之前先检查 是否当前项存在
-  const check = IsExist()
-  !check && getInfoAndPushItem(box, mesh)
+  getInfoAndPushItem(box, mesh)
 }
 
 const getInfoAndPushItem = async (box, mesh) => {
+  if (IsExist()) return
   //  模型加载完之后 获取商品所有详细信息
   const model3d = getALLInformation(box, mesh.geometry)
 
   modelFileInfo.value.volume = model3d.volume
   modelFileInfo.value.surfaceArea = model3d.surfaceArea
-  const imageUrl = await screenShot(box)
-  const newItem = { ...RAWDATA, model3d, imageUrl, ...{ modelFileInfo: modelFileInfo.value } }
+  await new Promise(resolve => setTimeout(resolve, 10)) // 此处需要延迟  否则获取的图片会是空的
+  renderer.render(scene, camera)
+  const imageUrl = screenShot(renderer)
+  const newItem = { ...RAWDATA, model3d, imageUrl, modelFileInfo: modelFileInfo.value }
   addItem(newItem)
   setTimeout(() => {
     updatePrice()
@@ -176,51 +183,6 @@ const findMinIndex = arr => {
   return minIndex
 }
 
-const screenShot = async box => {
-  // 1. 先比较获取面积最大的面
-  // const size = box.getSize(new THREE.Vector3())
-  // const { x, y, z } = size
-  // // // 2. 从而确定轴  改变相机显示视角
-  // let index = findMinIndex([z, 999999, y, 9999999, x])
-  // changeFace(camera, index)
-  // const maxDimension = Math.max(x, y, z)
-  // const fov = camera.fov * (Math.PI / 180) // convert vertical fov to radians
-  // const fitHeightDistance = maxDimension / (2 * Math.atan(fov / 2))
-  // const fitWidthDistance = fitHeightDistance / camera.aspect
-  // const distance = Math.max(fitHeightDistance, fitWidthDistance)
-  // const obj = { x: 4, y: 2, z: 0 }
-  // Object.entries(obj).forEach(([key, value]) => {
-  //   if (index == value) {
-  //     camera.position[key] = distance
-  //     // camera.position[key] = size[key]
-  //   }
-  // })
-
-  // camera.lookAt(meshSize.value.center)
-  // 3. 调整模型 适配 canvas  大小
-  await new Promise(resolve => setTimeout(resolve, 10))
-  // 获取预览图片
-  renderer.render(scene, camera)
-  const imageUrl = renderer.domElement.toDataURL("image/jpeg")
-
-  // 4. 恢复初始视角
-  // restoreCarmera(camera, controls, initialStatus.value)
-  return imageUrl
-}
-
-// const animate = () => {
-//   requestAnimationFrame(animate)
-//   // if (mesh && camera) {
-//   controls.value.update()
-//   // 使点光源跟随相机
-//   const vector = camera.position.clone()
-//   pointLight.position.set(vector.x, vector.y, vector.z) //点光源位置
-//   // 显示器每刷新一次就重新render一次  相当于实时刷新渲染的场景
-//   // 也就是这里定义的方法 会随显示屏每一帧刷新率而刷新
-//   renderer.value.render(scene, camera)
-//   // }
-// }
-
 //  一键切换显示三维信息
 const toggleLabel = () => {
   if (!mesh) return
@@ -238,7 +200,7 @@ const toggleLabel = () => {
 watch(isFullscreen, val => {
   const dom = document.querySelector("#threecontainer")
   dom.style.height = val ? `calc(100vh - 70px)` : `600px`
-  autoResize(camera, renderer)
+  autoResize(camera, renderer, modelFileInfo.value.rawSize, val)
 })
 
 defineExpose({ loadModel })

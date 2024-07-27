@@ -14,19 +14,6 @@ export const useFn = () => {
     }, 300)
   }
 
-  //  恢复模型（相机） 初始状态
-  const restoreCarmera = (camera, controls, initialStatus) => {
-    //  固定的初始 状态
-    const { savedPosition, savedRotation, controlsarget } = initialStatus
-    //  为何要传递参数？  因为数据不是响应式的， 模型加载后 变更后的参数只能实时传递？？
-    camera.position.copy(savedPosition)
-    camera.rotation.copy(savedRotation)
-    // camera.zoom = savedZoom
-    camera.updateProjectionMatrix()
-    controls.target.copy(controlsarget)
-    controls.update()
-  }
-
   const getALLInformation = (box, geometry) => {
     // 获取模型的宽高
     const model3d = {}
@@ -90,26 +77,11 @@ export const useFn = () => {
     }
   }
 
-  const autoResize = (camera, renderer) => {
-    nextTick(() => {
-      const width = document.getElementById("threecontainer").offsetWidth
-      const height = document.getElementById("threecontainer").offsetHeight
-      // console.log("🚀: autoResize -> width", width)
-      // console.log("🚀: autoResize -> height", height)
-      // camera.zoom = width / 4
-      camera.updateProjectionMatrix()
-      renderer.setSize(width, height)
-    })
-  }
-
   return {
     isFullscreen,
     toggleFullscreen,
     dialogTableVisible,
     openDialog,
-    restoreCarmera,
-    // getModelView,
     getALLInformation,
-    autoResize,
   }
 }
