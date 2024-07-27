@@ -50,7 +50,7 @@ const { addItem, IsExist, updatePrice } = store
 const { modelFileInfo } = storeToRefs(store)
 const dialogRef = ref(null)
 const containerRef = ref(null)
-const { is3dm, ratioValue, initExplodeModel, explodeModel } = useBoom()
+const { is3dm, initExplodeModel, explodeModel } = useBoom()
 
 // threejs   scene、mesh 、renderer、controls 内部有只读属性的value  无法使用vue的响应式  ref 包裹
 
