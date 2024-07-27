@@ -25,6 +25,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
+      "@views": path.resolve(__dirname, "src/views"),
+      "@store": path.resolve(__dirname, "src/pinia"),
     },
   },
 })

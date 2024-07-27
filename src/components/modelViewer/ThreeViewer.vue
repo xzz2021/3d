@@ -60,25 +60,16 @@ onEvent("openPreview", () => {
 })
 const labelStatus = ref(false)
 
-const {
-  initialStatus,
-  scene,
-  renderer,
-  camera,
-  controls,
-  chooseLoader,
-  LoadStep,
-  LoadIges,addCameraLight
-} = useThree()
+const { initialStatus, scene, renderer, camera, controls, chooseLoader, LoadStep, LoadIges, addCameraLight } = useThree()
 let mesh
-const {  clearScene,changeFace, meshSize, getMeshSize, autoResize, addLight, addAxes } = useConfig()
+const { clearScene, changeFace, meshSize, getMeshSize, autoResize, addLight, addAxes } = useConfig()
 const { openLoading, closeLoading } = useLoading()
 onEvent("openLoading", openLoading)
 
 //  打开面板需要等待dom渲染之后 执行模型渲染
 const bootPanel = () => {
   nextTick(() => {
-    commonFn(modelFileInfo.value)
+    commonFn()
   })
 }
 // 加载模型 前 类型 判断
@@ -133,10 +124,12 @@ const backCarmera = () => {
   restoreCarmera(camera, controls.value, initialStatus.value)
 }
 
-const commonFn = async modelFileInfo => {
+const commonFn = async () => {
   // 此函数最好放当前模块
   // 计算模型的中心点
   const { box, center, size } = getMeshSize(mesh)
+  const { x, y, z } = size
+  modelFileInfo.value.size = `${x.toFixed(2)}x${y.toFixed(2)}x${z.toFixed(2)}`
   addAxes(size, scene)
   autoResize(camera, renderer, size)
 
@@ -152,15 +145,18 @@ const commonFn = async modelFileInfo => {
   closeLoading()
 
   //  新增商品推送之前先检查 是否当前项存在
-  const check = IsExist(modelFileInfo.filePath)
-  !check && getInfoAndPushItem(box, modelFileInfo, mesh)
+  const check = IsExist()
+  !check && getInfoAndPushItem(box, mesh)
 }
 
-const getInfoAndPushItem = async (box, modelFileInfo, mesh) => {
+const getInfoAndPushItem = async (box, mesh) => {
   //  模型加载完之后 获取商品所有详细信息
   const model3d = getALLInformation(box, mesh.geometry)
+
+  modelFileInfo.value.volume = model3d.volume
+  modelFileInfo.value.surfaceArea = model3d.surfaceArea
   const imageUrl = await screenShot(box)
-  const newItem = { ...RAWDATA, model3d, imageUrl, modelFileInfo }
+  const newItem = { ...RAWDATA, model3d, imageUrl, ...{ modelFileInfo: modelFileInfo.value } }
   addItem(newItem)
   setTimeout(() => {
     updatePrice()
@@ -211,7 +207,6 @@ const screenShot = async box => {
   // restoreCarmera(camera, controls, initialStatus.value)
   return imageUrl
 }
-
 
 // const animate = () => {
 //   requestAnimationFrame(animate)

@@ -1,17 +1,17 @@
 import { defineStore } from "pinia"
-
+import { aa } from "./default"
 // 你可以任意命名 `defineStore()` 的返回值，但最好使用 store 的名字，同时以 `use` 开头且以 `Store` 结尾。
 // (比如 `useUserStore`，`useCartStore`，`useProductStore`)
 // 第一个参数是你的应用中 Store 的唯一 ID。
 export const useShopStore = defineStore("shopStore", () => {
   // 其他配置...
 
-  const tableData = ref([])
+  const tableData = ref([aa])
   const backendData = ref({})
   const modelFileInfo = ref({})
-const updateModelFileInfo = (obj) => {
-  modelFileInfo.value = obj
-}
+  const updateModelFileInfo = obj => {
+    modelFileInfo.value = obj
+  }
   const totalPrice00 = computed(() => {
     let price = 0
     tableData.value.forEach(item => {
@@ -45,9 +45,9 @@ const updateModelFileInfo = (obj) => {
     tableData.value.push(JSON.parse(JSON.stringify(rawData)))
   }
 
-  const IsExist = filePath => {
+  const IsExist = () => {
     // modelFileInfo.filePath
-    return tableData.value.some(item => item.modelFileInfo.filePath === filePath)
+    return tableData.value.some(item => item.modelFileInfo.filePath === modelFileInfo.value.filePath)
   }
 
   const roundUp = (num, decimalPlaces) => {
@@ -109,6 +109,6 @@ const updateModelFileInfo = (obj) => {
     getGrindingPrice,
     backendData,
     modelFileInfo,
-    updateModelFileInfo
+    updateModelFileInfo,
   }
 })

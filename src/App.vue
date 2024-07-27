@@ -1,22 +1,13 @@
 <script setup>
-import Steps from "@/views/Steps.vue"
-import Table from "@/views/Table.vue"
-import Upload from "@/views/Upload.vue"
-import ShopCard from "@/views/ShopCard.vue"
+import NewApp from "@views/NewApp.vue"
 // import BaiduMap from "@/views/BaiduMap.vue"
 </script>
 
 <template>
   <div id="xzzapp">
     <!-- <el-card style="width: 1036px"> -->
-    <el-card>
-      <Steps />
-      <Table />
-      <div class="upload_shop_box">
-        <Upload />
-        <ShopCard />
-      </div>
-    </el-card>
+
+      <NewApp />
   </div>
   <!-- <BaiduMap /> -->
 </template>

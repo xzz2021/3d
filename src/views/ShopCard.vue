@@ -5,33 +5,29 @@
  * ShopCard.vue
 -->
 <template>
-  <div class="shop_card">
-    <el-card>
-      <div class="shop_box">
-        <p>
-          当前选中产品:
-          <span style="color: red; font-weight: 600">{{ productNum }}</span>
-          件, 数量:
-          <span style="color: red; font-weight: 600">{{ sum }}</span>
-          个
-        </p>
-        <p>
-          价格总计 :
-          <span style="color: red; font-weight: 600">{{ totalPrice }}</span>
-          元
-        </p>
-        <!-- <div> -->
-        <el-button color="#409eff" size="large" :icon="Goods" style="color: aliceblue" @click="goToCheckout">去结算</el-button>
-        <!-- <el-button color="#d72242" size="large" style="width: 110px">去结算</el-button> -->
-        <!-- </div> -->
-        <p>预计发货时间: 2024-06-01 前发货</p>
-      </div>
-    </el-card>
+  <div class="shop_box">
+    <p>
+      当前选中产品:
+      <span style="color: red; font-weight: 600">{{ productNum }}</span>
+      件, 数量:
+      <span style="color: red; font-weight: 600">{{ sum }}</span>
+      个
+    </p>
+    <p>
+      价格总计 :
+      <span style="color: red; font-weight: 600">{{ totalPrice }}</span>
+      元
+    </p>
+    <!-- <div> -->
+    <el-button color="#409eff" size="large" :icon="Goods" style="color: aliceblue" @click="goToCheckout">去结算</el-button>
+    <!-- <el-button color="#d72242" size="large" style="width: 110px">去结算</el-button> -->
+    <!-- </div> -->
+    <p>预计发货时间: 2024-06-01 前发货</p>
   </div>
 </template>
 
 <script setup>
-import { useShopStore } from "@/pinia/shopTable.js"
+import { useShopStore } from "@store/shopTable.js"
 import { Goods } from "@element-plus/icons-vue"
 import { ElMessage } from "element-plus"
 // 可以在组件中的任意位置访问 `store` 变量 ✨
@@ -49,8 +45,9 @@ const goToCheckout = () => {
 
 <style lang="scss" scoped>
 .shop_box {
-  height: 232px;
-  min-width: 234px;
+  height: 230px;
+  border: 1px solid #cfcfcf;
+  padding: 10px;
   display: flex;
   flex-direction: column;
   justify-content: space-around;

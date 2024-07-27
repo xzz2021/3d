@@ -23,14 +23,14 @@
               </div>
             </template>
           </el-image>
-          <div style="font-size: small;">{{ scope.row.modelFileInfo.fileName }}</div>
+          <div style="font-size: small">{{ scope.row.modelFileInfo.fileName }}</div>
         </template>
       </el-table-column>
       <el-table-column label="材料" width="180">
         <template #default="scope">
           <div>{{ scope.row.material.name + scope.row.material.default_code }}</div>
           <el-button type="primary" @click="openMaterialPanel(scope.$index)" size="small">选择材料</el-button>
-          <div style="font-size: small;">尺寸: {{ scope.row.modelFileInfo.size }}</div>
+          <div style="font-size: small">尺寸: {{ scope.row.modelFileInfo.size }}</div>
         </template>
       </el-table-column>
       <el-table-column label="表面处理" min-width="100">
@@ -109,7 +109,7 @@
       <el-table-column label="价格">
         <template #default="scope">
           <!-- <el-input-number v-model="scope.row.count.val" :min="1" :max="10" @change="updatePrice" size="small" /> -->
-          <div> x {{ scope.row.count.val }} </div>
+          <div>x {{ scope.row.count.val }}</div>
           <div style="color: red">{{ scope.row.finalPrice }} 元</div>
         </template>
       </el-table-column>
@@ -192,10 +192,9 @@ const openMaterialPanel = index => {
 
 const copyItem = item => {
   const deepCopy = JSON.parse(JSON.stringify(item))
+  console.log("TCL: deepCopy", deepCopy)
   tableData.value.push(deepCopy)
 }
-
-const colorPickerRef = ref(null)
 
 const handleChangePicker = (bool, index) => {
   tableData.value[index].paint.status = false
