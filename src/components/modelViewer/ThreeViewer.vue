@@ -49,7 +49,6 @@ const store = useShopStore()
 const { addItem, IsExist, updatePrice } = store
 const { modelFileInfo } = storeToRefs(store)
 const dialogRef = ref(null)
-
 const containerRef = ref(null)
 const { is3dm, ratioValue, initExplodeModel, explodeModel } = useBoom()
 
