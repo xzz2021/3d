@@ -24,7 +24,7 @@
         <div class="mathBox">
           <div class="filename">{{ item.modelFileInfo.fileName }}</div>
           <div class="size">{{ item.modelFileInfo.size }} mm</div>
-          <div class="volume">体积: {{ item.modelFileInfo.volume }} mm³</div>
+          <!-- <div class="volume">体积: {{ item.modelFileInfo.volume }} mm³</div> -->
         </div>
       </div>
       <div class="printInfo">
@@ -60,16 +60,29 @@
         </div>
       </div>
       <div class="countInfo">
-        <el-input-number v-model="item.count.val" :min="1" :max="10" @change="updatePrice" size="small" />
+        <div v-if="showCount" class="count" @click="showCount = false">x {{ item.count.val }}</div>
+        <el-input-number
+          v-else
+          @blur="showCount = true"
+          v-model="item.count.val"
+          :min="1"
+          :max="10"
+          @change="updatePrice"
+          size="small"
+        />
       </div>
       <div class="priceInfo">
         <span style="color: red">{{ item.finalPrice }}</span>
         元
       </div>
       <div class="operateBox">
-        <el-button @click="copyItem(item)" type="success" size="small" :icon="DocumentCopy" text />
-        <div style="background: #cfcfcf; width: 1px; height: 24px"></div>
-        <el-button @click="deleteItem(index)" type="danger" size="small" :icon="Delete" text />
+        <el-tooltip class="box-item" effect="dark" content="复制产品" placement="top">
+          <el-button @click="copyItem(item)" type="success" size="large" :icon="CopyDocument" text />
+        </el-tooltip>
+        <!-- <div style="background: #cfcfcf; width: 1px; height: 24px"></div> -->
+        <el-tooltip class="box-item" effect="dark" content="删除产品" placement="top">
+          <el-button @click="deleteItem(index)" type="danger" size="large" :icon="Delete" text />
+        </el-tooltip>
       </div>
     </div>
   </div>
@@ -83,7 +96,7 @@
 import { useShopStore } from "@store/shopTable.js"
 import { useTable } from "@/hooks/useTable"
 import { useMitt } from "@/hooks/mitt"
-import { Delete, DocumentCopy, Picture as IconPicture, MagicStick, Plus } from "@element-plus/icons-vue"
+import { Delete, CopyDocument, Picture as IconPicture, MagicStick, Plus } from "@element-plus/icons-vue"
 
 const { backendData } = useTable()
 const store = useShopStore()
@@ -187,6 +200,8 @@ const handleDelivery = (index, indey) => {
   tableData.value[index].deliveryTime.currentIndex = indey
   updatePrice()
 }
+
+const showCount = ref(true)
 </script>
 
 <style scoped lang="scss">
@@ -282,17 +297,22 @@ const handleDelivery = (index, indey) => {
       // align-items: center;
       // padding: 10px;
       margin-top: 40px;
+      margin-top: 40px;
       :deep(.el-input-number--small) {
         width: 80px;
+      }
+      .count {
+        text-align: center;
       }
     }
     .priceInfo {
       // margin-top: 40px;
       // padding: 10px;
+      margin-top: 180px;
       flex: 1;
     }
     .operateBox {
-      border: 1px solid #cfcfcf;
+      // border: 1px solid #cfcfcf;
       position: absolute;
       top: 0px;
       right: -5px;
@@ -303,6 +323,7 @@ const handleDelivery = (index, indey) => {
       // padding: 2px;
       > button {
         margin: 0;
+        padding: 8px 15px;
       }
     }
   }
