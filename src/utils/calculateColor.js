@@ -12,13 +12,12 @@ const colorDifference = (rgb1, rgb2) => {
 }
 
 // 找到最接近的N个Pantone颜色
-export const closestPantoneColors = (rgbColor, pantoneArr, count = 10) => {
+export const closestPantoneColors = (hexColor, pantoneArr, count = 10) => {
   let distances = [] // 存储每个Pantone颜色的距离
 
   // 遍历所有Pantone颜色，计算与目标RGB颜色的距离
   pantoneArr.map(item => {
-    let pantoneRgb = item.rgb
-    let diff = colorDifference(rgbColor, pantoneRgb)
+    let diff = colorDifference(hexToRgb(hexColor), hexToRgb(item.hex))
     distances.push({ pantone: item, diff }) // 保存Pantone颜色及其距离
   })
 
@@ -29,9 +28,30 @@ export const closestPantoneColors = (rgbColor, pantoneArr, count = 10) => {
   return distances.slice(0, count).map(item => item.pantone)
 }
 
-export const getPantoneUC = rgbColor => {
+export const getPantoneUC = hexColor => {
   return {
-    pantoneU: closestPantoneColors(rgbColor, pantoneU),
-    pantoneC: closestPantoneColors(rgbColor, pantoneC),
+    pantoneU: closestPantoneColors(hexColor, pantoneU),
+    pantoneC: closestPantoneColors(hexColor, pantoneC),
   }
+}
+
+export const hexToRgb = hex => {
+  // 移除可能的前缀#
+  hex = hex.replace(/^#/, "")
+  // 处理简写形式（例如 #03F）
+  if (hex.length === 3) {
+    hex = hex
+      .split("")
+      .map(item => item + item)
+      .join("")
+  }
+  // 将十六进制字符串转换为整数
+  const bigint = parseInt(hex, 16)
+  // 提取红、绿、蓝分量
+  const r = (bigint >> 16) & 255
+  const g = (bigint >> 8) & 255
+  const b = bigint & 255
+
+  // 返回结果
+  return [r, g, b]
 }

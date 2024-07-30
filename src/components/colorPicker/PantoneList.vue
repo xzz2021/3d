@@ -39,7 +39,7 @@
 </template>
 
 <script setup>
-import { pantoneColors } from "../../utils/calculateColor"
+import { pantoneColors, hexToRgb } from "../../utils/calculateColor"
 import { Search } from "@element-plus/icons-vue"
 import { useShopStore } from "@/pinia/shopTable.js"
 import { useMitt } from "@/hooks/mitt.js"
@@ -75,7 +75,6 @@ const deleteItemU = item => {
   addList.value.u = addList.value.u.filter(i => i !== item)
 }
 
-
 // 更新颜色
 const emit = defineEmits(["updateColorBlock"])
 const selectValue = ref([])
@@ -84,21 +83,20 @@ const selectColor = item => {
   selectValue.value = item
   // 选择颜色后 触发 列表更新
   // 此处颜色值需要转换
-  const [r, g, b] = item.rgb
-  emit("updateColorBlock", { rgb: { r, g, b } })
+  // const [r, g, b] = hexToRgb(item.hex)
+  emit("updateColorBlock", item.hex)
 }
-
 
 const store = useShopStore()
 const { tableData } = storeToRefs(store)
 //  关闭面板   给颜色赋值  更新  面板勾选状态
-const updateDate = (index) => {
+const updateDate = index => {
   tableData.value[index].paint.colorList = addList.value
   const bool = colorSum.value != 0
   tableData.value[index].paint.status = bool
- //  有喷漆 必有打磨 // 触发事件
- emitEvent("checkGrinding",{ v: bool, index })
- store.updatePrice()
+  //  有喷漆 必有打磨 // 触发事件
+  emitEvent("checkGrinding", { v: bool, index })
+  store.updatePrice()
 }
 
 //  开启面板 初始化已选择的颜色
@@ -126,7 +124,6 @@ const remoteMethod = query => {
   }
 }
 
-
 //  选择颜色  推送到右侧
 const chooseColor = color => {
   if (color.pantone.lastIndexOf("C") == -1) {
@@ -138,7 +135,7 @@ const chooseColor = color => {
 
 defineExpose({
   initPanel,
-  updateDate
+  updateDate,
 })
 </script>
 

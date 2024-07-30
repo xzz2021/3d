@@ -19,14 +19,13 @@
             <div
               class="text"
               :style="{
-                color: getHighContrastColor(item.rgb),
+                color: getHighContrastColor(item.hex),
                 fontSize: changeFontSize(item.pantone),
                 lineHeight: changeLineHeight(item.pantone),
               }"
             >
               {{ item.pantone }}
             </div>
-
           </div>
         </div>
       </div>
@@ -35,6 +34,8 @@
 </template>
 
 <script setup>
+import { pantoneColors, hexToRgb } from "../../utils/calculateColor"
+
 const props = defineProps({
   defaultColor: {
     type: Array,
@@ -50,7 +51,8 @@ const pushColor = color => {
 
 //    颜色块  内部的 文字颜色 动态变换  高对比度
 const getHighContrastColor = color => {
-  const [R, G, B] = color.map(channel => {
+  const rgbColor = hexToRgb(color)
+  const [R, G, B] = rgbColor.map(channel => {
     const proportion = channel / 255
     return proportion <= 0.03928 ? proportion / 12.92 : Math.pow((proportion + 0.055) / 1.055, 2.4)
   })

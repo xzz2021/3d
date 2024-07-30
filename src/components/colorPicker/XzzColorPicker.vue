@@ -10,11 +10,7 @@
     <el-dialog v-model="dialogVisible" width="800" draggable :show-close="false" :close-on-click-modal="false">
       <div class="pantone_picker_box">
         <ColorPicker @changeColor="updateColorBlock" :sucker-hide="true" />
-        <PantoneList
-          ref="pantoneListRef"
-          @updateColorBlock="updateColorBlock"
-          :colorList="colorList"
-        />
+        <PantoneList ref="pantoneListRef" @updateColorBlock="updateColorBlock" :colorList="colorList" />
         <div>
           <div class="tips_box">
             <p>温馨提示:</p>
@@ -44,12 +40,10 @@ const dialogVisible = ref(false)
 const colorList = ref(defaultColor)
 
 //  更新供选择的  颜色块
-const updateColorBlock = color => {
-  const { r, g, b } = color.rgba || color.rgb
-  const arr = getPantoneUC([r, g, b])
+const updateColorBlock = item => {
+  const arr = getPantoneUC(item.hex || item)
   colorList.value = arr
 }
-
 
 // 打开面板
 const currentIndex = ref(0)
@@ -81,7 +75,7 @@ defineExpose({ handleOpen })
   display: flex;
   justify-content: space-between;
 }
-.tips_box{
+.tips_box {
   font-size: 12px;
 }
 </style>
