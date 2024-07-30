@@ -21,33 +21,28 @@
               @click="selectItem(item, index)"
               class="itemBox"
             >
-              <!-- <el-image class="imgBox" :src="item.image" fit="cover" crossorigin="anonymous" /> -->
-              <el-image
-                class="imgBox"
-                src="https://yun3d.com/filestore/assets/shuzhi9400.png"
-                fit="cover"
-                crossorigin="anonymous"
-              />
-              <div class="priceBox">￥{{ item.list_price / 1000 }}起</div>
-              <div class="nameBox">{{ item.default_code + item.name }}</div>
+              <div class="leftSide">
+                <el-image
+                  class="imgBox"
+                  src="https://yun3d.com/filestore/assets/shuzhi9400.png"
+                  fit="cover"
+                  crossorigin="anonymous"
+                />
+                <div class="priceBox">￥{{ item.list_price / 1000 }}起</div>
+                <div class="nameBox">{{ item.default_code + item.name }}</div>
+              </div>
+
+              <div class="rightSide">
+                <div class="title">材料优点: {{ selectedItem.material_advantages }}</div>
+                <div class="title">材料缺点: {{ selectedItem.material_disadvantages }}</div>
+                <div class="title">颜色: {{ selectedItem.color }}</div>
+                <div class="title">误差及精度: {{ selectedItem.error_and_precision }}</div>
+                <div class="title">单台成型尺寸: {{ selectedItem.equipment_size }}</div>
+              </div>
             </div>
           </template>
         </el-tab-pane>
       </el-tabs>
-
-      <div class="sideBox">
-        <div class="title">材料优点</div>
-        <div class="description">{{ selectedItem.material_advantages }}</div>
-        <div class="title">材料缺点</div>
-        <div class="description">{{ selectedItem.material_disadvantages }}</div>
-        <div class="title">颜色</div>
-        <div class="description">{{ selectedItem.color }}</div>
-        <div class="title">误差及精度</div>
-        <div class="description">{{ selectedItem.error_and_precision }}</div>
-        <div class="title">最大成型尺寸</div>
-        <div class="description">{{ selectedItem.equipment_size }}</div>
-        <!-- <div>材料详情</div> -->
-      </div>
 
       <template #footer>
         <div class="dialog-footer">
@@ -182,19 +177,6 @@ defineExpose({
 :deep(.el-tabs) {
   flex: 4;
 }
-.sideBox {
-  padding: 0 10px;
-  flex: 2;
-  .title {
-    font-weight: bold;
-    margin: 5px;
-    color: black;
-  }
-  .description {
-    font-size: 11px;
-    margin: 5px 5px 18px 5px;
-  }
-}
 :deep(.el-tab-pane) {
   display: flex;
   // justify-content: space-between;
@@ -212,34 +194,51 @@ defineExpose({
 }
 
 .itemBox {
+  display: flex;
+  width: 400px;
   cursor: pointer;
-  align-items: center;
-  width: 130px;
-  // height: 112px;
-  margin: 5px;
-  // border-radius: 5px;
-  // border: 1px solid #15f515;
   border: 1px solid white;
-
-  box-sizing: content-box;
-  position: relative;
-  .imgBox {
+  .leftSide {
+    align-items: center;
     width: 130px;
-    height: 130px;
+    // height: 112px;
+    margin: 5px;
+    // border-radius: 5px;
+    // border: 1px solid #15f515;
+
+    box-sizing: content-box;
+    position: relative;
+    .imgBox {
+      width: 130px;
+      height: 130px;
+    }
+    .nameBox {
+      font-size: 11px;
+      margin: 3px 0;
+    }
+    .priceBox {
+      position: absolute;
+      bottom: 25px;
+      right: 0;
+      color: red;
+      font-size: 12px;
+      background: #d7d7d7;
+      width: 70%;
+      text-align: center;
+    }
   }
-  .nameBox {
-    font-size: 11px;
-    margin: 3px 0;
-  }
-  .priceBox {
-    position: absolute;
-    bottom: 25px;
-    right: 0;
-    color: red;
-    font-size: 12px;
-    background: #d7d7d7;
-    width: 70%;
-    text-align: center;
+  .rightSide {
+    // padding: 0 10px;
+    flex: 2;
+    .title {
+      // font-weight: bold;
+      // margin: 5px;
+      color: black;
+    }
+    .description {
+      font-size: 11px;
+      // margin: 5px 5px 18px 5px;
+    }
   }
 }
 .itemBoxSelected {

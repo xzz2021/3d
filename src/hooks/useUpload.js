@@ -4,7 +4,6 @@ import { baseUrl } from "@/utils/env"
 import { ElMessage } from "element-plus"
 import { useShopStore } from "@/pinia/shopTable.js"
 const getFileType = fileName => {
-
   const fileExtension = fileName.split(".").pop().toLowerCase()
   return fileExtension
 }
@@ -16,16 +15,15 @@ const uploadId = Math.random().toString(36).substring(2, 15)
 const { emitEvent } = useMitt()
 export const useUpload = () => {
   const store = useShopStore()
+  // const { initialCart } = store
   const { modelFileInfo } = storeToRefs(store)
   const uploadFormRef = ref(null)
   const forgeRef = ref(null)
-  const modelName = ref("")
 
-  const resData = ref({})
   const onUpload = async file => {
-		// console.log("TCL: useUpload -> file", file)
+    // console.log("TCL: useUpload -> file", file)
     const fileType = getFileType(file.name)
-    // const fileName = 
+    // const fileName =
     const accept = ".glb,.obj,.gltf,.fbx,.stl,.igs,.stp,.step,.iges,.dae,.3ds,.3dm"
     const arr = accept.replaceAll(".", "").split(",")
     if (!arr.includes(fileType)) return ElMessage.error("文件格式不合法,请重新选择!")
@@ -33,28 +31,28 @@ export const useUpload = () => {
     if (file.size > M50 * 10) {
       return ElMessage.error("文件过大,请上传小于500MB的文件")
     } else {
-      await multiPartUpload(file)
+      const res = await multiPartUpload(file)
+      if (!res.cart) return ElMessage.error("文件上传失败,请刷新后重试!")
+      store.initialCart(res.cart)
+      const orderList = res.cart.order_lines
+      const filePath = URL.createObjectURL(file.raw)
+      modelFileInfo.value = {
+        filePath: orderList[orderList.length - 1]?.drawing_filepath,
+        fileType,
+        fileName: file.name,
+      }
+
+      // return
+      // 触发模型加载
+      emitEvent("openPreview")
+      emitEvent("openLoading")
+      emitEvent("showLogo")
     }
-    if (!resData.value) return
-    modelName.value = file.name
-    const filePath = URL.createObjectURL(file.raw)
-    modelFileInfo.value = {
-      filePath,
-      fileType,
-      fileName:file.name,
-      resData: resData.value,
-    }
-    
-    // return
-    // 触发模型加载
-    emitEvent("openPreview")
-    emitEvent("openLoading")
-    emitEvent("showLogo")
   }
 
   const multiPartUpload = async file => {
     try {
-      await uploadSlice(file)
+      return await uploadSlice(file)
     } catch (error) {
       console.error("Upload failed:", error)
     }
@@ -71,22 +69,23 @@ export const useUpload = () => {
     formData.append("chunkNumber", currentIndex.value)
     formData.append("totalChunks", totalSlices)
     formData.append("filename", file.name)
-    const response = await fetch(`${baseUrl}/cust_attachment/upload_chunk`, {
+    const response = await fetch(`/api/cust_attachment/upload_chunk`, {
       // const response = await fetch("/cust_attachment/upload_chunk", {
       method: "POST",
       body: formData,
+      credentials: "include",
+      mode: "cors",
     })
     if (response.ok) {
       currentIndex.value += 1
       console.log("上传分片:" + currentIndex.value + "/" + totalSlices)
       // Self._calculateUploadPercent();
       if (currentIndex.value < totalSlices) {
-        await uploadSlice(file)
+        return await uploadSlice(file)
       } else {
         // alert('文件上传且合并成功!');
         const res = await response.json()
-        const { product_tmpl_id, product_id, file_url } = res
-        resData.value = { product_tmpl_id, product_id, file_url }
+        console.log("🚀 ~ xzz: res", res)
         return res
       }
     } else {

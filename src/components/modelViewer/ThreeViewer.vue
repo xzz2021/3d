@@ -43,7 +43,7 @@ import { useMitt } from "@/hooks/mitt.js"
 import { useBoom } from "./hooks/useBoom.js"
 import { FullScreen } from "@element-plus/icons-vue"
 import { useShopStore } from "@/pinia/shopTable.js"
-import { RAWDATA } from "./utils/constant"
+// import { RAWDATA } from "./utils/constant"
 import { ElMessage } from "element-plus"
 // import { checkThickness } from "@/utils/checkThickness"
 // import matcapPorcelainWhite from "./hooks/66.jpg"
@@ -59,7 +59,7 @@ const { is3dm, initExplodeModel, explodeModel } = useBoom()
 
 const { onEvent } = useMitt()
 onEvent("openPreview", () => {
-  loadModel(modelFileInfo.value)
+  loadModel()
 })
 const labelStatus = ref(false)
 
@@ -163,11 +163,9 @@ const getInfoAndPushItem = async (box, mesh) => {
   await new Promise(resolve => setTimeout(resolve, 10)) // 此处需要延迟  否则获取的图片会是空的
   renderer.render(scene, camera)
   const imageUrl = screenShot(renderer)
-  const newItem = { ...RAWDATA, model3d, imageUrl, modelFileInfo: modelFileInfo.value }
+  const newItem = { imageUrl, modelFileInfo }
+  console.log("🚀 ~ xzz: getInfoAndPushItem -> newItem", newItem)
   addItem(newItem)
-  setTimeout(() => {
-    updatePrice()
-  }, 1000)
 }
 
 const findMinIndex = arr => {

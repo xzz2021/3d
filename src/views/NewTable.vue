@@ -22,49 +22,51 @@
           </template>
         </el-image>
         <div class="mathBox">
-          <div class="filename">{{ item.modelFileInfo.fileName }}</div>
-          <div class="size">{{ item.modelFileInfo.size }} mm</div>
+          <!-- <div class="filename">{{ item?.modelFileInfo?.fileName || "名称" }}</div>
+          <div class="size">{{ item.modelFileInfo?.size || "尺寸" }} mm</div> -->
+          <div class="filename">{{ "名称" }}</div>
+          <div class="size">{{ "尺寸" }} mm</div>
           <!-- <div class="volume">体积: {{ item.modelFileInfo.volume }} mm³</div> -->
         </div>
       </div>
-      <div class="printInfo">
+      <!-- <div class="printInfo">
         <div class="material">{{ item.material.name + item.material.default_code }}</div>
         <div class="paint">颜色: {{ displayPantone(item.paint) }}</div>
         <div class="paint" v-if="item.braces.total.length > 0">牙套: {{ displayBracesOrNuts(item.braces.total) }}</div>
         <div class="paint" v-if="item.nuts.total.length > 0">螺母: {{ displayBracesOrNuts(item.nuts.total) }}</div>
         <div class="grinding">{{ item.grinding.checkDisabled ? "精磨" : "" }}</div>
-      </div>
+      </div> -->
       <div class="selectInfo">
         <el-button @click="openMaterialPanel(index)" type="danger" link>选择材料</el-button>
         <el-button @click="handleChangePicker(index)" type="primary" link>上色</el-button>
-        <el-button @click="handleChangeBraces(index)" type="success" link>选择牙套</el-button>
-        <el-button @click="handleChangeNuts(index)" type="warning" link>选择螺母</el-button>
-        <el-switch
+        <!-- <el-button @click="handleChangeBraces(index)" type="success" link>选择牙套</el-button> -->
+        <el-button @click="handleChangeNuts(index)" type="warning" link>配件选择</el-button>
+        <!-- <el-switch
           v-model="item.grinding.checkDisabled"
           size="small"
           inline-prompt
           style="--el-switch-on-color: #13ce66; --el-switch-off-color: #898888"
           active-text="精打磨"
           inactive-text="普通打磨"
-        />
+        /> -->
         <div class="delivery_box">
           <el-button
-            v-for="(iten, indey) in deliveryTimeArr"
+            v-for="(iten, indey) in backendData.deliveryTimeArr"
             :key="indey"
             @click="handleDelivery(index, indey)"
             :type="item.deliveryTime.currentIndex == indey ? 'primary' : ''"
             size="small"
           >
-            {{ iten.val }}
+            {{ iten.name }}
           </el-button>
         </div>
       </div>
       <div class="countInfo">
-        <div v-if="showCount" class="count" @click="showCount = false">x {{ item.count.val }}</div>
+        <div v-if="showCount" class="count" @click="showCount = false">x {{ item.quantity }}</div>
         <el-input-number
           v-else
           @blur="showCount = true"
-          v-model="item.count.val"
+          v-model="item.quantity"
           :min="1"
           :max="10"
           @change="updatePrice"
@@ -72,7 +74,7 @@
         />
       </div>
       <div class="priceInfo">
-        <span style="color: red">{{ item.finalPrice }}</span>
+        <span style="color: red">{{ item.unit_price * item.quantity }}</span>
         元
       </div>
       <div class="operateBox">
@@ -94,20 +96,13 @@
 
 <script setup>
 import { useShopStore } from "@store/shopTable.js"
-import { useTable } from "@/hooks/useTable"
-import { useMitt } from "@/hooks/mitt"
 import { Delete, CopyDocument, Picture as IconPicture, MagicStick, Plus } from "@element-plus/icons-vue"
-
-const { backendData } = useTable()
+import { useTable } from "@/hooks/useTable"
 const store = useShopStore()
-const { updatePrice } = store
-const { tableData, totalPrice } = storeToRefs(store)
-const { emitEvent, onEvent } = useMitt()
+const { updatePrice, initialData } = store
+const { tableData, totalPrice, backendData } = storeToRefs(store)
 
-const openPreview = modelFileInfo => {
-  emitEvent("openLoading")
-  emitEvent("openPreview", modelFileInfo)
-}
+const { deliveryTimeArr, handleDelivery, openPreview } = useTable()
 
 const displayPantone = item => {
   return "yanse"
@@ -188,17 +183,6 @@ const handleChangeNuts = index => {
   // tableData.value[index].nuts.status = false
   // 打开面板 进行数据更改
   nutsPanelRef.value && nutsPanelRef.value.handleOpen(index)
-}
-
-const deliveryTimeArr = ref([
-  { name: "交期", key: "deliveryTime", price: 56, val: "加急" },
-  { name: "交期", key: "deliveryTime", price: 23, val: "标准" },
-  { name: "交期", key: "deliveryTime", price: 0, val: "经济" },
-])
-const handleDelivery = (index, indey) => {
-  tableData.value[index].deliveryTime = deliveryTimeArr.value[indey]
-  tableData.value[index].deliveryTime.currentIndex = indey
-  updatePrice()
 }
 
 const showCount = ref(true)
