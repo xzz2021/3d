@@ -68,21 +68,6 @@ const curIndex = ref(0)
 
 const dialogVisible = ref(false)
 
-// const nutsType = ref([
-//   { type: "M1.6*3", length: "4.5", diameter: "2.2", outerDiameter: "5.2", num: 0 },
-//   { type: "M2*2", length: "3.5", diameter: "3.2", outerDiameter: "6.2", num: 0 },
-//   { type: "M2*3", length: "4.5", diameter: "3.2", outerDiameter: "6.2", num: 0 },
-//   { type: "M2*5", length: "6.5", diameter: "3.2", outerDiameter: "6.2", num: 0 },
-//   { type: "M2.5*3", length: "4.5", diameter: "3.9", outerDiameter: "6.2", num: 0 },
-//   { type: "M3*3", length: "4.5", diameter: "3.8", outerDiameter: "6.8", num: 0 },
-//   { type: "M3*5", length: "6.5", diameter: "3.8", outerDiameter: "6.8", num: 0 },
-//   { type: "M4*4", length: "5.5", diameter: "4.8", outerDiameter: "7.8", num: 0 },
-//   { type: "M4*8", length: "9.5", diameter: "4.8", outerDiameter: "7.8", num: 0 },
-//   { type: "M5*5", length: "6.5", diameter: "5.9", outerDiameter: "9.1", num: 0 },
-//   { type: "M6*5", length: "7.5", diameter: "7.9", outerDiameter: "11.9", num: 0 },
-//   { type: "M8*10", length: "11.5", diameter: "9.8", outerDiameter: "13.8", num: 0 },
-// ])
-
 const nutsType = computed(() => {
   const temp = []
   props.list.map(item => {
@@ -103,8 +88,8 @@ const confirm = () => {
   })
   dialogVisible.value = false //  不需要关闭面板 本身就包含关闭事件
   // 发送事件 更新牙套数据
-  if (total.length == 0) status = false
-  emit("changeNuts", { index: curIndex.value, total, status })
+  // if (total.length == 0) status = false
+  emit("changeNuts", { index: curIndex.value, total })
 }
 
 const handleCancel = () => {
@@ -116,7 +101,7 @@ const handleCancel = () => {
   props.list.map(item => {
     item.num = 0
   })
-  emit("changeNuts", { index: curIndex.value, total: [], status: false })
+  emit("changeNuts", { index: curIndex.value, total: [] })
 }
 
 const handleOpen = index => {

@@ -11,7 +11,7 @@
       <div class="fileInfo">
         <el-image
           style="width: 130px; height: 130px; cursor: pointer"
-          :src="item?.image_1024"
+          :src="item?.image_1024 || ''"
           fit="fill"
           @click="openPreview({ drawing_filepath: item.drawing_filepath, fileType: getFileType(item.filename) })"
         >
@@ -146,10 +146,12 @@ const updateBraces = msg => {
 }
 
 const updateNuts = msg => {
-  const { index, total, status } = msg
+  console.log("🚀 ~ xzz: msg", msg)
+  const { index, total } = msg
   tableData.value[index].nuts.total = total
   tableData.value[index].nuts.price = calculatePrice(total)
-  tableData.value[index].nuts.status = status
+  // tableData.value[index].nuts.status = status
+  console.log("🚀 ~ xzz: tableData.value[index]", tableData.value)
   updatePrice()
 }
 
@@ -198,6 +200,7 @@ const showCount = ref(true)
 const updateGrinding = (bool, index) => {
   const idx = bool ? 1 : 0
   tableData.value[index].grinding = backendData.value.grinding[idx]
+  tableData.value[index].grinding.checkDisabled = bool
   updatePrice()
 }
 </script>

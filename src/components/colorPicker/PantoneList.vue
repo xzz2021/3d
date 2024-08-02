@@ -91,17 +91,17 @@ const store = useShopStore()
 const { tableData } = storeToRefs(store)
 //  关闭面板   给颜色赋值  更新  面板勾选状态
 const updateDate = index => {
-  tableData.value[index].paint.colorList = addList.value
-  const bool = colorSum.value != 0
+  tableData.value[index].paint = { colorList: addList.value }
+  // const bool = colorSum.value != 0
   // tableData.value[index].paint.status = bool
   //  有喷漆 必有打磨 // 触发事件
-  emitEvent("checkGrinding", { v: bool, index })
+  // emitEvent("checkGrinding", { v: bool, index })
   store.updatePrice()
 }
 
 //  开启面板 初始化已选择的颜色
 const initPanel = index => {
-  addList.value = tableData.value[index].paint.colorList
+  addList.value = tableData.value[index].paint.colorList || { c: [], u: [] }
 }
 
 const options = ref([])

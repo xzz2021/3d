@@ -121,6 +121,7 @@ const selectItem = (item, index) => {
 
 const confirm = () => {
   dialogVisible.value = false
+  selectedItem.value.material_id = selectedItem.value.id
   tableData.value[curlistIndex.value].material = selectedItem.value
   updatePrice()
 }

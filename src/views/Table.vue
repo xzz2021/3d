@@ -212,7 +212,7 @@ const handleChangeBraces = (bool, index) => {
 const nutsPanelRef = ref(null)
 const handleChangeNuts = (bool, index) => {
   // 拦截点击事件  不主动勾选
-  tableData.value[index].nuts.status = false
+  // tableData.value[index].nuts.status = false
   // 打开面板 进行数据更改
   nutsPanelRef.value && nutsPanelRef.value.handleOpen(index)
 }

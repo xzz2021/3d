@@ -1,6 +1,6 @@
 import { defineStore } from "pinia"
 import { baseUrl } from "@/utils/env"
-
+import { ElMessageBox } from "element-plus"
 // 你可以任意命名 `defineStore()` 的返回值，但最好使用 store 的名字，同时以 `use` 开头且以 `Store` 结尾。
 // (比如 `useUserStore`，`useCartStore`，`useProductStore`)
 // 第一个参数是你的应用中 Store 的唯一 ID。
@@ -47,9 +47,15 @@ export const useShopStore = defineStore("shopStore", () => {
     return Math.ceil(num * factor) / factor
   }
 
+  const roundToTwo = num => {
+    const factor = Math.pow(10, 2)
+    const roundedNum = Math.round(num * factor) / factor
+    return roundedNum.toFixed(2)
+  }
+
   const updatePrice = () => {
     tableData.value.map(item => {
-      const { c, u } = item.paint.colorList
+      const { c, u } = item.paint?.colorList || { c: [], u: [] }
       const colorLength = c.length + u.length
       const { grinding, material, deliveryTime, qty, nuts, modelFileInfo } = item
       console.log("🚀 ~ xzz: updatePrice -> material", material)
@@ -64,10 +70,10 @@ export const useShopStore = defineStore("shopStore", () => {
         (Number(part_surface_area) * Number(colorLength)) / 100 +
         (nuts?.price || 0) +
         (deliveryTimePrice + grinding?.list_price * (part_volume / 1000))
-      console.log("🚀 ~ xzz: updatePrice -> final", final)
+      // console.log("🚀 ~ xzz: updatePrice -> final", final)
       // item.unit_price = final == 0 ? 0 : roundUp(final, 2)
       item.unit_price = roundUp(final, 2)
-      console.log("🚀 ~ xzz: updatePrice -> item.unit_price", item.unit_price)
+      // console.log("🚀 ~ xzz: updatePrice -> item.unit_price", item.unit_price)
       const finalPrice = final * item.qty
       item.finalPrice = finalPrice == 0 ? 0 : roundUp(finalPrice, 2)
     })
@@ -102,7 +108,7 @@ export const useShopStore = defineStore("shopStore", () => {
 
   const lastTableData = ref("")
   const autoUpdateCart = async () => {
-    console.log("🚀 ~ xzz: autoUpdateCart 触发更新提交-> autoUpdateCart")
+    console.log("🚀 ~ xzz: autoUpdateCart -> tableData.value", tableData.value)
     if (JSON.stringify(tableData.value) === lastTableData.value) return
 
     const params = {
@@ -119,7 +125,21 @@ export const useShopStore = defineStore("shopStore", () => {
     if (response.ok) {
       const res = await response.json()
       console.log("🚀 ~ xzz: autoUpdateCart -> res", res)
-      if (res?.error?.data?.debug) alert("错误信息:   " + res?.error?.data?.debug)
+      let debmsg = res?.error?.data?.debug
+      if (debmsg) {
+        // console.log("🚀 ~ xzz: autoUpdateCart -> debmsg", debmsg)
+        debmsg = debmsg.replaceAll("\n", "<br/>")
+        ElMessageBox({
+          // duration: 0,
+          // position: "top-right",
+          center: true,
+          dangerouslyUseHTMLString: true,
+          width: 900,
+          top: 0,
+          type: "error",
+          message: debmsg,
+        })
+      }
       // lastTableData.value = JSON.stringify(tableData.value)
     }
   }
@@ -229,6 +249,16 @@ export const useShopStore = defineStore("shopStore", () => {
     await initialCart()
   }
 
+  const initalSelect = () => {
+    tableData.value.map(item => {
+      console.log("🚀 ~ xzz: initalSelect -> item", item)
+      item.grinding.checkDisabled = item.grinding.name != "粗磨"
+      backendData.value.deliveryTimeArr.map((iten, indey) => {
+        if (item.deliveryTime.name == iten.name) item.deliveryTime.currentIndex = indey
+      })
+    })
+  }
+
   const initialData = async () => {
     await fetchData()
     await initialCart()
@@ -249,5 +279,6 @@ export const useShopStore = defineStore("shopStore", () => {
     autoUpdateCart,
     deleteItem,
     newItem,
+    initalSelect,
   }
 })

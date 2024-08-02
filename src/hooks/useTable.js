@@ -5,13 +5,13 @@ import { useMitt } from "@/hooks/mitt"
 
 export const useTable = () => {
   const store = useShopStore()
-  const { updatePrice, initialData, autoUpdateCart } = store
+  const { updatePrice, initialData, autoUpdateCart, initalSelect } = store
   const { tableData, backendData } = storeToRefs(store)
 
   const { emitEvent, onEvent } = useMitt()
-  const openPreview = () => {
+  const openPreview = val => {
     emitEvent("openLoading")
-    emitEvent("openPreview")
+    emitEvent("openPreview", val)
   }
   //  更新交期按钮状态
   // const deliveryTimeArr = ref([{ name: "加急" }, { name: "标准" }, { name: "经济" }])
@@ -24,6 +24,7 @@ export const useTable = () => {
 
   onMounted(async () => {
     await initialData()
+    initalSelect()
     // updatePrice()
 
     // setInterval(async () => {

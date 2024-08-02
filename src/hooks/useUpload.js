@@ -36,19 +36,20 @@ export const useUpload = () => {
       console.log("🚀 ~ xzz: orderInfo.value", orderInfo.value)
       const { filename, drawing_filepath, modelFileInfo, grinding, qty } = newItem.value
       const { length, width, height } = modelFileInfo
-      newItem.value.filePath = baseUrl + drawing_filepath
+      newItem.value.drawing_filepath = baseUrl + drawing_filepath
       newItem.value.fileType = getFileType(filename)
       newItem.value.size = `${length}x${width}x${height}`
       newItem.value.nuts = { total: [] }
       newItem.value.paint = { colorList: { c: [], u: [] } }
-      // newItem.value.qty = qty || 1
       console.log("🚀 ~ xzz: newItem.value", newItem.value)
-      newItem.value.grinding.checkDisabled = grinding?.name != "粗磨"
       // return
       // 触发模型加载
-      emitEvent("openPreview", { drawing_filepath: newItem.value.filePath, fileType: newItem.value.fileType })
-      emitEvent("openLoading")
+      emitEvent("openPreview", {
+        drawing_filepath: newItem.value.drawing_filepath,
+        fileType: newItem.value.fileType,
+      })
       emitEvent("showLogo")
+      console.log("🚀 ~ xzz: newItem======.value")
     }
   }
 

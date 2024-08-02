@@ -50,16 +50,18 @@ import { ElMessage } from "element-plus"
 let { isFullscreen, toggleFullscreen, dialogTableVisible, openDialog, getALLInformation } = useFn()
 // 可以在组件中的任意位置访问 `store` 变量 ✨
 const store = useShopStore()
-const { addItem, IsExist, updatePrice } = store
+const { addItem, IsExist, updatePrice, initalSelect } = store
 const { newItem } = storeToRefs(store)
 const dialogRef = ref(null)
 const { is3dm, initExplodeModel, explodeModel } = useBoom()
 
 // threejs   scene、mesh 、renderer、controls 内部有只读属性的value  无法使用vue的响应式  ref 包裹
 
-const { onEvent } = useMitt()
+const { onEvent, emitEvent } = useMitt()
 onEvent("openPreview", val => {
   // console.log("🚀 ~ xzz: val", val)
+  // emitEvent("openLoading")
+  openLoading()
   loadModel(val)
 })
 const labelStatus = ref(false)
@@ -131,15 +133,31 @@ const backCarmera = () => {
 
 const containerRef = ref(null)
 
+const roundUp = (num, decimalPlaces) => {
+  const factor = Math.pow(10, decimalPlaces)
+  return Math.ceil(num * factor) / factor
+}
+const roundToTwo = num => {
+  const factor = Math.pow(10, 2)
+  const roundedNum = Math.round(num * factor) / factor
+  return roundedNum.toFixed(2)
+}
 const commonFn = async () => {
   // 此函数最好放当前模块
   // 计算模型的中心点
   const { box, center, size } = getMeshSize(mesh)
   const { x, y, z } = size
-  newItem.value.modelFileInfo.width = x
-  newItem.value.modelFileInfo.height = y
-  newItem.value.modelFileInfo.length = z
+  // console.log("🚀 ~ xzz: commonFn -> z", z)
+  // console.log("🚀 ~ xzz: commonFn -> y", y)
+  // 首次上传   赋值 以  提交给 后端
+  newItem.value.modelFileInfo.width = roundToTwo(y)
+  newItem.value.modelFileInfo.height = roundToTwo(z)
+  newItem.value.modelFileInfo.length = roundToTwo(x)
   newItem.value.modelFileInfo.rawSize = size
+  const { width, height, length } = newItem.value.modelFileInfo
+
+  newItem.value.size = `${length}x${width}x${height}`
+
   addAxes(size, scene)
   await autoResize(camera, renderer, size, initialStatus)
 
@@ -168,6 +186,8 @@ const getInfoAndPushItem = async (box, mesh) => {
   const imageUrl = screenShot(renderer)
   newItem.value.image_1024 = imageUrl
   addItem(newItem.value)
+  initalSelect()
+  updatePrice()
 }
 
 const findMinIndex = arr => {
