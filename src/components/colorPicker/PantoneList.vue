@@ -93,7 +93,7 @@ const { tableData } = storeToRefs(store)
 const updateDate = index => {
   tableData.value[index].paint.colorList = addList.value
   const bool = colorSum.value != 0
-  tableData.value[index].paint.status = bool
+  // tableData.value[index].paint.status = bool
   //  有喷漆 必有打磨 // 触发事件
   emitEvent("checkGrinding", { v: bool, index })
   store.updatePrice()

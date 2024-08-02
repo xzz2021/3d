@@ -22,11 +22,16 @@ export default defineConfig({
     open: true,
     port: 666,
     proxy: {
-      "^/api": {
+      "/api": {
         target: "http://192.168.1.152:8069", // 后端服务器的局域网IP地址和端口
         changeOrigin: true,
         rewrite: path => path.replace(/^\/api/, ""),
       },
+      // "/": {
+      //   target: "http://192.168.1.152:8069", // 后端服务器的局域网IP地址和端口
+      //   changeOrigin: true,
+      //   rewrite: path => path.replace(/^\//, ""),
+      // },
     },
   },
   resolve: {

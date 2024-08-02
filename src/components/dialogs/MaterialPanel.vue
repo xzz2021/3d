@@ -7,37 +7,40 @@
 <template>
   <div class="containerMaterial">
     <!-- <img src="http://xzz2022.top:2222/rural/px.png" alt="" srcset="" style="width: 100px; height: 100px" /> -->
-    <el-dialog v-model="dialogVisible" width="920" draggable top="5vh" title="选择材料">
-      <el-tabs type="card" class="demo-tabs" style="height: 500px" @tab-click="tabClick" v-model="activeTabName">
+    <el-dialog v-model="dialogVisible" width="700" draggable top="5vh" title="选择材料">
+      <el-tabs type="card" class="demo-tabs" @tab-click="tabClick" v-model="activeTabName">
         <el-tab-pane size="small" v-for="(item, index) in listType" :key="index" :label="item" :name="item">
           <template #label>
             <span class="custom-tabs-label">{{ item }}</span>
           </template>
           <template #default>
-            <div
-              v-for="(item, index) in list"
-              :key="item.name + index"
-              :class="index == currentIndex ? 'itemBoxSelected' : ''"
-              @click="selectItem(item, index)"
-              class="itemBox"
-            >
-              <div class="leftSide">
-                <el-image
-                  class="imgBox"
-                  src="https://yun3d.com/filestore/assets/shuzhi9400.png"
-                  fit="cover"
-                  crossorigin="anonymous"
-                />
-                <div class="priceBox">￥{{ item.list_price / 1000 }}起</div>
-                <div class="nameBox">{{ item.default_code + item.name }}</div>
+            <div class="material_container">
+              <div class="infoBox">
+                <div class="leftSide">
+                  <el-image class="imgBox" :src="selectedItem?.imgUrl" fit="cover" crossorigin="anonymous" />
+                  <div class="priceBox">￥{{ selectedItem.list_price / 1000 }}起</div>
+                  <!-- <div class="nameBox">{{ selectedItem.default_code + selectedItem.name }}</div> -->
+                </div>
+
+                <div class="rightSide">
+                  <div class="title">材料优点: {{ selectedItem.material_advantages }}</div>
+                  <div class="title">材料缺点: {{ selectedItem.material_disadvantages }}</div>
+                  <div class="title">颜色: {{ selectedItem.color }}</div>
+                  <div class="title">误差及精度: {{ selectedItem.error_and_precision }}</div>
+                  <div class="title">单台成型尺寸: {{ selectedItem.equipment_size }}</div>
+                  <div class="title">
+                    详细参数:
+                    <el-link type="danger">PDF报告</el-link>
+                  </div>
+                </div>
               </div>
 
-              <div class="rightSide">
-                <div class="title">材料优点: {{ selectedItem.material_advantages }}</div>
-                <div class="title">材料缺点: {{ selectedItem.material_disadvantages }}</div>
-                <div class="title">颜色: {{ selectedItem.color }}</div>
-                <div class="title">误差及精度: {{ selectedItem.error_and_precision }}</div>
-                <div class="title">单台成型尺寸: {{ selectedItem.equipment_size }}</div>
+              <div class="selectBox">
+                <div class="itemBox" v-for="(iten, indey) in list" :key="indey" @click="selectItem(iten, indey)">
+                  <el-button :type="currentIndex == indey ? 'primary' : ''" size="small">
+                    {{ iten.name + iten.default_code }}
+                  </el-button>
+                </div>
               </div>
             </div>
           </template>
@@ -70,8 +73,6 @@ const props = defineProps({
     default: () => [],
   },
 })
-
-const currentIndex = ref(0)
 
 const selectedItem = ref({
   id: 315,
@@ -111,6 +112,8 @@ const selectedItem = ref({
     },
   ],
 })
+const currentIndex = ref(-1)
+
 const selectItem = (item, index) => {
   currentIndex.value = index
   selectedItem.value = item
@@ -134,35 +137,35 @@ const handleOpen = curIndex => {
 }
 
 const activeTabName = ref("树脂")
-const autoSelect = () => {
-  const material = tableData.value[curlistIndex.value].material
-  const tabName = material.categ_material_name
+const autoSelect = async () => {
+  const curItem = tableData.value[curlistIndex.value]?.material
+  console.log("🚀 ~ xzz: autoSelect -> curItem", curItem)
+  const tabName = curItem?.categ_material_name || "树脂"
   activeTabName.value = tabName //  主动触发激活选择tab
-  list.value = props.materialList.filter(item2 => item2.categ_material_name == tabName)
-  list.value.map((item, index) => {
-    if (item.default_code == material.default_code) {
+  await updateList(tabName)
+  list.value.every((item, index) => {
+    if (item.default_code == curItem?.default_code) {
       currentIndex.value = index
+      return false // 提前退出
     }
+    return true
   })
 }
-
-const list = ref([])
 
 // tab切换时  触发
 const tabClick = (pane, event) => {
   // 切换时 还原所有选择样式
   //  其实最好  是根据 选择信息去还原选中项
   currentIndex.value = -1
-
   // 通过获取tab页签  渲染相应列表
-  const { index } = pane
-  updateList(index)
+  updateList(pane.props.name)
 }
 
 //  更新 列表 内容
-const updateList = i => {
-  const curTab = listType[i]
-  list.value = props.materialList.filter(item => item.categ_material_name == curTab)
+const list = ref([])
+const updateList = async (tabName = "树脂") => {
+  list.value = props.materialList.filter(item => item.categ_material_name == tabName)
+  console.log("🚀 ~ xzz: updateList -> list.value", list.value)
 }
 
 defineExpose({
@@ -192,52 +195,73 @@ defineExpose({
   vertical-align: middle;
   margin-left: 4px;
 }
-
-.itemBox {
+.material_container {
   display: flex;
-  width: 400px;
-  cursor: pointer;
-  border: 1px solid white;
-  .leftSide {
-    align-items: center;
-    width: 130px;
-    // height: 112px;
-    margin: 5px;
-    // border-radius: 5px;
-    // border: 1px solid #15f515;
+  flex-direction: column;
 
-    box-sizing: content-box;
-    position: relative;
-    .imgBox {
+  .infoBox {
+    display: flex;
+    // width: 400px;
+    border: 1px solid white;
+    .leftSide {
+      align-items: center;
       width: 130px;
-      height: 130px;
+      // height: 112px;
+      // flex: 1;
+      margin: 5px;
+      // border-radius: 5px;
+      // border: 1px solid #15f515;
+
+      box-sizing: content-box;
+      position: relative;
+      .imgBox {
+        width: 130px;
+        height: 130px;
+      }
+      .nameBox {
+        font-size: 11px;
+        margin: 3px 0;
+      }
+      .priceBox {
+        position: absolute;
+        bottom: 4px;
+        right: 0;
+        color: red;
+        font-size: 12px;
+        background: #d7d7d7;
+        width: 70%;
+        text-align: center;
+      }
     }
-    .nameBox {
-      font-size: 11px;
-      margin: 3px 0;
-    }
-    .priceBox {
-      position: absolute;
-      bottom: 25px;
-      right: 0;
-      color: red;
-      font-size: 12px;
-      background: #d7d7d7;
-      width: 70%;
-      text-align: center;
+    .rightSide {
+      // padding: 0 10px;
+      padding: 2px;
+      // flex: 2;
+      > div {
+        margin-bottom: 6px;
+      }
+      .title {
+        // font-weight: bold;
+        // margin: 5px;
+        color: black;
+      }
+      .description {
+        font-size: 11px;
+        // margin: 5px 5px 18px 5px;
+      }
     }
   }
-  .rightSide {
-    // padding: 0 10px;
-    flex: 2;
-    .title {
-      // font-weight: bold;
-      // margin: 5px;
-      color: black;
-    }
-    .description {
-      font-size: 11px;
-      // margin: 5px 5px 18px 5px;
+  .selectBox {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 80%;
+    margin-top: 20px;
+    .itemBox {
+      margin: 3px;
+      > button {
+        width: 160px;
+      }
     }
   }
 }
