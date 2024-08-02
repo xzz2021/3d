@@ -23,7 +23,7 @@
         </el-image>
         <div class="mathBox">
           <div class="filename">{{ item?.filename || "名称" }}</div>
-          <div class="size">{{ item?.size || "尺寸" }} mm</div>
+          <div class="size">{{ displaySize(item?.modelFileInfo) }}</div>
           <!-- <div class="filename">{{ "名称" }}</div>
           <div class="size">{{ "尺寸" }} mm</div> -->
           <!-- <div class="volume">体积: {{ item.modelFileInfo.volume }} mm³</div> -->
@@ -88,7 +88,7 @@
           <el-button @click="deleteItem(index)" type="danger" size="large" :icon="Delete" text />
         </el-tooltip>
       </div>
-      <el-button type="danger" @click="autoUpdateCart">手动更新</el-button>
+      <el-button style="margin-top: 30px" type="danger" @click="autoUpdateCart">手动更新</el-button>
     </div>
   </div>
   <XzzColorPicker ref="colorPickerRef" />
@@ -128,6 +128,10 @@ const displayBracesOrNuts = total => {
   return str
 }
 
+const displaySize = modelFileInfo => {
+  const { width, height, length } = modelFileInfo
+  return `${length}x${width}x${height} mm` || "尺寸数据异常"
+}
 const calculatePrice = total => {
   let price = 0
   if (total.length == 0) return 0

@@ -50,7 +50,7 @@ import { ElMessage } from "element-plus"
 let { isFullscreen, toggleFullscreen, dialogTableVisible, openDialog, getALLInformation } = useFn()
 // 可以在组件中的任意位置访问 `store` 变量 ✨
 const store = useShopStore()
-const { addItem, IsExist, updatePrice, initalSelect } = store
+const { addItem, IsExist, updatePrice, initalSelect, autoUpdateCart } = store
 const { newItem } = storeToRefs(store)
 const dialogRef = ref(null)
 const { is3dm, initExplodeModel, explodeModel } = useBoom()
@@ -188,6 +188,7 @@ const getInfoAndPushItem = async (box, mesh) => {
   addItem(newItem.value)
   initalSelect()
   updatePrice()
+  autoUpdateCart()
 }
 
 const findMinIndex = arr => {

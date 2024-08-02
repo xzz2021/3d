@@ -16,9 +16,12 @@ import { Rhino3dmLoader } from "three/addons/loaders/3DMLoader.js"
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
 import { onMounted } from "vue"
 
+// import occtimportjs from "occt-import-js"
+
 export const useThree = () => {
   const initialStatus = ref({})
-
+  // var occtImportJs = require("occt-import-js")
+  // console.log("🚀 ~ xzz: occtImportJs", occtImportJs)
   // 初始化创建场景
   const scene = new THREE.Scene()
   scene.background = new THREE.Color(0x8c8aff) //  设置场景的背景色0x8c8aff

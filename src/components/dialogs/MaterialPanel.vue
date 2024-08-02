@@ -74,44 +74,7 @@ const props = defineProps({
   },
 })
 
-const selectedItem = ref({
-  id: 315,
-  name: "光敏树脂",
-  default_code: "C-UV 9400",
-  list_price: 500,
-  categ_big_name: "原材料",
-  categ_material_name: "树脂",
-  starting_price: 0,
-  material_density: 1.4,
-  material_density_uom: "cm²",
-  material_group_id: "树脂",
-  device_id: "联泰-600",
-  color: "白色",
-  material_advantages: "表面非常细腻, 耐温55℃ ,韧性好",
-  material_disadvantages: "材料颜色淡黄",
-  error_and_precision: "±200微米或±0.2%",
-  material_shrinkage: false,
-  fastest_delivery: "24小时",
-  equipment_size: "800mm × 800mm × 550mm",
-  experts_recommend: "C-UV 9400",
-  variants: [
-    {
-      id: 325,
-      name: "[C-UV 9400] 光敏树脂",
-      default_code: "C-UV 9400",
-      list_price: 500,
-      attribute_values: {
-        热变形温度: "58 ℃",
-        吸水性: "0.26%",
-        拉伸模量: "2600MPa",
-        拉伸强度: "52.3MPa",
-        断裂应变: "11%",
-        屈服应变: "3.4%",
-        悬臂梁冲击强度: "36KJ/m",
-      },
-    },
-  ],
-})
+const selectedItem = ref()
 const currentIndex = ref(-1)
 
 const selectItem = (item, index) => {
@@ -140,6 +103,8 @@ const handleOpen = curIndex => {
 const activeTabName = ref("树脂")
 const autoSelect = async () => {
   const curItem = tableData.value[curlistIndex.value]?.material
+  selectedItem.value = curItem
+
   console.log("🚀 ~ xzz: autoSelect -> curItem", curItem)
   const tabName = curItem?.categ_material_name || "树脂"
   activeTabName.value = tabName //  主动触发激活选择tab

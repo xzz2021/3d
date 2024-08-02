@@ -33,7 +33,6 @@ export const useUpload = () => {
       const { order_id, order_name, product } = res?.order
       newItem.value = JSON.parse(JSON.stringify(product))
       orderInfo.value = { order_id, order_name }
-      console.log("🚀 ~ xzz: orderInfo.value", orderInfo.value)
       const { filename, drawing_filepath, modelFileInfo, grinding, qty } = newItem.value
       const { length, width, height } = modelFileInfo
       newItem.value.drawing_filepath = baseUrl + drawing_filepath
