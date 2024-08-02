@@ -11,9 +11,9 @@
       <div class="fileInfo">
         <el-image
           style="width: 130px; height: 130px; cursor: pointer"
-          :src="item.imageUrl"
+          :src="item?.image_1024"
           fit="fill"
-          @click="openPreview(item.modelFileInfo)"
+          @click="openPreview({ drawing_filepath: item.drawing_filepath, fileType: getFileType(item.filename) })"
         >
           <template #error>
             <div class="image-slot">
@@ -22,10 +22,10 @@
           </template>
         </el-image>
         <div class="mathBox">
-          <!-- <div class="filename">{{ item?.modelFileInfo?.fileName || "名称" }}</div>
-          <div class="size">{{ item.modelFileInfo?.size || "尺寸" }} mm</div> -->
-          <div class="filename">{{ "名称" }}</div>
-          <div class="size">{{ "尺寸" }} mm</div>
+          <div class="filename">{{ item?.filename || "名称" }}</div>
+          <div class="size">{{ item?.size || "尺寸" }} mm</div>
+          <!-- <div class="filename">{{ "名称" }}</div>
+          <div class="size">{{ "尺寸" }} mm</div> -->
           <!-- <div class="volume">体积: {{ item.modelFileInfo.volume }} mm³</div> -->
         </div>
       </div>
@@ -38,17 +38,19 @@
       </div> -->
       <div class="selectInfo">
         <el-button @click="openMaterialPanel(index)" type="danger" link>选择材料</el-button>
+        <div>{{ item.material.name + item.material.default_code }}</div>
         <el-button @click="handleChangePicker(index)" type="primary" link>上色</el-button>
         <!-- <el-button @click="handleChangeBraces(index)" type="success" link>选择牙套</el-button> -->
         <el-button @click="handleChangeNuts(index)" type="warning" link>配件选择</el-button>
-        <!-- <el-switch
+        <el-switch
           v-model="item.grinding.checkDisabled"
           size="small"
           inline-prompt
           style="--el-switch-on-color: #13ce66; --el-switch-off-color: #898888"
           active-text="精打磨"
           inactive-text="普通打磨"
-        /> -->
+          @change="bool => updateGrinding(bool, index)"
+        />
         <div class="delivery_box">
           <el-button
             v-for="(iten, indey) in backendData.deliveryTimeArr"
@@ -62,11 +64,11 @@
         </div>
       </div>
       <div class="countInfo">
-        <div v-if="showCount" class="count" @click="showCount = false">x {{ item.quantity }}</div>
+        <div v-if="showCount" class="count" @click="showCount = false">x {{ item.qty }}</div>
         <el-input-number
           v-else
           @blur="showCount = true"
-          v-model="item.quantity"
+          v-model="item.qty"
           :min="1"
           :max="10"
           @change="updatePrice"
@@ -74,7 +76,7 @@
         />
       </div>
       <div class="priceInfo">
-        <span style="color: red">{{ item.unit_price * item.quantity }}</span>
+        <span style="color: red">{{ item.finalPrice }}</span>
         元
       </div>
       <div class="operateBox">
@@ -86,6 +88,7 @@
           <el-button @click="deleteItem(index)" type="danger" size="large" :icon="Delete" text />
         </el-tooltip>
       </div>
+      <el-button type="danger" @click="autoUpdateCart">手动更新</el-button>
     </div>
   </div>
   <XzzColorPicker ref="colorPickerRef" />
@@ -99,11 +102,15 @@ import { useShopStore } from "@store/shopTable.js"
 import { Delete, CopyDocument, Picture as IconPicture, MagicStick, Plus } from "@element-plus/icons-vue"
 import { useTable } from "@/hooks/useTable"
 const store = useShopStore()
-const { updatePrice, initialData } = store
+const { updatePrice, initialData, autoUpdateCart } = store
 const { tableData, totalPrice, backendData } = storeToRefs(store)
 
 const { deliveryTimeArr, handleDelivery, openPreview } = useTable()
 
+const getFileType = fileName => {
+  const fileExtension = fileName.split(".").pop().toLowerCase()
+  return fileExtension
+}
 const displayPantone = item => {
   return "yanse"
   const { c, u } = item.colorList
@@ -152,7 +159,8 @@ const copyItem = item => {
 }
 
 const deleteItem = index => {
-  tableData.value.splice(index, 1)
+  // tableData.value.splice(index, 1)
+  store.deleteItem(index)
 }
 
 //  材料选择面板
@@ -186,6 +194,12 @@ const handleChangeNuts = index => {
 }
 
 const showCount = ref(true)
+
+const updateGrinding = (bool, index) => {
+  const idx = bool ? 1 : 0
+  tableData.value[index].grinding = backendData.value.grinding[idx]
+  updatePrice()
+}
 </script>
 
 <style scoped lang="scss">

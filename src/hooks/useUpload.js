@@ -15,15 +15,12 @@ const uploadId = Math.random().toString(36).substring(2, 15)
 const { emitEvent } = useMitt()
 export const useUpload = () => {
   const store = useShopStore()
-  // const { initialCart } = store
-  const { modelFileInfo } = storeToRefs(store)
+  const { newItem, orderInfo } = storeToRefs(store)
   const uploadFormRef = ref(null)
   const forgeRef = ref(null)
 
   const onUpload = async file => {
-    // console.log("TCL: useUpload -> file", file)
     const fileType = getFileType(file.name)
-    // const fileName =
     const accept = ".glb,.obj,.gltf,.fbx,.stl,.igs,.stp,.step,.iges,.dae,.3ds,.3dm"
     const arr = accept.replaceAll(".", "").split(",")
     if (!arr.includes(fileType)) return ElMessage.error("文件格式不合法,请重新选择!")
@@ -32,19 +29,24 @@ export const useUpload = () => {
       return ElMessage.error("文件过大,请上传小于500MB的文件")
     } else {
       const res = await multiPartUpload(file)
-      if (!res.cart) return ElMessage.error("文件上传失败,请刷新后重试!")
-      store.initialCart(res.cart)
-      const orderList = res.cart.order_lines
-      const filePath = URL.createObjectURL(file.raw)
-      modelFileInfo.value = {
-        filePath: orderList[orderList.length - 1]?.drawing_filepath,
-        fileType,
-        fileName: file.name,
-      }
-
+      if (!res.order) return ElMessage.error("文件上传失败,请刷新后重试!")
+      const { order_id, order_name, product } = res?.order
+      newItem.value = JSON.parse(JSON.stringify(product))
+      orderInfo.value = { order_id, order_name }
+      console.log("🚀 ~ xzz: orderInfo.value", orderInfo.value)
+      const { filename, drawing_filepath, modelFileInfo, grinding, qty } = newItem.value
+      const { length, width, height } = modelFileInfo
+      newItem.value.filePath = baseUrl + drawing_filepath
+      newItem.value.fileType = getFileType(filename)
+      newItem.value.size = `${length}x${width}x${height}`
+      newItem.value.nuts = { total: [] }
+      newItem.value.paint = { colorList: { c: [], u: [] } }
+      // newItem.value.qty = qty || 1
+      console.log("🚀 ~ xzz: newItem.value", newItem.value)
+      newItem.value.grinding.checkDisabled = grinding?.name != "粗磨"
       // return
       // 触发模型加载
-      emitEvent("openPreview")
+      emitEvent("openPreview", { drawing_filepath: newItem.value.filePath, fileType: newItem.value.fileType })
       emitEvent("openLoading")
       emitEvent("showLogo")
     }

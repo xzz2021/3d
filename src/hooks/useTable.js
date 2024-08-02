@@ -5,7 +5,7 @@ import { useMitt } from "@/hooks/mitt"
 
 export const useTable = () => {
   const store = useShopStore()
-  const { updatePrice, initialData } = store
+  const { updatePrice, initialData, autoUpdateCart } = store
   const { tableData, backendData } = storeToRefs(store)
 
   const { emitEvent, onEvent } = useMitt()
@@ -16,14 +16,19 @@ export const useTable = () => {
   //  更新交期按钮状态
   // const deliveryTimeArr = ref([{ name: "加急" }, { name: "标准" }, { name: "经济" }])
   const handleDelivery = (index, indey) => {
-    tableData.value[index].deliveryTime = backendData.value.deliveryTimeArr[indey]
+    const { id, name } = backendData.value.deliveryTimeArr[indey]
+    tableData.value[index].deliveryTime = { id, name }
     tableData.value[index].deliveryTime.currentIndex = indey
     updatePrice()
   }
 
   onMounted(async () => {
     await initialData()
-    updatePrice()
+    // updatePrice()
+
+    // setInterval(async () => {
+    //   await autoUpdateCart()
+    // }, 10000)
 
     // 页面 关闭  瞬间  执行
     // window.onbeforeunload = async () => {

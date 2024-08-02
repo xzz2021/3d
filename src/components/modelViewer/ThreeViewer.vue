@@ -51,15 +51,16 @@ let { isFullscreen, toggleFullscreen, dialogTableVisible, openDialog, getALLInfo
 // 可以在组件中的任意位置访问 `store` 变量 ✨
 const store = useShopStore()
 const { addItem, IsExist, updatePrice } = store
-const { modelFileInfo } = storeToRefs(store)
+const { newItem } = storeToRefs(store)
 const dialogRef = ref(null)
 const { is3dm, initExplodeModel, explodeModel } = useBoom()
 
 // threejs   scene、mesh 、renderer、controls 内部有只读属性的value  无法使用vue的响应式  ref 包裹
 
 const { onEvent } = useMitt()
-onEvent("openPreview", () => {
-  loadModel()
+onEvent("openPreview", val => {
+  // console.log("🚀 ~ xzz: val", val)
+  loadModel(val)
 })
 const labelStatus = ref(false)
 
@@ -77,16 +78,16 @@ const bootPanel = () => {
 }
 
 // 加载模型 前 类型 判断
-const loadModel = async () => {
+const loadModel = async val => {
   clearScene(scene) //  加载新模型前先清除旧场景所有对象
   // openLoading() // 开启加载效果
   let loadView
   //  特殊3d文件类型判断, 使用自定义的加载方法, 不走官方loader判断
-  const { filePath, fileType } = modelFileInfo.value
+  const { drawing_filepath, fileType } = val
   if (fileType == "stp" || fileType == "step") {
-    loadView = await LoadStep(filePath)
+    loadView = await LoadStep(drawing_filepath)
   } else if (fileType == "iges" || fileType == "igs") {
-    loadView = await LoadIges(filePath)
+    loadView = await LoadIges(drawing_filepath)
   } else {
   }
   if (loadView) {
@@ -100,7 +101,7 @@ const loadModel = async () => {
   // 其他常规3d文件走这里   // 获取对应的模型加载器
   const loader = chooseLoader(fileType)
   loader.load(
-    filePath,
+    drawing_filepath,
     geometry => {
       if (fileType == "3dm") {
         is3dm.value = true
@@ -135,8 +136,10 @@ const commonFn = async () => {
   // 计算模型的中心点
   const { box, center, size } = getMeshSize(mesh)
   const { x, y, z } = size
-  modelFileInfo.value.size = `${x.toFixed(2)}x${y.toFixed(2)}x${z.toFixed(2)}`
-  modelFileInfo.value.rawSize = size
+  newItem.value.modelFileInfo.width = x
+  newItem.value.modelFileInfo.height = y
+  newItem.value.modelFileInfo.length = z
+  newItem.value.modelFileInfo.rawSize = size
   addAxes(size, scene)
   await autoResize(camera, renderer, size, initialStatus)
 
@@ -156,16 +159,15 @@ const commonFn = async () => {
 const getInfoAndPushItem = async (box, mesh) => {
   if (IsExist()) return
   //  模型加载完之后 获取商品所有详细信息
-  const model3d = getALLInformation(box, mesh.geometry)
+  const { volume, surfaceArea } = getALLInformation(box, mesh.geometry)
 
-  modelFileInfo.value.volume = model3d.volume
-  modelFileInfo.value.surfaceArea = model3d.surfaceArea
+  newItem.value.modelFileInfo.part_volume = volume
+  newItem.value.modelFileInfo.part_surface_area = surfaceArea
   await new Promise(resolve => setTimeout(resolve, 10)) // 此处需要延迟  否则获取的图片会是空的
   renderer.render(scene, camera)
   const imageUrl = screenShot(renderer)
-  const newItem = { imageUrl, modelFileInfo }
-  console.log("🚀 ~ xzz: getInfoAndPushItem -> newItem", newItem)
-  addItem(newItem)
+  newItem.value.image_1024 = imageUrl
+  addItem(newItem.value)
 }
 
 const findMinIndex = arr => {
@@ -198,7 +200,7 @@ const toggleLabel = () => {
 watch(isFullscreen, val => {
   const dom = document.querySelector("#threecontainer")
   dom.style.height = val ? `calc(100vh - 70px)` : `600px`
-  autoResize(camera, renderer, modelFileInfo.value.rawSize, val)
+  autoResize(camera, renderer, newItem.value.modelFileInfo.rawSize, val)
 })
 
 defineExpose({ loadModel })
